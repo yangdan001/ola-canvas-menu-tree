@@ -115,6 +115,7 @@ const App = () => {
   const [expandedKeys] = useState(['标题-1-1']);
 
   const onDragEnter = (info) => {
+    console.log('info',info);
     // console.log(info);
     // expandedKeys, set it when controlled is needed
     // setExpandedKeys(info.expandedKeys)
@@ -183,6 +184,7 @@ const App = () => {
       }
     }
     setGData(data);
+    console.log('更改之后的数据结构',defaultData);
   };
   //选中属性item
   const onSelectTree = (selectedKeys, e) => {
