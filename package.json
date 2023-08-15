@@ -1,0 +1,55 @@
+{
+  "name": "suika",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "xigua",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "run-p \"watch icons\" \"watch components\" app:dev",
+    "watch": "node scripts/dev.js",
+    "app:dev": "pnpm --filter @suika/suika dev",
+    "app:build": "pnpm --filter @suika/suika build",
+    "storybook": "pnpm --filter @suika/components storybook",
+    "components:build": "pnpm --filter @suika/components build",
+    "icons:dev": "pnpm --filter @suika/icons dev",
+    "all:build": "pnpm -r exec pnpm run build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "prepare": "husky install",
+    "eslint:check": "eslint packages"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.1",
+    "@commitlint/config-conventional": "^17.6.1",
+    "@typescript-eslint/parser": "^5.59.0",
+    "esbuild": "^0.17.17",
+    "esbuild-sass-plugin": "^2.9.0",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.1",
+    "minimist": "^1.2.8",
+    "npm-run-all": "^4.1.5",
+    "prettier": "2.8.7",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "antd": "^5.8.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 80,
+    "tabWidth": 2,
+    "semi": true,
+    "bracketSpacing": true
+  }
+}
