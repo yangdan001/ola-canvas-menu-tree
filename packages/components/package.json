@@ -1,5 +1,5 @@
 {
-  "name": "@suika/components",
+  "name": "@euler/components",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.22.3",
-    "@suika/icons": "workspace:^",
+    "@euler/icons": "workspace:^",
     "classnames": "^2.3.2"
   },
   "peerDependencies": {
