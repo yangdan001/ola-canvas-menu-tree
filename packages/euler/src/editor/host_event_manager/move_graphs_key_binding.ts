@@ -112,6 +112,7 @@ export class MoveGraphsKeyBinding {
     });
 
     window.addEventListener('keyup', handleKeyup);
+    
     editor.commandManager.on('beforeExecCmd', flushRecordDebounce);
 
     this.unbindHandler = () => {

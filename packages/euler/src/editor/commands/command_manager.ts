@@ -64,14 +64,19 @@ export class CommandManager {
   }
   pushCommand(command: ICommand) {
     this.emitter.emit('beforeExecCmd');
-    console.log(
-      `%c Exec %c ${command.desc}`,
-      'background: #222; color: #bada55',
-      '',
-    );
+    console.log('command',command)
+    // console.log(
+    //   `%c Exec %c ${command.desc}`,
+    //   'background: #222; color: #bada55',
+    //   '',
+    // );
     this.undoStack.push(command);
     this.redoStack = [];
     this.emitStatusChange();
+
+    // 监听到右侧画布新增元素，-- 将元素同步到左侧目录树（）
+
+
   }
   private emitStatusChange() {
     this.emitter.emit('change', {

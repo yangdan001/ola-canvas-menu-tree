@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Tree } from 'antd';
 import { EditorContext } from '../../context';
-const x = 3;
-const y = 2;
-const z = 1;
+import EventEmitter from 'eventemitter3';
+const emitter = new EventEmitter();
+
 // const defaultData = [
 //   {
 //       "title": "标题-1",
@@ -116,15 +116,17 @@ const App = () => {
   const [objects, setObjects] = useState([]);
   const [treeData, setTreeData] = useState([]);
   const [selectedIds, setSelectedIds] = useState(new Set());
-  const [gData, setGData] = useState([]);
+  const [gData, setGData] = useState([]);//目录树 数据
   const [expandedKeys,setExpandedKeys] = useState(['']);
   const [selectedKeys,setSelectedKeys] = useState(['']);
   
   useEffect(() => {
     if (editor) {
+      // 右侧组件获取到的原始数据 -- 进行以下处理
       let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
       let ChangeDataStructureAfter = []
-      setObjects(editor.sceneGraph.getObjects()); // init
+      // 数据处理为树形结构
+      // setObjects(editor.sceneGraph.getObjects()); // init
       if(ChangeDataStructureBefore&&ChangeDataStructureBefore.length>0){
         ChangeDataStructureBefore.forEach((item,index)=>{
           ChangeDataStructureAfter.push({
@@ -132,13 +134,24 @@ const App = () => {
             "key": item.id
           })
         })
-        setTreeData(ChangeDataStructureAfter)
+
+        // setTreeData(ChangeDataStructureAfter)
+        // 设置树状结构数据
         setGData(ChangeDataStructureAfter);
       }
+      // 监听到画布新增
+      emitter.on('emitCommand', (command)=>{
+        console.log('新增',command);
+        gData.push({
+          title: command.name,
+          key: command.id
+        })
+        setGData(gData);
+
+      });
+      // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
-        setObjects(editor.sceneGraph.getObjects());
-        setTreeData(ChangeDataStructureAfter)
-        setGData(ChangeDataStructureAfter);
+
         setSelectedIds(editor.selectedElements.getIdSet());
         setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
       });
