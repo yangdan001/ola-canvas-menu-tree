@@ -1,9 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Tree } from 'antd';
 import { EditorContext } from '../../context';
-import EventEmitter from 'eventemitter3';
-const emitter = new EventEmitter();
-
 // const defaultData = [
 //   {
 //       "title": "标题-1",
@@ -139,16 +136,6 @@ const App = () => {
         // 设置树状结构数据
         setGData(ChangeDataStructureAfter);
       }
-      // 监听到画布新增
-      emitter.on('emitCommand', (command)=>{
-        console.log('新增',command);
-        gData.push({
-          title: command.name,
-          key: command.id
-        })
-        setGData(gData);
-
-      });
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
 
