@@ -12,6 +12,7 @@ export class MoveElementsCommand implements ICommand {
     private dy: number,
   ) {}
   redo() {
+    console.log(1,'moveredo');
     const { dx, dy } = this;
     for (let i = 0, len = this.elements.length; i < len; i++) {
       const element = this.elements[i];
@@ -20,6 +21,7 @@ export class MoveElementsCommand implements ICommand {
     }
   }
   undo() {
+    console.log(2,'moveundo');
     const { dx, dy } = this;
     for (let i = 0, len = this.elements.length; i < len; i++) {
       const element = this.elements[i];

@@ -50,6 +50,7 @@ export const InfoPanel: FC = () => {
     //   )}
     // </div>
     <div className="info-panel">
+      
         <Tabs 
         defaultActiveKey={'1'}
         activeKey={key} 

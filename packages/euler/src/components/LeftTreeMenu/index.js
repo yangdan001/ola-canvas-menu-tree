@@ -139,8 +139,8 @@ const App = () => {
       });
       //监听到数据新增
       addEventEmitter.on('addCanvas', (obj)=>{
-        // 有elements字段为新增
-        if(obj.elements){
+        // 根据字段判断为新增
+        if(obj.desc.split(' ')[0] == 'Add'){
           let appendobj = {
             "title": obj.elements[0].objectName,
             "key": obj.elements[0].id

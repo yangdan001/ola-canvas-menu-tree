@@ -59,11 +59,14 @@ const Editor: FC = () => {
           {/* 目录树组件 */}
           {/* <LayerPanel /> */}
           <LeftTreeMenu />
+          {/* 画布组件 */}
           <div
             ref={containerRef}
             style={{ position: 'absolute', left: 240, top: 0 }}
           />
+          {/* 属性面板 */}
           <InfoPanel />
+          {/* 右键-弹出面板 */}
           <ContextMenu />
         </div>
       </EditorContext.Provider>
