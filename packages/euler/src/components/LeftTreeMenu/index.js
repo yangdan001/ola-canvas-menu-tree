@@ -111,8 +111,9 @@ import { addEventEmitter } from '../../events';
 
 const App = () => {
   const editor = useContext(EditorContext);
-  const [objects, setObjects] = useState([]);
-  let [gData, setGData] = useState([]);//目录树 数据
+  const [gData, setGData] = useState([]);//目录树 数据
+  const [addGraphData,setAddgraphData] = useState([])
+  const [removeGraphData,setRemoveGraphData] = useState([])
   const [expandedKeys, setExpandedKeys] = useState(['']);
   const [selectedKeys, setSelectedKeys] = useState(['']);
   useEffect(() => {
@@ -121,7 +122,6 @@ const App = () => {
       let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
       let ChangeDataStructureAfter = []
       // 数据处理为树形结构
-      // setObjects(editor.sceneGraph.getObjects()); // init
       if (ChangeDataStructureBefore && ChangeDataStructureBefore.length > 0) {
         ChangeDataStructureBefore.forEach((item, index) => {
           ChangeDataStructureAfter.push({
@@ -130,8 +130,7 @@ const App = () => {
           })
         })
         // 设置树状结构数据
-        gData = ChangeDataStructureAfter
-        setGData(gData);
+        setGData(ChangeDataStructureAfter);
       }
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
@@ -139,30 +138,71 @@ const App = () => {
       });
       //监听到数据新增
       addEventEmitter.on('addCanvas', (obj)=>{
+        /* eslint-disable-next-line no-debugger */
         // 根据字段判断为新增
         if(obj.desc.split(' ')[0] == 'Add'){
           let appendobj = {
             "title": obj.elements[0].objectName,
             "key": obj.elements[0].id
           }
-          let ChangeDataStructureAfter = JSON.parse(JSON.stringify(gData))
-          ChangeDataStructureAfter.push(appendobj)
-          gData = ChangeDataStructureAfter
-          setGData(gData)
+          setAddgraphData(appendobj)
+        }
+        else if(obj.desc.split(' ')[0] == 'Remove'){
+          let removeobj = {
+            "title": obj.removedElements[0].objectName,
+            "key": obj.removedElements[0].id
+          }
+          setRemoveGraphData(removeobj)
         }
       });
     }
   }, [editor]);
+  let treeData = []
+  // 新增处理
+  useEffect(() => {
+    let newdata = JSON.parse(JSON.stringify(gData))
+    newdata.push(addGraphData);
+    setGData(newdata)
+  }, [addGraphData]);
+  // 删除处理
+  useEffect(() => {
+    let newdata = JSON.parse(JSON.stringify(gData))
+    // 做删除处理
+    const itemRemoved = removeItemByKey(newdata,removeGraphData.key)
+    if (itemRemoved) {
+      setGData(newdata)
+    } else {
+      console.log('Item not found.');
+    }
+  }, [removeGraphData]);
+  
+// 递归删除  根据key
+const removeItemByKey = (arr, keyToDelete) => {
+  for (let i = 0; i < arr.length; i++) {
+      if (arr[i].key === keyToDelete) {
+          arr.splice(i, 1); // Remove the matching item from the array
+          return true; // Indicate that the item was removed
+      }
+      if (arr[i].children) {
+          // If the item has children, recursively search for the key in the children
+          if (removeItemByKey(arr[i].children, keyToDelete)) {
+              return true; // Indicate that the item was removed
+          }
+      }
+  }
+  return false; // Indicate that the item was not found
+}
 
 
-  const onDragEnter = (info) => {
-    console.log('info', info);
+  const onDragEnd = (info) => {
+    console.log('info', info, gData);
     // console.log(info);
     // expandedKeys, set it when controlled is needed
     // setExpandedKeys(info.expandedKeys)
   };
   // 拖拽逻辑
   const onDrop = (info) => {
+    console.log('拖拽');
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split('-');
@@ -249,7 +289,7 @@ const App = () => {
       defaultSelectedKeys={selectedKeys}
       draggable
       blockNode
-      onDragEnter={onDragEnter}
+      onDragEnd={onDragEnd}
       onDrop={onDrop}
       onSelect={onSelectTree}
       treeData={gData}
