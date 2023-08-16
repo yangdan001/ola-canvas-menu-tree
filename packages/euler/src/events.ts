@@ -6,3 +6,8 @@ interface Events {
 }
 
 export const appEventEmitter = new EventEmitter<Events>();
+
+// 监听画布新增
+export const addEventEmitter = new EventEmitter();
+
+

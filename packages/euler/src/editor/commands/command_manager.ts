@@ -1,4 +1,5 @@
 import EventEmitter from '../../utils/event_emitter';
+import { addEventEmitter } from '../../events';
 import { Editor } from '../editor';
 import { ICommand } from './type';
 
@@ -6,10 +7,15 @@ export interface IHistoryStatus {
   canRedo: boolean;
   canUndo: boolean;
 }
+export interface newGraph {
+  obj: object;
+}
+
 
 interface Events {
   change(status: IHistoryStatus): void;
   beforeExecCmd(): void;
+  aaa(status:newGraph): object;
 }
 
 export class CommandManager {
@@ -17,9 +23,8 @@ export class CommandManager {
   undoStack: ICommand[] = [];
   private isEnableRedoUndo = true;
   private emitter = new EventEmitter<Events>();
-
   constructor(private editor: Editor) {}
-
+  private _command = {}
   redo() {
     if (!this.isEnableRedoUndo) {
       return;
@@ -64,7 +69,7 @@ export class CommandManager {
   }
   pushCommand(command: ICommand) {
     this.emitter.emit('beforeExecCmd');
-    console.log('command',command)
+    this._command = command
     // console.log(
     //   `%c Exec %c ${command.desc}`,
     //   'background: #222; color: #bada55',
@@ -73,16 +78,14 @@ export class CommandManager {
     this.undoStack.push(command);
     this.redoStack = [];
     this.emitStatusChange();
-
-    // 监听到右侧画布新增元素，-- 将元素同步到左侧目录树（）
-
-
   }
   private emitStatusChange() {
     this.emitter.emit('change', {
       canRedo: this.redoStack.length > 0,
       canUndo: this.undoStack.length > 0,
     });
+    // 监听到右侧画布新增元素，-- 将元素同步到左侧目录树（）
+    addEventEmitter.emit('addCanvas', this._command);
   }
   on<T extends keyof Events>(eventName: T, listener: Events[T]) {
     this.emitter.on(eventName, listener);

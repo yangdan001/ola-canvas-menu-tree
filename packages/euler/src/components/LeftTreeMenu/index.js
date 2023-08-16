@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Tree } from 'antd';
 import { EditorContext } from '../../context';
+import { addEventEmitter } from '../../events';
 // const defaultData = [
 //   {
 //       "title": "标题-1",
@@ -111,12 +112,9 @@ import { EditorContext } from '../../context';
 const App = () => {
   const editor = useContext(EditorContext);
   const [objects, setObjects] = useState([]);
-  const [treeData, setTreeData] = useState([]);
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [gData, setGData] = useState([]);//目录树 数据
-  const [expandedKeys,setExpandedKeys] = useState(['']);
-  const [selectedKeys,setSelectedKeys] = useState(['']);
-  
+  let [gData, setGData] = useState([]);//目录树 数据
+  const [expandedKeys, setExpandedKeys] = useState(['']);
+  const [selectedKeys, setSelectedKeys] = useState(['']);
   useEffect(() => {
     if (editor) {
       // 右侧组件获取到的原始数据 -- 进行以下处理
@@ -124,35 +122,47 @@ const App = () => {
       let ChangeDataStructureAfter = []
       // 数据处理为树形结构
       // setObjects(editor.sceneGraph.getObjects()); // init
-      if(ChangeDataStructureBefore&&ChangeDataStructureBefore.length>0){
-        ChangeDataStructureBefore.forEach((item,index)=>{
+      if (ChangeDataStructureBefore && ChangeDataStructureBefore.length > 0) {
+        ChangeDataStructureBefore.forEach((item, index) => {
           ChangeDataStructureAfter.push({
             "title": item.name,
             "key": item.id
           })
         })
-
-        // setTreeData(ChangeDataStructureAfter)
         // 设置树状结构数据
-        setGData(ChangeDataStructureAfter);
+        gData = ChangeDataStructureAfter
+        setGData(gData);
       }
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
-
-        setSelectedIds(editor.selectedElements.getIdSet());
         setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
+      });
+      //监听到数据新增
+      addEventEmitter.on('addCanvas', (obj)=>{
+        // 有elements字段为新增
+        if(obj.elements){
+          let appendobj = {
+            "title": obj.elements[0].objectName,
+            "key": obj.elements[0].id
+          }
+          let ChangeDataStructureAfter = JSON.parse(JSON.stringify(gData))
+          ChangeDataStructureAfter.push(appendobj)
+          gData = ChangeDataStructureAfter
+          setGData(gData)
+        }
       });
     }
   }, [editor]);
+
+
   const onDragEnter = (info) => {
-    console.log('info',info);
+    console.log('info', info);
     // console.log(info);
     // expandedKeys, set it when controlled is needed
     // setExpandedKeys(info.expandedKeys)
   };
   // 拖拽逻辑
   const onDrop = (info) => {
-    // console.log(info);
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split('-');
@@ -189,8 +199,8 @@ const App = () => {
         item.children.unshift(dragObj);
       });
     } else if (
-      ((info.node ).props.children || []).length > 0 && // Has children
-      (info.node ).props.expanded && // Is expanded
+      ((info.node).props.children || []).length > 0 && // Has children
+      (info.node).props.expanded && // Is expanded
       dropPosition === 1 // On the bottom gap
     ) {
       loop(data, dropKey, (item) => {
@@ -218,31 +228,32 @@ const App = () => {
   };
   //选中属性item
   const onSelectTree = (selectedKeys, e) => {
-    console.log('选中节点的Key',selectedKeys);
     // editor.selectedElements.toggleItemById(selectedKeys[0]);
+    // 选中右侧画布上的节点
     editor.selectedElements.setItemsById(new Set([selectedKeys[0]]));
+    // 重新渲染右侧画布
     editor.sceneGraph.render();
-    // console.log('e',e);
   };
   /**
    * 1、defaultExpandAll  ： 默认展开所有父节点
-   * 2、expandedKeys ：默认选中的值，
-   * */ 
-// eslint-disable-next-line
+   * 2、selectedKeys ：设置选中的树节点
+   * 3、defaultSelectedKeys ：默认选中的值
+   * */
+  // eslint-disable-next-line
   return (
     <Tree
       className="draggable-tree"
-      style={{width:240}}
+      style={{ width: 240 }}
       defaultExpandAll={true}
       selectedKeys={selectedKeys}
-      defaultSelectedKeys={expandedKeys}
+      defaultSelectedKeys={selectedKeys}
       draggable
       blockNode
       onDragEnter={onDragEnter}
       onDrop={onDrop}
       onSelect={onSelectTree}
-      treeData={gData} 
-      />
+      treeData={gData}
+    />
   );
 };
 
