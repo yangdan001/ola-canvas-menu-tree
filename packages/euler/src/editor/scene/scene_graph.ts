@@ -283,6 +283,8 @@ export class SceneGraph {
     return isPointInRect(point, composedBBox);
   }
   getTopHitElement(x: number, y: number): Graph | null {
+    /* eslint-disable-next-line no-debugger */
+    debugger
     const padding =
       this.editor.setting.get('selectionHitPadding') /
       this.editor.zoomManager.getZoom();

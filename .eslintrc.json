@@ -9,7 +9,7 @@
   // "plugins": ["@typescript-eslint", "react", "react-hooks"],
   // "parser": "@typescript-eslint/parser",
   "rules": {
-      "no-debugger": "off",
+      
     // 缩进
     // "indent": ["error", 2, { "SwitchCase": 1 }],
     // // 必须使用分号
@@ -73,6 +73,7 @@
       {
         "component": true
       }
-    ]
+    ],
+    "no-debugger": "off"
   }
 }

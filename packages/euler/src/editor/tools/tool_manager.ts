@@ -61,6 +61,8 @@ export class ToolManager {
     let startWithLeftMouse = false;
 
     const handleDown = (e: PointerEvent) => {
+      /* eslint-disable-next-line no-debugger */
+      debugger
       isPressing = true;
       this.isDragging = false;
       startWithLeftMouse = false;

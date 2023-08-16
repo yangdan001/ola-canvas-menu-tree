@@ -308,8 +308,8 @@ const restructuring = (arr1,arr2) =>{
   const onSelectTree = (selectedKeys, e) => {
     console.log('选中节点的Key',selectedKeys);
     // editor.selectedElements.toggleItemById(selectedKeys[0]);
-    editor.selectedElements.setItemsById(new Set([selectedKeys[0]]));
-    editor.sceneGraph.render();
+    // editor.selectedElements.setItemsById(new Set([selectedKeys[0]]));
+    // editor.sceneGraph.render();
     // console.log('e',e);
   };
   /**

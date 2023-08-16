@@ -59,6 +59,7 @@ export class SelectTool implements ITool {
     this.editor.setCursor(cursor);
   }, 50);
   start(e: PointerEvent) {
+    /* eslint-disable-next-line no-debugger */
     this.currStrategy = null;
     this.topHitElementWhenStart = null;
     this.isDragHappened = false;
