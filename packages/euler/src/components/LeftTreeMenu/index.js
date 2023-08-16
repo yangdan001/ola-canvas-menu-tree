@@ -206,6 +206,25 @@ const App = () => {
   
     return sortedTargetArray;
   }
+
+const restructuring = (arr1,arr2) =>{
+  const keyToObjMap = arr2.reduce((map, obj) => {
+    map[obj.id] = obj;
+    return map;
+  }, {});
+  
+  // Sort arr2 based on the order of keys in arr1
+  const sortedArr2 = arr1.map(item => {
+    const newObj = { ...keyToObjMap[item.key] };
+    if (item.children) {
+        newObj.children = item.children.map(child => ({ ...keyToObjMap[child.key] }));
+    }
+    return newObj;
+  });
+  return sortedArr2
+}
+  // Create a mapping of keys to objects in arr2
+
   
   const onDragEnter = (info) => {
     console.log('info',info);
@@ -277,10 +296,13 @@ const App = () => {
       }
     }
     setGData(data);
-    const flattened = flattenArray(data)
+    // const flattened = flattenArray(data)
     const alignedArray = alignArrayOrder(data, editor.sceneGraph.getChildren())
-    editor.sceneGraph.setChildren(alignedArray)
-    console.log('更改之后的数据结构',data,alignedArray);
+    const restructuringTr = restructuring(data, editor.sceneGraph.getChildren())
+    // alignedArray[2].children =alignedArray[3]
+    // alignedArray.splice(3, 1)
+    editor.sceneGraph.setChildren(restructuringTr)
+    console.log('更改之后的数据结构',data,alignedArray,restructuringTr);
   };
   //选中属性item
   const onSelectTree = (selectedKeys, e) => {
