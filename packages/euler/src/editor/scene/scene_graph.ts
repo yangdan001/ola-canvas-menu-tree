@@ -394,6 +394,17 @@ export class SceneGraph {
     return objects;
   }
 
+  getChildren() {
+    console.log(this.children,'this.children')
+    const children = this.children;
+    return children;
+  }
+
+  setChildren(data:Graph[]) {
+    const children = this.children;
+    this.children = data
+  }
+
   toJSON() {
     const paperData: IEditorPaperData = {
       appVersion: 'euler-editor_0.0.1',

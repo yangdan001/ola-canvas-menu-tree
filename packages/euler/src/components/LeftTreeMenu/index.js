@@ -123,14 +123,14 @@ const App = () => {
   useEffect(() => {
     if (editor) {
       // 右侧组件获取到的原始数据 -- 进行以下处理
-      let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
+      let ChangeDataStructureBefore = editor.sceneGraph.getChildren()
       let ChangeDataStructureAfter = []
       // 数据处理为树形结构
       // setObjects(editor.sceneGraph.getObjects()); // init
       if(ChangeDataStructureBefore&&ChangeDataStructureBefore.length>0){
         ChangeDataStructureBefore.forEach((item,index)=>{
           ChangeDataStructureAfter.push({
-            "title": item.name,
+            "title": item.objectName,
             "key": item.id
           })
         })
@@ -140,23 +140,73 @@ const App = () => {
         setGData(ChangeDataStructureAfter);
       }
       // 监听到画布新增
-      emitter.on('emitCommand', (command)=>{
-        console.log('新增',command);
-        gData.push({
-          title: command.name,
-          key: command.id
-        })
-        setGData(gData);
+      // emitter.on('emitCommand', (command)=>{
+      //   console.log('新增',command);
+      //   gData.push({
+      //     title: command.name,
+      //     key: command.id
+      //   })
+      //   setGData(gData);
 
-      });
+      // });
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
+        let ChangeDataStructureBefore = editor.sceneGraph.getChildren()
+        let ChangeDataStructureAfter = []
+        // 数据处理为树形结构
+        // setObjects(editor.sceneGraph.getObjects()); // init
+        if(ChangeDataStructureBefore&&ChangeDataStructureBefore.length>0){
+          ChangeDataStructureBefore.forEach((item,index)=>{
+            ChangeDataStructureAfter.push({
+              "title": item.objectName,
+              "key": item.id
+            })
+          })
 
+          // setTreeData(ChangeDataStructureAfter)
+          // 设置树状结构数据
+          setGData(ChangeDataStructureAfter);
+        }
         setSelectedIds(editor.selectedElements.getIdSet());
         setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
       });
     }
   }, [editor]);
+
+  const flattenArray = (arr) => {
+    const flattenedArray = [];
+  
+    function recursiveFlatten(arr) {
+      arr.forEach(item => {
+        flattenedArray.push(item);
+        if (item.children && item.children.length > 0) {
+          recursiveFlatten(item.children);
+        }
+      });
+    }
+  
+    recursiveFlatten(arr);
+    return flattenedArray;
+  }
+
+  const alignArrayOrder = (referenceArray, targetArray) => {
+    const referenceMap = new Map();
+  
+    // 创建一个映射，将参考数组中的每个元素与其索引关联起来
+    referenceArray.forEach((item, index) => {
+      referenceMap.set(item.key, index);
+    });
+  
+    // 根据映射对目标数组进行排序
+    const sortedTargetArray = targetArray.sort((a, b) => {
+      const indexA = referenceMap.get(a.id);
+      const indexB = referenceMap.get(b.id);
+      return indexA - indexB;
+    });
+  
+    return sortedTargetArray;
+  }
+  
   const onDragEnter = (info) => {
     console.log('info',info);
     // console.log(info);
@@ -227,7 +277,10 @@ const App = () => {
       }
     }
     setGData(data);
-    // console.log('更改之后的数据结构',defaultData);
+    const flattened = flattenArray(data)
+    const alignedArray = alignArrayOrder(data, editor.sceneGraph.getChildren())
+    editor.sceneGraph.setChildren(alignedArray)
+    console.log('更改之后的数据结构',data,alignedArray);
   };
   //选中属性item
   const onSelectTree = (selectedKeys, e) => {
