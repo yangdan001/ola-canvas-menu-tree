@@ -16,7 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@suika/icons": ["../icons/src"]
+      "@euler/icons": ["../icons/src"]
     }
   },
   "include": ["src"],

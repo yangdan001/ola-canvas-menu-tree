@@ -1,12 +1,12 @@
-# Suika
+# euler
 
-Suika, an open-source vector graphics editor based on Canvas, similar to Figma.
+euler, an open-source vector graphics editor based on Canvas, similar to Figma.
 
 **西瓜牌图形编辑器**，一款开源的基于 Canvas 实现的矢量图形编辑器，类似 Figma。
 
-[Suika Editor](https://blog.fstars.wang/app/suika/)
+[euler Editor](https://blog.fstars.wang/app/euler/)
 
-![image](https://github.com/F-star/suika/assets/18698939/46ec7396-ecab-4caa-a0da-f77cf9ba773e)
+![image](https://github.com/F-star/euler/assets/18698939/46ec7396-ecab-4caa-a0da-f77cf9ba773e)
 
 ## Feature
 
@@ -38,4 +38,4 @@ Some Chinese language articles on how to develop a graphic editor.
 
 ## Material
 
-- [icons](https://www.figma.com/community/file/1224385128783567603/suika-icons)
+- [icons](https://www.figma.com/community/file/1224385128783567603/euler-icons)

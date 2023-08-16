@@ -32,7 +32,7 @@ const setup = async () => {
       ...pkgJson.dependencies,
       ...pkgJson.peerDependencies,
       ...pkgJson.devDependencies,
-    }).filter((dep) => !dep.startsWith('@suika')),
+    }).filter((dep) => !dep.startsWith('@euler')),
     sourcemap: true,
     format: 'esm',
     platform: 'browser',

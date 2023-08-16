@@ -1,5 +1,5 @@
 {
-  "name": "suika",
+  "name": "euler",
   "version": "0.0.1",
   "main": "index.js",
   "author": "xigua",
@@ -11,11 +11,11 @@
   "scripts": {
     "dev": "run-p \"watch icons\" \"watch components\" app:dev",
     "watch": "node scripts/dev.js",
-    "app:dev": "pnpm --filter @suika/suika dev",
-    "app:build": "pnpm --filter @suika/suika build",
-    "storybook": "pnpm --filter @suika/components storybook",
-    "components:build": "pnpm --filter @suika/components build",
-    "icons:dev": "pnpm --filter @suika/icons dev",
+    "app:dev": "pnpm --filter @euler/euler dev",
+    "app:build": "pnpm --filter @euler/euler build",
+    "storybook": "pnpm --filter @euler/components storybook",
+    "components:build": "pnpm --filter @euler/components build",
+    "icons:dev": "pnpm --filter @euler/icons dev",
     "all:build": "pnpm -r exec pnpm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

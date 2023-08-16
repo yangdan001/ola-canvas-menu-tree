@@ -8,7 +8,7 @@ import {
 import React, { FC, useState } from 'react';
 import './select.scss';
 import classNames from 'classnames';
-import { ArrowDownOutlined, CheckOutlined } from '@suika/icons';
+import { ArrowDownOutlined, CheckOutlined } from '@euler/icons';
 
 type ValueType = string;
 
