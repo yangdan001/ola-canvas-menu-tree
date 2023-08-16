@@ -2,6 +2,7 @@ import { Graph } from '../scene/graph';
 import { Editor } from '../editor';
 import { ICommand } from './type';
 
+
 export enum AlignType {
   Left = 'Left',
   HCenter = 'HCenter',
