@@ -173,6 +173,7 @@ const App = () => {
       setGData(newdata)
     } else {
       console.log('Item not found.');
+      setGData([])
     }
   }, [removeGraphData]);
   
