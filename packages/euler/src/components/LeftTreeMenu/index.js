@@ -286,7 +286,7 @@ const removeItemByKey = (arr, keyToDelete) => {
       style={{ width: 240 }}
       defaultExpandAll={true}
       selectedKeys={selectedKeys}
-      defaultSelectedKeys={selectedKeys}
+      // defaultSelectedKeys={selectedKeys}
       draggable
       blockNode
       onDragEnd={onDragEnd}
