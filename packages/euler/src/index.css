@@ -4,3 +4,7 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+/* .slider-box .ant-slider .ant-slider-handle::after {
+  background-color: #7F39FB!important;
+  box-shadow: 0 0 0 2px #7F39FB!important;
+} */

@@ -109,7 +109,7 @@ import { addEventEmitter } from '../../events';
 //   }
 // ]
 
-const App = () => {
+const LeftTree = () => {
   const editor = useContext(EditorContext);
   const [gData, setGData] = useState([]);//目录树 数据
   const [addGraphData,setAddgraphData] = useState([])
@@ -298,4 +298,4 @@ const removeItemByKey = (arr, keyToDelete) => {
   );
 };
 
-export default App;
+export default LeftTree;

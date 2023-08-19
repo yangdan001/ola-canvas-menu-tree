@@ -8,6 +8,14 @@ const resolvePath = (str: string) => path.resolve(__dirname, str);
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+    // // 定义开发环境下的变量
+    // 'process.env': {
+    //   NODE_ENV: JSON.stringify('development'),
+    //   API_BASE_URL: JSON.stringify('http://localhost:3000')
+    // }
+  },
   plugins: [react()],
   build: {
     lib: {

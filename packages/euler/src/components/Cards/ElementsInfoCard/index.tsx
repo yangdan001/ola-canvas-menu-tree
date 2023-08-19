@@ -99,6 +99,7 @@ const ElementsInfoCards: FC = () => {
 
   return (
     <BaseCard>
+      <div className='base-card-title'>Frame</div>
       <div className="element-info-attrs-row">
         {[
           {

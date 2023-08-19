@@ -2,7 +2,7 @@
   "name": "euler",
   "version": "0.0.1",
   "main": "index.js",
-  "author": "xigua",
+  "author": "yangdan",
   "license": "MIT",
   "private": true,
   "workspaces": [
@@ -42,7 +42,11 @@
   "dependencies": {
     "antd": "^5.8.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "query-string": "^8.1.0",
+    "shortid": "^2.2.16",
+    "@ant-design/icons": "^5.0.1",
+    "lodash": "^4.17.21"
   },
   "prettier": {
     "singleQuote": true,

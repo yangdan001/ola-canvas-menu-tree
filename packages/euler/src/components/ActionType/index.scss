@@ -1,0 +1,18 @@
+.type-box {
+  .type-box-title {
+    margin-top: 12px;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+  }
+  .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    position: relative;
+    background-color: #1E2022;
+    border: 1px solid #3C3F44;
+    transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    color: #FFFFFF;
+  }
+  .type-box-dec{
+    margin-top: 5px;
+    color: #FFFFFF;
+  }
+}

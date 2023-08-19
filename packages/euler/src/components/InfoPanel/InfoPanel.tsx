@@ -7,7 +7,14 @@ import { FillCard } from '../Cards/FillCard';
 import './style.scss';
 import { FormattedMessage } from 'react-intl';
 import { StrokeCard } from '../Cards/StrokeCard';
-import { Tabs } from 'antd';
+import Generate from '../Generate/index';
+import { Tabs, Divider, Select, Slider } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import ActionType from '../ActionType';
+import OpcitySet from '../OpcitySet';
+import BackToMeta from '../BackToMeta';
+import PenSize from '../PenSize';
+
 const { TabPane } = Tabs;
 enum PanelType {
   Global = 'Global',
@@ -18,6 +25,7 @@ export const InfoPanel: FC = () => {
   const editor = useContext(EditorContext);
   const [type, setType] = useState(PanelType.Global);
   const [key, setKey] = useState('1');
+
   // 根据是否选中元素，来决定面板类型
 
   useEffect(() => {
@@ -33,6 +41,18 @@ export const InfoPanel: FC = () => {
     }
   }, [editor]);
 
+  
+
+    
+     //去噪强度 Denoising StrengthonChange
+     const onSize = (value: number) => {
+      console.log('onChange: ', value);
+    }
+  
+    //去噪强度 Denoising StrengthonAfterChange
+    const onAfterSize = (value: number) => {
+      console.log('onAfterChange: ', value);
+    }
   return (
     // <div className="info-panel" onKeyDown={(e) => e.stopPropagation()}>
     //   {type === PanelType.SelectedElements && (
@@ -59,13 +79,20 @@ export const InfoPanel: FC = () => {
         }}
         >
           <TabPane key="1" tab="Tab 1">
-           <div className="" onKeyDown={(e) => e.stopPropagation()}>
+           <div className="left-tab" onKeyDown={(e) => e.stopPropagation()}>
             {type === PanelType.SelectedElements && (
                 <>
-                  <AlignCard />
+                  <div className='property-title'>Property</div>
+                  <Divider style={{marginTop: 10,marginBottom: 0,background:'#444'}}/>
+                  <ActionType/>
+                  {/* <AlignCard /> */}
                   <ElementsInfoCards />
-                  <FillCard key="fill" />
-                  <StrokeCard key="stroke" />
+                  {/* <Divider style={{marginTop: 10,marginBottom: 0}}/> */}
+                  <OpcitySet/>
+                  <BackToMeta/>
+                  <PenSize/>
+                  {/* <FillCard key="fill" /> */}
+                  {/* <StrokeCard key="stroke" /> */}
                 </>
               )}
               {type === PanelType.Global && (
@@ -76,19 +103,11 @@ export const InfoPanel: FC = () => {
             </div>
           </TabPane>
           <TabPane key="2" tab="Tab 2">
-          <div className="" onKeyDown={(e) => e.stopPropagation()}>
+            <div className="right-tab" onKeyDown={(e) => e.stopPropagation()} style={{overflowY:'scroll',height:'500px'}}>
             {type === PanelType.SelectedElements && (
                 <>
-                  <AlignCard />
-                  <ElementsInfoCards />
-                  <FillCard key="fill" />
-                  <StrokeCard key="stroke" />
-                </>
-              )}
-              {type === PanelType.Global && (
-                <div className="empty-text">
-                  <FormattedMessage id="noSelectedShapes" />
-                </div>
+              <Generate/>
+              </>
               )}
             </div>
           </TabPane>

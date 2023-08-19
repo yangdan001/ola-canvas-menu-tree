@@ -1,0 +1,19 @@
+.generate {
+  .prompts-box{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .upload-box{
+    display: flex;
+    min-width: 274px;
+    max-width: 274px;
+    min-height: 36px;
+    padding: 9.5px 19px 9.5px 13px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    border: 1px solid #3C3F44;
+    background: #1E2022;
+  }
+}
