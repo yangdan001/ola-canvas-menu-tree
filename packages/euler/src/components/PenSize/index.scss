@@ -1,9 +1,15 @@
 .pen-box {
+  color: #FFFFFF;
   .pen-box-title{
     display: flex;
     width: 274px;
-    padding: 4px 182.41px 8px 1px;
+    // padding: 4px 182.41px 8px 1px;
+    margin: 30px 0 15px;
     align-items: center;
     border-bottom: 1px solid #303236;
+  }
+
+  .ant-slider {
+      margin: 6px 0 10px 0!important;
   }
 }

@@ -9,7 +9,7 @@ const maxRetries = 3;
 const retryDelay = 1000;
 axios.defaults.timeout = 2400000;
 
-const api = axios.create({
+const api =  axios.create({
   baseURL,
   // timeout,
   headers: {
@@ -18,9 +18,9 @@ const api = axios.create({
   },
 });
 
-api.interceptors.response.use(
+ api.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
     const { message: errorMessage } = error;
 
     if (error.response) {
@@ -28,11 +28,34 @@ api.interceptors.response.use(
       const errorMessage = `请求错误：${status} ${statusText}`;
 
       if (status === 401) {
-        message.error('身份验证已过期，请重新登录');
+        // message.error('身份验证已过期，请重新登录');
         // localStorage.clear();
         localStorage.removeItem('selectType');
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        // window.location.href = '/login';
+        const username = 'yangdan'
+      const password = '123456'
+      let temp = JSON.stringify({ username: username, password: password });
+        const customHeaders = `Basic ${btoa(`${username}:${password}`)}`;
+        await login(temp, customHeaders).then(async (res) => {
+          if (res && !res.code && res.token) {
+            localStorage.setItem('token', res.token);
+            const result = await getUserInfo();
+            if (result && result.code === 0 && result.user_info.user_id) {
+              localStorage.setItem('user_info', JSON.stringify(result.user_info));
+            }
+              const encryptedUsername = CryptoJS.AES.encrypt(username, SECRET_KEY).toString();
+              const encryptedPassword = CryptoJS.AES.encrypt(password, SECRET_KEY).toString();
+              // 如果remember为true，将用户名和密码保存到cookie中，有效期7天
+              Cookies.set('username', encryptedUsername, { expires: 7 });
+              Cookies.set('password', encryptedPassword, { expires: 7 });
+          } else {
+            notification.error({
+              message: `发生错误-code${res && res.code ? res.code : '登陆失败'}`,
+              description: `${res && res.message ? res.message : '登陆失败'}`,
+            });
+          }
+        })
       }
     } else if (errorMessage === 'Network Error') {
       notification.error({

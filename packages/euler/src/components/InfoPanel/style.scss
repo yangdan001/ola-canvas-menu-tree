@@ -23,19 +23,6 @@
       color: #b3b3b3;
       padding: 16px;
     }
-    .back-box{
-      display: flex;
-      width: 274px;
-      height: 46px;
-      padding: 14px 0px 15px 0px;
-      justify-content: center;
-      align-items: center;
-      flex-shrink: 0;
-      border-radius: 4px;
-      border: 1px solid #5858E6;
-      background: var(--400, #7F39FB);
-      box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.07);
-    }
     .ant-tabs .ant-tabs-tab-btn {
       outline: none;
       transition: all 0.3s;

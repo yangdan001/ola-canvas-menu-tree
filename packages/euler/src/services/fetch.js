@@ -1,11 +1,14 @@
 import react from 'react'
+import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
 import { notification, message } from 'antd';
+import { signup, login, getUserInfo } from '../services/api';
+console.log(process.env.VITE_API_URL,'process.env.VITE_API_URL');
 console.log('fetch----process.env', process.env) // > prod
+const SECRET_KEY = 'my_key';
 // // 访问 NODE_ENV 环境变量
 // console.log(import.meta.env.NODE_ENV,'环境变量');
 
-// // 访问 API_BASE_URL 环境变量
-// console.log(import.meta.env.API_BASE_URL,'环境变量url');
 if (process.env.NODE_ENV) {
   console.log('Current environment:', process.env.NODE_ENV);
 } else {
@@ -87,10 +90,33 @@ const fetchWrapper = {
     debugger
     // const url = `${this.baseURL}${endpoint}`;
     const url = useTempUrl ? `${this.createModalBaseURL}${endpoint}` : `${this.baseURL}${endpoint}`; // 根据useTempUrl判断使用哪个URL
-    // const token = localStorage.getItem('token');
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MCwiZXhwIjoxNjkyNDI2MzY0fQ.j7OzGNJtBBZpsx7sQP7Mci3StwP-Tgw__Gmy_b8KQfw';
+    const token = localStorage.getItem('token');
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MCwiZXhwIjoxNjkyNjY5OTI5fQ.kNeRP3Hg4KXiPJMSIFRnbs5zQUcIDQ1QN0pVEc2Eh0Y';
     if (!token && !skipTokenCheck) { // 检查是否需要跳过token检查
-      window.location.href = '/login';
+      // window.location.href = '/login';
+      const username = 'yangdan'
+      const password = '123456'
+      let temp = JSON.stringify({ username: username, password: password });
+        const customHeaders = `Basic ${btoa(`${username}:${password}`)}`;
+        await login(temp, customHeaders).then(async (res) => {
+          if (res && !res.code && res.token) {
+            localStorage.setItem('token', res.token);
+            const result = await getUserInfo();
+            if (result && result.code === 0 && result.user_info.user_id) {
+              localStorage.setItem('user_info', JSON.stringify(result.user_info));
+            }
+              const encryptedUsername = CryptoJS.AES.encrypt(username, SECRET_KEY).toString();
+              const encryptedPassword = CryptoJS.AES.encrypt(password, SECRET_KEY).toString();
+              // 如果remember为true，将用户名和密码保存到cookie中，有效期7天
+              Cookies.set('username', encryptedUsername, { expires: 7 });
+              Cookies.set('password', encryptedPassword, { expires: 7 });
+          } else {
+            notification.error({
+              message: `发生错误-code${res && res.code ? res.code : '登陆失败'}`,
+              description: `${res && res.message ? res.message : '登陆失败'}`,
+            });
+          }
+        })
       return;
     }
 
@@ -211,7 +237,7 @@ const fetchWrapper = {
   },
 
   //统一错误处理
-  _handleErrors(response) {
+  async _handleErrors(response) {
     if (!response.ok) {
       let errorMessage;
       if (response.status === 502) {
@@ -222,11 +248,34 @@ const fetchWrapper = {
 
       if (response.status === 401) {
         console.log(response);
-        message.error('身份验证已过期，请重新登陆');
+        // message.error('身份验证已过期，请重新登陆');
         localStorage.clear();
         localStorage.removeItem('selectType');
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        // window.location.href = '/login';
+        const username = 'yangdan'
+      const password = '123456'
+      let temp = JSON.stringify({ username: username, password: password });
+        const customHeaders = `Basic ${btoa(`${username}:${password}`)}`;
+        await login(temp, customHeaders).then(async (res) => {
+          if (res && !res.code && res.token) {
+            localStorage.setItem('token', res.token);
+            const result = await getUserInfo();
+            if (result && result.code === 0 && result.user_info.user_id) {
+              localStorage.setItem('user_info', JSON.stringify(result.user_info));
+            }
+              const encryptedUsername = CryptoJS.AES.encrypt(username, SECRET_KEY).toString();
+              const encryptedPassword = CryptoJS.AES.encrypt(password, SECRET_KEY).toString();
+              // 如果remember为true，将用户名和密码保存到cookie中，有效期7天
+              Cookies.set('username', encryptedUsername, { expires: 7 });
+              Cookies.set('password', encryptedPassword, { expires: 7 });
+          } else {
+            notification.error({
+              message: `发生错误-code${res && res.code ? res.code : '登陆失败'}`,
+              description: `${res && res.message ? res.message : '登陆失败'}`,
+            });
+          }
+        })
       }
       // notification.error({
       //   message: '请求错误',

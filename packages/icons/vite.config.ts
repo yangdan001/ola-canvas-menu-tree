@@ -1,13 +1,15 @@
 import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'vite';
+import { loadEnv } from 'vite';
 import typescript from '@rollup/plugin-typescript';
 
 import path from 'path';
 
 const resolvePath = (str: string) => path.resolve(__dirname, str);
 
-// https://vitejs.dev/config/
+//https://vitejs.dev/config/
 export default defineConfig({
+  base:'./',
   plugins: [react()],
   build: {
     lib: {
@@ -16,6 +18,7 @@ export default defineConfig({
       fileName: (format) => `icons.${format}.js`,
     },
     rollupOptions: {
+      
       external: ['react', 'react-dom'],
       output: {
         globals: {
@@ -25,6 +28,7 @@ export default defineConfig({
       },
       plugins: [
         typescript({
+         
           target: 'esnext',
           rootDir: resolvePath('src'),
           declaration: true,

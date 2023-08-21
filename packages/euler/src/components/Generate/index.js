@@ -64,6 +64,9 @@ const Generate = () => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [inpaintingChecked, setInpaintingChecked] = useState(false);
   const [multidiffusionChecked, setMultidiffusionChecked] = useState(false);
+  const [stepsVal, setStepsVal] = useState(0);
+  const [scaleVal, setScaleVal] = useState(0);
+
 
   useEffect(() => {
     const setVhToState = () => {
@@ -176,14 +179,27 @@ const Generate = () => {
     })
   }
 
-  //去噪强度 Denoising StrengthonChange
-  const onChange = (value) => {
+  //
+  const onChangeSteps = (value) => {
     console.log('onChange: ', value);
+    setStepsVal(value)
+  }
+  //
+  const onAfterChangeSteps = (value) => {
+    console.log('onAfterChange: ', value);
+    setStepsVal(value)
   }
 
-  //去噪强度 Denoising StrengthonAfterChange
-  const onAfterChange = (value) => {
+  //
+  const onChangeScale = (value) => {
+    console.log('onChange: ', value);
+    setScaleVal(value)
+  }
+  //
+  const onAfterChangeScale = (value) => {
     console.log('onAfterChange: ', value);
+    setScaleVal(value)
+
   }
   const onInpaintingChange = (value) => {
     setInpaintingChecked(value)
@@ -259,7 +275,9 @@ const Generate = () => {
   //   }
   // }, 300)
 
-return(<Form
+return(
+  <div className="generate">
+<Form
     form={form}
     name="validate_other"
     {...formItemLayout}
@@ -276,8 +294,9 @@ return(<Form
     labelCol={{
       style: { width: 120,textAlign:'left' }
     }}
-    className="generate"
+    
   >
+    <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}  >
     <Form.Item
       name="base_model_name"
       // label="Select"
@@ -289,7 +308,7 @@ return(<Form
         },
       ]}
     >
-      <div>Model</div>
+      <div className='model-title'>Model</div>
       {baseModelTips.title&&<Select 
       placeholder="请选择模型"
       defaultValue={baseModelTips.title}
@@ -297,95 +316,102 @@ return(<Form
       {checkOptionsType(configOptions.base_model || [])}
       </Select>}
     </Form.Item>
+    </ConfigProvider>
     <div>
       <div 
-        className="prompts-box" 
+        className="prompts-header" 
         onClick={() => {
         setIsPromptsOpen(!isPromptsOpen)
         }}>
-          <EditOutlined /> 
-          <div>Prompts</div>
+          <div className='prompts-left'>
+            <EditOutlined /> 
+            <div className='prompts-left-title'>Prompts</div>
+          </div>
           {isPromptsOpen?<DownOutlined />:<UpOutlined />}
       </div>
       <div>
       {!isPromptsOpen?
-      <div>
-        <div>Prompt</div>
+      <div className='prompts-content'>
+        <div className='prompts-content-title'>Prompt</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name="positive_prompt" >
             <TextArea rows={6} className="no-resize" />
           </Form.Item>
         </ConfigProvider>
-        <div>Negative prompt</div>
+        <div  className='negative-content-title'>Negative prompt</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name="negative_prompt" >
             <TextArea rows={6} />
           </Form.Item>
         </ConfigProvider>
-        <div>Concepts specified in the negative prompt won't guide the generation.</div>
+        <div className='negative-content-dec' >Concepts specified in the negative prompt won't guide the generation.</div>
       </div>
       :null}
       </div>
     </div>
     <div>
       <div 
-        className="prompts-box" 
+        className="prompts-header marT-20" 
         onClick={() => {
         setIsGenerationParametersOpen(!isGenerationParametersOpen)
         }}>
-          <MenuOutlined />
-          <div>Generation Parameters</div>
+          <div className='prompts-left'>
+            <MenuOutlined />
+            <div className='prompts-left-title'>Generation Parameters</div>
+          </div>
           {isGenerationParametersOpen?<DownOutlined />:<UpOutlined />}
       </div>
       <div>
       {!isGenerationParametersOpen?
       <div className='slider-box'>
-        <div>Steps (50)</div>
+        <div className='slider-title'>Steps {stepsVal}</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name={'num_inference_steps'} style={{marginBottom:0}}>
-            <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChange} onAfterChange={onAfterChange} />
+            <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChangeSteps} onAfterChange={onAfterChangeSteps} />
           </Form.Item>
         </ConfigProvider>
-        <div>Results are better the more steps you use. If you want faster results you can use a smaller number.</div>
-        <div>Guidance scale (7)</div>
+        <div className='slider-dec'>Results are better the more steps you use. If you want faster results you can use a smaller number.</div>
+        <div className='slider-title'>Guidance {scaleVal}</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name={'cfg'} style={{marginBottom:0}}>
-            <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChange} onAfterChange={onAfterChange} />
+            <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChangeScale} onAfterChange={onAfterChangeScale} />
           </Form.Item>
         </ConfigProvider>
-        <div>Increasing guidance scale forces the generation to better match the prompt.</div>
+        <div className='slider-dec'>Increasing guidance scale forces the generation to better match the prompt.</div>
       </div>
       :null}
       </div>
     </div>
     <div>
       <div 
-        className="prompts-box" 
+        className="prompts-header" 
         onClick={() => {
         setIsAdvancedOpen(!isAdvancedOpen)
         }}>
-          <SettingOutlined />
-          <div>Advanced</div>
+          <div className='prompts-left'>
+            <SettingOutlined />
+            <div>Advanced</div>
+          </div>
           {isAdvancedOpen?<DownOutlined />:<UpOutlined />}
       </div>
       <div>
       {!isAdvancedOpen?
-      <div>
-        <div>ControlNet</div>
+      <div  className='generate-select'>
+        <div className='generate-title marT-10 marB-3'>ControlNet</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name="controlnet" >
           <Select 
-          placeholder="请选择controlnet模型"
+          // placeholder="请选择controlnet模型"
           >
           {checkOptionsType(configOptions.preprocess || [])}
           </Select>
           </Form.Item>
         </ConfigProvider>
-        <div>LoRA</div>
+        <div className='generate-title marT-10 marB-3'>LoRA</div>
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name="lora" >
             <Select 
-            placeholder="请选择Lora模型"
+            // placeholder="请选择Lora模型"
             >
             {checkOptionsType(configOptions.lora_model || [])}
             </Select>
@@ -401,7 +427,7 @@ return(<Form
     <Form.Item name="Multidiffusion" label="Multidiffusion">
       <Switch checked={multidiffusionChecked} onChange={onMultidiffusionChange}/>
     </Form.Item>
-    <div>Image Content</div>
+    <div className='generate-title  marB-3'>Image Content</div>
     <Form.Item
       name="custom_image_name"
       // label="Upload"
@@ -421,12 +447,14 @@ return(<Form
         offset: 6,
       }}
     >
-      <Space>
-        <Button type="primary" htmlType="submit">
+      {/* <Space> */}
+        <Button type="primary" htmlType="submit" className='generate-btn'>
           Submit
         </Button>
-      </Space>
+      {/* </Space> */}
     </Form.Item>
-  </Form>)
+  </Form>
+  </div>
+)
 }
 export default Generate;

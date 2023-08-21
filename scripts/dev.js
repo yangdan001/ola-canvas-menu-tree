@@ -9,7 +9,7 @@ const setup = async () => {
     console.log('Please specify a target package');
     return;
   }
-
+  console.log('target',target);
   const pkgJson = require(path.resolve(
     __dirname,
     `../packages/${target}/package.json`,
@@ -20,13 +20,14 @@ const setup = async () => {
     `../packages/${target}/dist/${target}.es.js`,
   );
   const relativeOutputFile = path.relative(process.cwd(), outfile);
-
+    console.log('outfile',outfile);
   /** @type {import('esbuild').BuildContext} */
   const ctx = await context({
     entryPoints: [
       path.resolve(__dirname, `../packages/${target}/src/index.ts`),
     ],
     outfile,
+    // base:'./',
     bundle: true,
     external: Object.keys({
       ...pkgJson.dependencies,

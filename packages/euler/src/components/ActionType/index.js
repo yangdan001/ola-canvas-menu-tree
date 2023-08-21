@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import {
   Select,
+  ConfigProvider,
+  Form,
   Divider
 } from 'antd';
 import './index.scss';
@@ -21,14 +23,16 @@ const ActionType = () => {
 return(
    <div className='type-box'>
       <div className='type-box-title'>Type</div>
+      <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}  >
+      {/* <Form.Item name={'frame-type'} rules={[{ required: true, message: '请选择类型' }]}> */}
       <Select
         style={{ width: 120  }}
-        dropdownStyle={{ backgroundColor: '#1E2022' }}
+        // dropdownStyle={{ backgroundColor: '#1E2022' }}
         defaultValue={defaultType}
         onChange={handleChange}
-        // options={[{ value: 'image', label: 'image' },{ value: 'meta', label: 'meta' },{ value: 'mask', label: 'mask' }]}
+        options={[{ value: 'image', label: 'image' },{ value: 'meta', label: 'meta' },{ value: 'mask', label: 'mask' }]}
       >
-      <Option value="image" label="image" style={{ color: '#FFFFFF' }}>
+      {/* <Option value="image" label="image" style={{ color: '#FFFFFF' }}>
       image
       </Option>
       <Option value="meta" label="meta" style={{ color: '#FFFFFF' }}>
@@ -36,8 +40,10 @@ return(
       </Option>
       <Option value="mask" label="mask" style={{ color: '#FFFFFF' }}>
       mask
-      </Option>
+      </Option> */}
       </Select>
+      {/* </Form.Item> */}
+    </ConfigProvider>
       <div className='type-box-dec'>Frame type, image, meta or mask</div>
       <Divider style={{marginTop: 5,marginBottom: 0,background:'#444'}}/>
    </div>

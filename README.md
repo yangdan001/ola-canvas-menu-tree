@@ -2,7 +2,7 @@
 
 euler, an open-source vector graphics editor based on Canvas, similar to Figma.
 
-**西瓜牌图形编辑器**，一款开源的基于 Canvas 实现的矢量图形编辑器，类似 Figma。
+**图形编辑器**，一款开源的基于 Canvas 实现的矢量图形编辑器，类似 Figma。
 
 [euler Editor](https://blog.fstars.wang/app/euler/)
 

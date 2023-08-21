@@ -1,13 +1,14 @@
 import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'vite';
+import { loadEnv } from 'vite';
 import typescript from '@rollup/plugin-typescript';
 
 import path from 'path';
 
 const resolvePath = (str: string) => path.resolve(__dirname, str);
-
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './', // 项目的基础路径
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
     // // 定义开发环境下的变量

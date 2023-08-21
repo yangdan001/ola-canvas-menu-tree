@@ -24,10 +24,9 @@ enum PanelType {
 export const InfoPanel: FC = () => {
   const editor = useContext(EditorContext);
   const [type, setType] = useState(PanelType.Global);
-  const [key, setKey] = useState('1');
+  const [key, setKey] = useState('2');
 
   // 根据是否选中元素，来决定面板类型
-
   useEffect(() => {
     if (editor) {
       const handler = (items: GraphAttrs[]) => {
@@ -40,19 +39,7 @@ export const InfoPanel: FC = () => {
       };
     }
   }, [editor]);
-
-  
-
-    
-     //去噪强度 Denoising StrengthonChange
-     const onSize = (value: number) => {
-      console.log('onChange: ', value);
-    }
-  
-    //去噪强度 Denoising StrengthonAfterChange
-    const onAfterSize = (value: number) => {
-      console.log('onAfterChange: ', value);
-    }
+     
   return (
     // <div className="info-panel" onKeyDown={(e) => e.stopPropagation()}>
     //   {type === PanelType.SelectedElements && (

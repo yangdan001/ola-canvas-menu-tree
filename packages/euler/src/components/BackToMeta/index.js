@@ -13,12 +13,12 @@ const BackToMeta = () => {
 
 
 return(
-   <div>
-        <div className='back-box'>
+   <div className='back-box'>
+        <div className='back-box-btn'>
           <ArrowLeftOutlined style={{ fontSize: '16px', color: '#FFFFFF' }}/>
         </div>
-       <div>Back to meta</div>
-        <Divider style={{marginTop: 10,marginBottom: 0}}/>
+       <div className='back-box-title'>Back to meta</div>
+        <Divider style={{marginTop: 7,marginBottom: 0,background:'#444'}}/>
    </div>
       )
 }
