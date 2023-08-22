@@ -10,7 +10,8 @@ import './Editor.scss';
 import { ContextMenu } from './ContextMenu';
 
 const topMargin = 48;
-const leftRightMargin = 240 * 2;
+// const leftRightMargin = 240 * 2;
+const leftRightMargin = 240 +303;
 
 const Editor: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
