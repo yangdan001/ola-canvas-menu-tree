@@ -10,7 +10,7 @@ const resolvePath = (str: string) => path.resolve(__dirname, str);
 //https://vitejs.dev/config/
 export default defineConfig({
   envDir: path.resolve(__dirname, '../../env'),
-  base:'./',
+  // base:'./',
   plugins: [react()],
   build: {
     lib: {
@@ -19,7 +19,6 @@ export default defineConfig({
       fileName: (format) => `icons.${format}.js`,
     },
     rollupOptions: {
-      
       external: ['react', 'react-dom'],
       output: {
         globals: {
@@ -29,7 +28,6 @@ export default defineConfig({
       },
       plugins: [
         typescript({
-         
           target: 'esnext',
           rootDir: resolvePath('src'),
           declaration: true,
