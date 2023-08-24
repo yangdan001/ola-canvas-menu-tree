@@ -24,21 +24,40 @@ enum PanelType {
 export const InfoPanel: FC = () => {
   const editor = useContext(EditorContext);
   const [type, setType] = useState(PanelType.Global);
-  const [key, setKey] = useState('2');
-
+  const [key, setKey] = useState('1');
+  const [frameType, setFrameType] = useState('image');
+  const [isHide, setIsHide] = useState(false);
   // 根据是否选中元素，来决定面板类型
   useEffect(() => {
     if (editor) {
       const handler = (items: GraphAttrs[]) => {
         setType(items.length ? PanelType.SelectedElements : PanelType.Global);
-      };
+      };type
       editor.selectedElements.on('itemsChange', handler);
-
+      setFrameType(type)
       return () => {
         editor.selectedElements.off('itemsChange', handler);
       };
     }
   }, [editor]);
+  useEffect(() => {
+    const localFrameType = localStorage.getItem('frameType') || 'image'
+    const localIsHide = Boolean(localStorage.getItem('isHide')) || true
+    setFrameType(localFrameType)
+    setIsHide(localIsHide)
+    console.log(localFrameType,localIsHide,33)
+  }, [editor]);
+  useEffect(() => {
+    const localFrameType  = localStorage.getItem('frameType')
+    console.log(localFrameType,333)
+    if(localFrameType=='meta'){
+      setIsHide(false)
+    console.log(isHide,localFrameType,44)
+    }else{
+      setIsHide(true)
+    console.log(isHide,localFrameType,55)
+    }
+  }, [frameType]);
      
   return (
     // <div className="info-panel" onKeyDown={(e) => e.stopPropagation()}>
@@ -89,7 +108,7 @@ export const InfoPanel: FC = () => {
               )}
             </div>
           </TabPane>
-          <TabPane key="2" tab="Tab 2">
+          <TabPane key="2" tab="Tab 2"  disabled={!isHide}> 
             <div className="right-tab" onKeyDown={(e) => e.stopPropagation()} style={{overflowY:'scroll',height:'500px'}}>
             {type === PanelType.SelectedElements && (
                 <>

@@ -17,7 +17,19 @@ const ActionType = () => {
   const handleChange = (value) => {
     console.log(`selected ${value}`);
     setDefaultType(value)
-    localStorage.setItem('frameType', value)
+    if(value){
+      localStorage.setItem('frameType', value)
+      if(value == 'meta'){
+        localStorage.setItem('isHide', false)
+      }else{
+        localStorage.setItem('isHide', true)
+      }
+      console.log(value,11)
+    }else{
+      localStorage.setItem('frameType', 'image')
+      localStorage.setItem('isHide', true)
+      console.log(value,22)
+    }
   };
 
 return(

@@ -2,7 +2,9 @@ import React, { useState, useContext, useEffect } from 'react';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import shortid from 'shortid';
 import {
+  notification,
   Input,
+  message, 
   ConfigProvider,
   Button,
   Tooltip,
@@ -24,11 +26,13 @@ import {
 import _ from 'lodash';
 import { EditOutlined, DownOutlined, UpOutlined, MenuOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  postPreprocess, getAllDescription, getHistoryRecord, getRecordTotal,
+  postPreprocess, getAllDescription, getHistoryRecord, getRecordTotal,postImage,getRecord,
   getPreprocessRes, putTemplate, getTemplate, deleteEngineTemplate,deleteLora
 } from '../../../src/services/api';
 import { EditorContext } from '../../context';
 import './index.scss';
+import fetchApi from '../../../src/services/fetch';
+const socketBaseURL = fetchApi.socketBaseURL;
 const { Option } = Select;
 const { TextArea } = Input;
 // 然后在需要使用这些图标的地方使用它们
@@ -43,13 +47,7 @@ const formItemLayout = {
     span: 14,
   },
 };
-const normFile = (e) => {
-  console.log('Upload event:', e);
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
+
 const onFinish = (values) => {
   console.log('Received values of form: ', values);
 };
@@ -66,7 +64,7 @@ const Generate = () => {
   const [multidiffusionChecked, setMultidiffusionChecked] = useState(false);
   const [stepsVal, setStepsVal] = useState(0);
   const [scaleVal, setScaleVal] = useState(0);
-
+  const [fileObj, setFileObj] = useState({});
 
   useEffect(() => {
     const setVhToState = () => {
@@ -131,23 +129,10 @@ const Generate = () => {
           if (index !== -1) {
             setBaseModelTips(config.base_model[index]);
             console.log(config.base_model[index],'config.base_model[index]')
-            // let targetVaeModalArray = config.vae_model.filter(item => config.base_model[index].link === item.link);
-            // setconfigOptions({
-            //   ...config,
-            //   vae_model: targetVaeModalArray ? targetVaeModalArray : []
-            // });
           } else {
             setBaseModelTips(config.base_model[0]);
           }
         }
-        // if (config.vae_model && config.vae_model.length !== 0) {
-        //   const index = config.vae_model.findIndex(item => item.title === 'disabled.pt');
-        //   if (index !== -1) {
-        //     setVaeModelTips(config.vae_model[index]);
-        //   } else {
-        //     setVaeModelTips(config.vae_model[0]);
-        //   }
-        // }
       }
   }
   login();
@@ -156,6 +141,16 @@ const Generate = () => {
     }
   }, []); 
 
+  const normFile = (e) => {
+    console.log('Upload event:', e);
+    if(e&&e.file){
+      setFileObj(e.file)
+    }
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
   const checkOptionsType = (model) => {
     console.log(model,'model')
     return model && model.map(item => {
@@ -202,78 +197,308 @@ const Generate = () => {
 
   }
   const onInpaintingChange = (value) => {
+    console.log(value,'value888')
     setInpaintingChecked(value)
+    // if()
   }
 
   const onMultidiffusionChange = (value) => {
     setMultidiffusionChecked(value)
   }
   
-  //表单提交逻辑
-  // const onFinish = _.debounce(async (values) => {
-  //   let selectType = localStorage.getItem("selectType")
-  //   if (clipEditStatus) {
-  //     message.warning('请先退出CLIP提示词编辑模式，再生成图片');
-  //     return false;
-  //   }
-  //   try {
-  //     //校验图生图是否上传了图片
-  //     if (selectType === '2' && !toJS(textToImageStore.status.image_names.custom_image_name.file)) {
-  //       message.error('请上传图片！');
-  //       return false;
-  //     }
-  //     let value = await form.validateFields();
-  //     //处理后端所需字段，用来传递给后端
-  //     let backendData = setDatas(value, toJS(textToImageStore), selectType);
-  //     //页面渲染所需数据
-  //     let storeData = setStoreDatas(value, toJS(textToImageStore), selectType);
-  //     //处理所有图片（target_file）
-  //     const controlnetFiles = manageControlnetFile(toJS(textToImageStore.status), selectType);
-  //     //处理前端页面所需数据
-  //     textToImageStore.setStatus(storeData);
-  //     //判断controlnet文件是否存在
-  //     // return false
-  //     console.log(backendData, controlnetFiles);
-  //     // return false
-  //     if (toJS(textToImageStore.status.controlnet).length !== 0) {
-  //       const nullIndexes = toJS(textToImageStore.status.controlnet).filter(obj => obj.target_file === '' || obj.target_file === null || obj.target_file === undefined).map(obj => toJS(textToImageStore.status.controlnet).indexOf(obj));
-  //       const newIndexes = nullIndexes.map(index => index + 1);
-  //       if (newIndexes.length !== 0) {
-  //         return false
-  //       } else {
-  //         textToImageStore.changetextToLoading(true);//历史图片组件loading
-  //         textToImageStore.changeImageListLoading(true)//视图组件
-  //         // 更新表单值 
+    //存储历史图片和处理后需要渲染的图片列表
+  const changeHistoryImages = (process, history) => {
+      // runInAction(() => {
+      //   this.processHistoryImages = process.reverse();
+      //   this.historyImages = history;
+      // });
+      localStorage.setItem('processHistoryImages', process.reverse())
+      localStorage.setItem('historyImages', history)
+    }
 
-  //         form.setFieldsValue({ lora: textToImageStore.status.lora, });
-  //         //文生图逻辑处理
-  //         if (selectType === '1') {
-  //           textToImageStore.textToImageSocket(backendData, controlnetFiles)
-  //         }
-  //         if (selectType === '2') {
-  //           textToImageStore.imageToImageSocket(backendData, controlnetFiles)
-  //         }
-  //       }
-  //       return false;
-  //     } else {
-  //       textToImageStore.changetextToLoading(true);//历史图片组件loading
-  //       textToImageStore.changeImageListLoading(true)//视图组件
-  //       // 更新表单值 
-  //       form.setFieldsValue({ lora: textToImageStore.status.lora, });
-  //       //文生图逻辑处理
-  //       console.log(backendData, controlnetFiles);
-  //       if (selectType === '1') {
-  //         textToImageStore.textToImageSocket(backendData, controlnetFiles)
-  //       }
-  //       if (selectType === '2') {
-  //         textToImageStore.imageToImageSocket(backendData, controlnetFiles)
-  //       }
-  //     }
-  //   } catch (errorInfo) {
-  //     textToImageStore.changeImageListLoading(false)//视图组件
-  //     textToImageStore.changetextToLoading(false);//历史图片组件loading
+  //点击ImageGallery下方滑动视图组件时方法
+  const ImageGalleryClick = (record, type) => {
+    let tempHistoryImages = localStorage.getItem('historyImages')[localStorage.getItem('historyImages').length - 1];
+    if (type && type === 'again') {
+      if (tempHistoryImages && tempHistoryImages.img_files && tempHistoryImages.img_files.length !== 0) {
+        this.targetImages = {
+          ...tempHistoryImages,
+          images: tempHistoryImages.img_files.map((item, index) => {
+            return {
+              id: tempHistoryImages.images_id[index],
+              url: item,
+              record_id: record.record_id
+            }
+          })
+        }
+      } else if (tempHistoryImages && tempHistoryImages.images.length !== 0) {
+        this.targetImages = {
+          ...tempHistoryImages,
+          images: tempHistoryImages.images.map((item, index) => {
+            return {
+              id: tempHistoryImages.images_id[index],
+              url: item,
+              record_id: record.record_id
+            }
+          })
+        }
+      } else {
+        this.targetImages = { images: [] }
+      }
+    } else {
+      localStorage.getItem('historyImages').map((item) => {
+        if (record.id === item.record_id) {
+          this.targetImages = {
+            ...item,
+            images: item.images && item.images.length !== 0 ? item.images.map((image_item, index) => {
+              return {
+                id: item.images_id[index],
+                url: image_item,
+                record_id: record.record_id
+              }
+            }) :
+              item.images.map((image_item, index) => {
+                return {
+                  id: item.images_id[index],
+                  url: image_item,
+                  record_id: record.record_id
+                }
+              })
+          };
+        }
+      })
+    }
+  }
+    //文生图
+  const textToImageSocket = async (backendData, controlnetFiles) => {
+      await postImage(backendData, controlnetFiles).then((RES) => {
+        try {
+          if (!RES || RES.code !== 0) {
+            notification.error({
+              message: '请求错误',
+              description: `${RES && RES.message ? RES.message : ''}`,
+            });
+            // this.changeImageListLoading(false)//视图组件
+            // this.changetextToLoading(false);//历史图片组件loading
+            return false;
+          } else {
+            if (RES.params.task_id) {
+              const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
+              const socket = new WebSocket(socketUrl);
+              socket.onopen = () => {
+                console.log('WebSocket连接已打开');
+              };
+              socket.onmessage = (event) => {
+                console.log('触发', JSON.parse(event.data));
+                if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
+                  // runInAction(() => {
+                  //   this.textToImageDataRes = event && JSON.parse(event.data);
+                  // });
+                  let textToImageDataRes = event && JSON.parse(event.data);
+                  localStorage.setItem('textToImageDataRes', textToImageDataRes)
+                }
+              };
+              socket.onclose = async (event) => {
+                console.log('close');
+                console.log(localStorage.getItem('textToImageDataRes'));
+                if (localStorage.getItem('textToImageDataRes') && localStorage.getItem('textToImageDataRes').status === 'COMPLETED') {
+                  const res = await getRecord(RES.params.task_id);
+                  let tempImagesArr = [];
+                  var temp = _.clone(localStorage.getItem('historyImages'));
+                  if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+                    //处理历史
+                    if (temp.length >= 5) { temp.splice(0, 1) }
+                    temp.push(res.params);
+                    temp.map(item => {
+                      tempImagesArr.push({
+                        id: item.record_id,
+                        url: item.images && item.images.length !== 0 ? item.images[0] : item.images[0],
+                        recorc_id: item.record_id
+                      })
+                    })
+                    //tempImagesArr 处理下方展示所需图片(取每个item中的第一个)
+                    //temp 所有历史的record
+                    changeHistoryImages([...tempImagesArr], temp);
+                    ImageGalleryClick(res.params, 'again')
+                    // this.changeImageListLoading(false)//视图组件
+                    // this.changetextToLoading(false);//历史图片组件loading
+                    getRecordTotal().then((res) => {
+                      if (res && res.code === 0) {
+                        this.total = res.params.total;
+                      }
+                    })
+                  } else {
+                    notification.error({
+                      message: '操作失败',
+                      description: `${res && res.message ? res.message : '请求异常'}`,
+                    });
+                    // this.changeImageListLoading(false)//视图组件
+                    // this.changetextToLoading(false);//历史图片组件loading
+                  }
+                } else {
+                  notification.error({
+                    message: '操作失败',
+                    description: `请求失败`,
+                  });
+                  // this.changeImageListLoading(false)//视图组件
+                  // this.changetextToLoading(false);//历史图片组件loading
+                }
+              };
+            } else {
+              notification.error({
+                message: '接口错误',
+                description: `task_id不存在或发生异常`,
+              });
+              // this.changeImageListLoading(false)//视图组件
+              // this.changetextToLoading(false);//历史图片组件loading
+            }
+          }
+        } catch (err) {
+          this.changeImageListLoading(false)//视图组件
+          this.changetextToLoading(false);//历史图片组件loading
+        }
+      })
+    }
+
+  //表单提交逻辑
+  const onFinish = _.debounce(async (values) => {
+    let frameType = localStorage.getItem("frameType")
+    let initValue = {
+      "isInpainting": "0",
+      "models": {
+        "base_model_name": "Base-V1-5.ckpt",
+        "vae_model_name": "disabled.pt"
+      },
+      "lora": [{
+        "model_name": "CreamTheRabbit.safetensors",
+        "unet_weights": 1,
+        "te_weights": 1
+      }],
+      "controlnet": [{
+        "model_name": "Control_V11p_Sd15s2_Lineart_Anime.pth",
+        "apply": {
+          "strength": 0.2
+        },
+        "preprocess": [],
+        "load_img_index": 1
+      }],
+      "image_names": {
+        "control_image_name": ["117d487c1263439b249a57f281fe6407.jpg"],
+        "custom_image_name": ["117d487c1263439b249a57f281fe6407.jpg"]
+      },
+      "prompts": {
+        "positive_prompt": "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
+        "negative_prompt": "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face"
+      },
+      "sampler_params": {
+        "number": 1,
+        "num_inference_steps": "60",
+        "cfg": "9.0",
+        "scheduler_name": "Euler_a",
+        "width": "512",
+        "height": "768",
+        "seed": "1234",
+        "denoise": "0.75"
+      }
+    }
+    // if (clipEditStatus) {
+    //   message.warning('请先退出CLIP提示词编辑模式，再生成图片');
+    //   return false;
+    // }
+    try {
+      //校验图生图是否上传了图片
+      if (frameType != 'meta' && !fileObj) {
+        message.error('请上传图片！');
+        return false;
+      }
+      let value = await form.validateFields();
+      console.log(value,'value33')
+      // let controlnetFiles={
+      //   name: '',
+      //   lastModified: '1692625729887',
+      //   lastModifiedDate: 'Mon Aug 21 2023 21: 48: 49 GMT + 0800(中国标准时间)',
+      //   webkitRelativePath: '',
+      // }
+      // let controlnetFiles=fileObj || {}
+      // textToImageSocket(initValue, controlnetFiles)
+      //拼接json对象，传递后端
+  // let datas = {
+  //   models: {
+  //     base_model_name: value.base_model_name,
+  //     vae_model_name: initValue.models.vae_model_name,
+  //   },
+  //   lora: value.lora ? value.lora : [],
+  //   controlnet: store.status.controlnet.length !== 0 ? controlNetArray : [],
+  //   image_names: {
+  //     control_image_name: store.status.controlnet.length !== 0 ? imageNamesArray : [],
+  //     custom_image_name: tempCheck(value, store, selectType),
+  //   },
+  //   prompts: {
+  //     positive_prompt: value.positive_prompt,
+  //     negative_prompt: value.negative_prompt ? value.negative_prompt : null,
+  //   },
+  //   sampler_params: {
+  //     number: value.number,
+  //     num_inference_steps: value.num_inference_steps,
+  //     cfg: value.cfg,
+  //     scheduler_name: value.scheduler_name,
+  //     width: value.width,
+  //     height: value.height,
+  //     seed: value.seed ? value.seed : 'disable',
+  //     denoise: value.denoise, //去噪强度 Denoising Strength
   //   }
-  // }, 300)
+  // }
+      //处理后端所需字段，用来传递给后端
+      // let backendData = setDatas(value, toJS(textToImageStore), selectType);
+      // //页面渲染所需数据
+      // let storeData = setStoreDatas(value, toJS(textToImageStore), selectType);
+      // //处理所有图片（target_file）
+      // const controlnetFiles = manageControlnetFile(toJS(textToImageStore.status), selectType);
+      // //处理前端页面所需数据
+      // textToImageStore.setStatus(storeData);
+      // //判断controlnet文件是否存在
+      // // return false
+      // console.log(backendData, controlnetFiles);
+      // return false
+      // if (toJS(textToImageStore.status.controlnet).length !== 0) {
+      //   const nullIndexes = toJS(textToImageStore.status.controlnet).filter(obj => obj.target_file === '' || obj.target_file === null || obj.target_file === undefined).map(obj => toJS(textToImageStore.status.controlnet).indexOf(obj));
+      //   const newIndexes = nullIndexes.map(index => index + 1);
+      //   if (newIndexes.length !== 0) {
+      //     return false
+      //   } else {
+      //     textToImageStore.changetextToLoading(true);//历史图片组件loading
+      //     textToImageStore.changeImageListLoading(true)//视图组件
+      //     // 更新表单值 
+
+      //     form.setFieldsValue({ lora: textToImageStore.status.lora, });
+      //     //文生图逻辑处理
+      //     if (selectType === '1') {
+      //       textToImageStore.textToImageSocket(backendData, controlnetFiles)
+      //     }
+      //     if (selectType === '2') {
+      //       textToImageStore.imageToImageSocket(backendData, controlnetFiles)
+      //     }
+      //   }
+      //   return false;
+      // } else {
+      //   textToImageStore.changetextToLoading(true);//历史图片组件loading
+      //   textToImageStore.changeImageListLoading(true)//视图组件
+      //   // 更新表单值 
+      //   form.setFieldsValue({ lora: textToImageStore.status.lora, });
+      //   //文生图逻辑处理
+      //   console.log(backendData, controlnetFiles);
+      //   if (selectType === '1') {
+      //     textToImageStore.textToImageSocket(backendData, controlnetFiles)
+      //   }
+      //   if (selectType === '2') {
+      //     textToImageStore.imageToImageSocket(backendData, controlnetFiles)
+      //   }
+      // }
+    } catch (errorInfo) {
+      // textToImageStore.changeImageListLoading(false)//视图组件
+      // textToImageStore.changetextToLoading(false);//历史图片组件loading
+    }
+  }, 300)
 
 return(
   <div className="generate">
@@ -283,10 +508,42 @@ return(
     {...formItemLayout}
     onFinish={onFinish}
     initialValues={{
-      'input-number': 3,
-      'checkbox-group': ['A', 'B'],
-      rate: 3.5,
-      'color-picker': null,
+      // "isInpainting": "0",
+      // "models": {
+      //   "base_model_name": "Base-V1-5.ckpt",
+      //   "vae_model_name": "disabled.pt"
+      // },
+      // "lora": [{
+      //   "model_name": "CreamTheRabbit.safetensors",
+      //   "unet_weights": 1,
+      //   "te_weights": 1
+      // }],
+      // "controlnet": [{
+      //   "model_name": "Control_V11p_Sd15s2_Lineart_Anime.pth",
+      //   "apply": {
+      //     "strength": 0.2
+      //   },
+      //   "preprocess": [],
+      //   "load_img_index": 1
+      // }],
+      // "image_names": {
+      //   "control_image_name": ["117d487c1263439b249a57f281fe6407.jpg"],
+      //   "custom_image_name": ["117d487c1263439b249a57f281fe6407.jpg"]
+      // },
+      // "prompts": {
+      //   "positive_prompt": "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
+      //   "negative_prompt": "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face"
+      // },
+      // "sampler_params": {
+      //   "number": 1,
+      //   "num_inference_steps": "60",
+      //   "cfg": "9.0",
+      //   "scheduler_name": "Euler_a",
+      //   "width": "512",
+      //   "height": "768",
+      //   "seed": "1234",
+      //   "denoise": "0.75"
+      // }
     }}
     style={{
       maxWidth: 600,
@@ -421,11 +678,11 @@ return(
       :null}
       </div>
     </div>
-    <Form.Item name="isInpainting" label="Inpainting" >
-      <Switch checked={inpaintingChecked} onChange={onInpaintingChange}/>
+    <Form.Item name="isInpainting" label="Inpainting" valuePropName="checked">
+      <Switch checked={inpaintingChecked} defaultChecked={false} onChange={onInpaintingChange}/>
     </Form.Item>
-    <Form.Item name="Multidiffusion" label="Multidiffusion">
-      <Switch checked={multidiffusionChecked} onChange={onMultidiffusionChange}/>
+    <Form.Item name="Multidiffusion" label="Multidiffusion"  valuePropName="multidiffusionChecked">
+      <Switch checked={multidiffusionChecked} defaultChecked={false} onChange={onMultidiffusionChange}/>
     </Form.Item>
     <div className='generate-title  marB-3'>Image Content</div>
     <Form.Item

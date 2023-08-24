@@ -6,12 +6,11 @@ import { en } from './locale/en';
 import { useEffect, useState } from 'react';
 import { appEventEmitter } from './events';
 import { SupportedLocale } from './locale/types';
-
 // FIXME: terrible code
 if (process.env.NODE_ENV !== 'development') {
   require('@euler/components/dist/style.css');
 }
-
+console.log(import.meta,'环境变量');
 const messageMap = {
   zh,
   en,

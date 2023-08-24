@@ -3,25 +3,38 @@ import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
 import { notification, message } from 'antd';
 import { signup, login, getUserInfo } from '../services/api';
-console.log(process.env.VITE_API_URL,'process.env.VITE_API_URL');
+// console.log(process.env.VITE_API_URL,'process.env.VITE_API_URL');
 console.log('fetch----process.env', process.env) // > prod
+// const baseUrl = process.env.REACT_APP_ENV === "production" ? process.env.REACT_APP_BASE_URL: "http://test.com";
+// console.log(baseUrl,'baseUrl')
 const SECRET_KEY = 'my_key';
 // // 访问 NODE_ENV 环境变量
-// console.log(import.meta.env.NODE_ENV,'环境变量');
-
-if (process.env.NODE_ENV) {
-  console.log('Current environment:', process.env.NODE_ENV);
+// console.log(import.meta,'环境变量');
+  let BASE_URL='http://13.212.144.219:8907'
+  let CREATE_MODAL_BASE_URL = 'http://13.250.52.38:8885'
+  let SOCKET_BASE_URL= 'ws://13.212.144.219:8907'
+  let CREATE_MODAL_SOCKET_BASE_URL= 'ws://13.250.52.38:8885'
+if (process.env.NODE_ENV == "production") {
+  BASE_URL= 'http://13.212.236.53:8906'
+  CREATE_MODAL_BASE_URL= 'http://13.250.52.38:8870'
+  SOCKET_BASE_URL='http://13.212.236.53:8906'
+  CREATE_MODAL_SOCKET_BASE_URL= 'ws://13.250.52.38:8870'
+  // console.log('Current environment:', process.env.NODE_ENV);
 } else {
-  console.log('Environment not defined.');
+  BASE_URL='http://13.212.144.219:8907'
+  CREATE_MODAL_BASE_URL = 'http://13.250.52.38:8885'
+  SOCKET_BASE_URL= 'ws://13.212.144.219:8907'
+  CREATE_MODAL_SOCKET_BASE_URL= 'ws://13.250.52.38:8885'
+  // console.log('Environment not defined.');
 }
 
 const token = localStorage.getItem('token');
 
 const fetchWrapper = {
-  baseURL: 'http://13.212.144.219:8907',
-  createModalBaseURL: 'http://13.250.52.38:8885',
-  socketBaseURL:'ws://13.212.144.219:8907',
-  createModalSocketBaseURL: 'ws://13.250.52.38:8885',
+  baseURL: BASE_URL,
+  createModalBaseURL: CREATE_MODAL_BASE_URL,
+  socketBaseURL:SOCKET_BASE_URL,
+  createModalSocketBaseURL: CREATE_MODAL_SOCKET_BASE_URL,
   // baseURL: process.env.BASE_URL,
   // createModalBaseURL: process.env.CREATE_MODAL_BASE_URL,
   // socketBaseURL: process.env.SOCKET_BASE_URL,//socket

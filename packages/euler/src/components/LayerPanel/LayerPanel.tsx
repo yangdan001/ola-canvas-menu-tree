@@ -46,7 +46,7 @@ export const LayerPanel: FC = () => {
             layerId={item.id}
           >
             {' '}
-            {item.name}111
+            {item.name}
           </LayerItem>
         ))
         .reverse()}

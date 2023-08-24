@@ -75,6 +75,8 @@ export class SelectTool implements ITool {
 
     const sceneGraph = this.editor.sceneGraph;
     const selectedElements = this.editor.selectedElements;
+    console.log(sceneGraph,'sceneGraph')
+    console.log(selectedElements,'selectedElements')
     const isShiftPressing = this.editor.hostEventManager.isShiftPressing;
 
     this.startPoint = this.editor.getSceneCursorXY(e);
@@ -147,6 +149,8 @@ export class SelectTool implements ITool {
     }
   }
   end(e: PointerEvent, isEnableDrag: boolean) {
+    console.log('拖拽结束')
+
     const currStrategy = this.currStrategy;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -166,6 +170,7 @@ export class SelectTool implements ITool {
     }
   }
   afterEnd() {
+    console.log('拖拽结束之后')
     if (!this.editor.hostEventManager.isDraggingCanvasBySpace) {
       this.editor.setCursor('');
     }

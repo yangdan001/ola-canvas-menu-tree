@@ -41,6 +41,7 @@ export class DragCanvasTool implements ITool {
     this.editor.sceneGraph.render();
   }
   end() {
+    console.log(222)
     // do nothing
   }
   afterEnd() {

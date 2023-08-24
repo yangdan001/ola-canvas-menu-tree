@@ -9,6 +9,7 @@ const resolvePath = (str: string) => path.resolve(__dirname, str);
 
 //https://vitejs.dev/config/
 export default defineConfig({
+  envDir: path.resolve(__dirname, '../../env'),
   base:'./',
   plugins: [react()],
   build: {

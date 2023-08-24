@@ -50,6 +50,7 @@ export class DrawSelectionBox implements IBaseTool {
     }
   }
   afterEnd() {
+    console.log(this.editor.sceneGraph.render(),'this.editor.sceneGraph.render()')
     this.isShiftPressingWhenStart = false;
     this.editor.sceneGraph.selection = null;
     this.editor.sceneGraph.render();
