@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Tree } from 'antd';
 import { EditorContext } from '../../context';
-import { addEventEmitter } from '../../events';
+import { addEventEmitter } from '../../events';//事件中心
+
 // const defaultData = [
 //   {
 //       "title": "标题-1",
@@ -155,6 +156,8 @@ const LeftTree = () => {
           setRemoveGraphData(removeobj)
         }
       });
+
+      
     }
   }, [editor]);
   let treeData = []

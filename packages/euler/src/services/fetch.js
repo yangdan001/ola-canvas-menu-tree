@@ -100,7 +100,7 @@ const fetchWrapper = {
     useTempUrl = false, // 新增参数，用于判断是否使用createModalBaseURL，默认值为false
   ) {
     /* eslint-disable-next-line no-debugger */
-    debugger
+    // debugger
     // const url = `${this.baseURL}${endpoint}`;
     const url = useTempUrl ? `${this.createModalBaseURL}${endpoint}` : `${this.baseURL}${endpoint}`; // 根据useTempUrl判断使用哪个URL
     const token = localStorage.getItem('token');
@@ -300,7 +300,7 @@ const fetchWrapper = {
 
 fetchWrapper.get = function (endpoint, customHeaders, skipTokenCheck, useTempUrl = false) {
   /* eslint-disable-next-line no-debugger */
-  debugger
+  // debugger
   return this._request('GET', endpoint, null, customHeaders, null, null, skipTokenCheck, useTempUrl);
 };
 fetchWrapper.post = function (endpoint, data, customHeaders, skipTokenCheck, useTempUrl = false) {

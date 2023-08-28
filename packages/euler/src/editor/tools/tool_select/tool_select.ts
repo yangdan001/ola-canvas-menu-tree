@@ -72,13 +72,20 @@ export class SelectTool implements ITool {
     // 3. 选中缩放或旋转控制点
     // 4. 选中 选中框 内部
     // 5. 按住 shift 键，可进行连选
-
+     
     const sceneGraph = this.editor.sceneGraph;
     const selectedElements = this.editor.selectedElements;
     console.log(sceneGraph,'sceneGraph')
     console.log(selectedElements,'selectedElements')
     const fileUrl: string | null = localStorage.getItem('fileUrl');
     console.log(fileUrl,'fileUrl')
+    /**
+     * 1、获取到选中的元素信息 如id、坐标、大小、是否为原形等；
+     * 2、删除该元素：左侧目录树与画布均删除，参考右键删除；
+     * 3、将图片渲染在原来元素的位置，形状大小要同原来的元素；
+     * */ 
+
+
     if (fileUrl) {
       const img = new Image();
       img.onload = () => {

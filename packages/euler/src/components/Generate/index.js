@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import shortid from 'shortid';
+import { uploadImgEmitter } from '../../events';//事件中心
+
 import {
   notification,
   Input,
@@ -126,7 +128,7 @@ const Generate = () => {
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
           /* eslint-disable-next-line no-debugger */
-      debugger
+      // debugger
           const index = config.base_model.findIndex(item => item.title === 'Base-V1-5.ckpt');
           if (index !== -1) {
             setBaseModelTips(config.base_model[index]);
@@ -144,7 +146,7 @@ const Generate = () => {
   }, []); 
 
   const normFile = (e) => {
-    console.log('Upload event:', e);
+    // console.log('Upload event:', e);
     if(e&&e.file){
       setFileObj(e.file)
     }
@@ -154,7 +156,7 @@ const Generate = () => {
     return e?.fileList;
   };
   const checkOptionsType = (model) => {
-    console.log(model,'model')
+    // console.log(model,'model')
     return model && model.map(item => {
       const { image } = item;
       return <Option value={item.title} key={item.title} item={item}>
@@ -416,7 +418,7 @@ const Generate = () => {
     try {
       //校验图生图是否上传了图片
       /* eslint-disable-next-line no-debugger */
-      debugger
+      // debugger
       let controlnetFormValue = [];
       controlnetFormValue.push({
         model_name: allValue.controlnet,
@@ -493,7 +495,8 @@ const Generate = () => {
 
   const onChangeHandler = (info) => {
     let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
-    localStorage.setItem('fileUrl',fileUrl)
+    // localStorage.setItem('fileUrl',fileUrl)
+    uploadImgEmitter.emit('uploadIMG','111')
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList,'uploading');
     }
