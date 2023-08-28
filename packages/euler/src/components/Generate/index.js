@@ -496,6 +496,28 @@ const Generate = () => {
     }
   }, 300)
 
+  const onChangeHandler = (info) => {
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList,'uploading');
+    }
+    if (info.file.status === 'done') {
+     
+      // let cvs = document.getElementById('cvs');
+      // var ctx = cvs!.getContext('2d');
+      // let fileUrl = window.URL.createObjectURL(info.file.originFileObj!);
+      // var img = document.getElementById('uploadedImg');
+      // this.setState({ imgUrl: fileUrl });
+      // img!.onload = function() {
+      //   console.info('xxx');
+      //   ctx.drawImage(img, 0, 0);//this即是imgObj,保持图片的原始大小：470*480
+    }
+    //   message.success(`${info.file.name} file uploaded successfully`);
+    // }
+     else if (info.file.status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  }
+
 return(
   <div className="generate">
 <Form
@@ -657,7 +679,7 @@ return(
       getValueFromEvent={normFile}
       extra=""
     >
-      <Upload name="logo" action="/upload.do" listType="picture">
+      <Upload name="logo"  maxCount={1} action="/upload.do" listType="picture" onChange={onChangeHandler}>
         <div className='upload-box'>
           <PlusOutlined style={{ fontSize: '24px', color: '#985EFF' }}/>
         </div>
