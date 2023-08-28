@@ -30,9 +30,6 @@ export const defaultWidthHeight = [
 ]
 
 // const tempCheck = (value, store, selectType) => {
-//   console.log(store.status);
-//   console.log(store.status.image_names.custom_image_name);
-
 //   if (selectType === '2') {
 //     if (
 //       Object.keys(store.status.image_names.custom_image_name).length !== 0 &&
@@ -41,7 +38,6 @@ export const defaultWidthHeight = [
 //       store.status.image_names.custom_image_name.start_file.name &&
 //       store.status.image_names.custom_image_name.mask.name
 //     ) {
-//       console.log('2');
 //       return [
 //         store.status.image_names.custom_image_name.file.name,
 //         store.status.image_names.custom_image_name.start_file.name,
@@ -56,7 +52,6 @@ export const defaultWidthHeight = [
 //       store.status.image_names.custom_image_name.start_file &&
 //       store.status.image_names.custom_image_name.start_file.name
 //     ) {
-//       console.log('8');
 //       return [
 //         store.status.image_names.custom_image_name.file.name,
 //         store.status.image_names.custom_image_name.start_file.name
@@ -69,7 +64,6 @@ export const defaultWidthHeight = [
 //       store.status.image_names.custom_image_name.file.name &&
 //       store.status.image_names.custom_image_name.mask
 //     ) {
-//       console.log('3');
 //       return [
 //         store.status.image_names.custom_image_name.file.name,
 //         store.status.image_names.custom_image_name.mask.name
@@ -81,7 +75,6 @@ export const defaultWidthHeight = [
 //       Object.keys(store.status.image_names.custom_image_name) &&
 //       store.status.image_names.custom_image_name.file.name
 //     ) {
-//       console.log('4');
 //       return [store.status.image_names.custom_image_name.file.name]
 //     }
 
@@ -93,8 +86,6 @@ export const defaultWidthHeight = [
 
 
 const tempCheck = (value, store, selectType) => {
-  console.log(store.status);
-  console.log(store.status.image_names.custom_image_name);
 
   if (selectType === '2') {
     let imgObj = store.status.image_names.custom_image_name;
@@ -109,7 +100,6 @@ const tempCheck = (value, store, selectType) => {
       imgObj.mask && // check if mask exists before accessing its properties
       imgObj.mask.name
     ) {
-      console.log('2');
       if (store.status.isInpainting === '0') {
         return [imgObj.file.name,]
       } else {
@@ -127,9 +117,7 @@ const tempCheck = (value, store, selectType) => {
       imgObj.start_file &&
       imgObj.start_file.name
     ) {
-      console.log('8');
       if (store.status.isInpainting === '0') {
-        console.log(store.status.isInpainting);
         return [imgObj.file.name,]
       } else {
         return [imgObj.start_file.name, imgObj.file.name,]
@@ -144,7 +132,6 @@ const tempCheck = (value, store, selectType) => {
       imgObj.file.name &&
       imgObj.mask  // check if mask exists before accessing its properties
     ) {
-      console.log('3');
       return [imgObj.file.name, imgObj.mask.name]
     }
 
@@ -154,7 +141,6 @@ const tempCheck = (value, store, selectType) => {
       imgObj.file &&
       imgObj.file.name
     ) {
-      console.log('4');
       return [imgObj.file.name]
     }
 
@@ -302,12 +288,10 @@ export const setStoreDatas = (value, store, selectType) => {
       ...datas
     };
   }
-  console.log(datas);
   return datas;
 }
 
 export const manageControlnetFile = (data, type) => {
-  console.log(data);
   const files = [];
   if (type && type === '2' && data && data.image_names.custom_image_name.length !== 0) {
 
@@ -381,7 +365,6 @@ export const manageControlnetFile = (data, type) => {
       files.push(item.target_file)
     })
   }
-  console.log(files);
   return files;
 }
 
@@ -435,7 +418,6 @@ export function getBase64Image(imgUrl, callback) {
   const urlWithRandomParam = `${imgUrl}?_=${timestamp}`;
   fetch(urlWithRandomParam)
     .then(response => {
-      console.log(response);
       if (response.ok) {
         return response.blob();
       } else {
@@ -446,7 +428,6 @@ export function getBase64Image(imgUrl, callback) {
       let reader = new FileReader();
       reader.onloadend = function () {
         callback(reader.result); // "data:image/jpeg;base64,iVBORw0KG..."
-        console.log(reader.result);
       };
       reader.readAsDataURL(blob);
     })
@@ -472,13 +453,11 @@ function guessImageType(base64) {
 }
 
 export async function base64ToFile2(base64Img, filename) {
-  // console.log(base64Img, filename);
   return new Promise((resolve) => {
     // const mimeType = guessImageType(base64Img);
     let firstSplit = base64Img.split(";")[0];
     let secondSplit = firstSplit.split(":")[1];
     let tempBase64 = base64Img.split(",")[1];
-    // console.log(base64Img);
     const base64ToArrayBuffer = (tempBase64) => {
       const binary_string = atob(tempBase64);
       const len = binary_string.length;

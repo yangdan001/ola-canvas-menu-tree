@@ -24,11 +24,9 @@ const ActionType = () => {
       }else{
         localStorage.setItem('isHide', true)
       }
-      console.log(value,11)
     }else{
       localStorage.setItem('frameType', 'image')
       localStorage.setItem('isHide', true)
-      console.log(value,22)
     }
   };
 

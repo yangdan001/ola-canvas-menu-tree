@@ -10,7 +10,6 @@ import { SupportedLocale } from './locale/types';
 if (process.env.NODE_ENV !== 'development') {
   require('@euler/components/dist/style.css');
 }
-console.log(import.meta,'环境变量');
 const messageMap = {
   zh,
   en,

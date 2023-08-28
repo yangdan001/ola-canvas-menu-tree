@@ -101,7 +101,6 @@ const Generate = () => {
         const output = processJson(result);
         if (result && result.description) {
           config = output;
-          console.log(output,'output')
           setconfigOptions(config);
           localStorage.setItem('config', JSON.stringify(config));
         }
@@ -124,8 +123,6 @@ const Generate = () => {
         
         let allValue = await form.getFieldsValue(true);
         let value = await form.validateFields();
-        console.log(value,'value111')
-        console.log(allValue,'allValue111')
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
           /* eslint-disable-next-line no-debugger */
@@ -406,7 +403,6 @@ const Generate = () => {
   const onFinish = _.debounce(async (values) => {
     let frameType = localStorage.getItem("frameType")
     let allValue = await form.getFieldsValue(true);
-      console.log(allValue,'allValue333')
     if(fileObj&&fileObj.name){
       if(allValue.controlnet){
         localStorage.setItem('selectType', '3');
@@ -464,7 +460,6 @@ const Generate = () => {
           }
         }
         let controlnetFiles = []
-        console.log(selectType,'selectType888888')
         if (selectType === '1') {
           if(allValue.controlnet){
             if(fileObj&&fileObj.name){
@@ -497,6 +492,8 @@ const Generate = () => {
   }, 300)
 
   const onChangeHandler = (info) => {
+    let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
+    localStorage.setItem('fileUrl',fileUrl)
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList,'uploading');
     }

@@ -8,7 +8,7 @@ import { DrawSelectionBox } from './tool_select_selection';
 import { SelectMoveTool } from './tool_select_move';
 import { SelectRotationTool } from './tool_select_rotation';
 import { SelectScaleTool } from './tool_select_scale';
-
+  
 export class SelectTool implements ITool {
   static type = 'select';
   type = 'select';
@@ -77,6 +77,17 @@ export class SelectTool implements ITool {
     const selectedElements = this.editor.selectedElements;
     console.log(sceneGraph,'sceneGraph')
     console.log(selectedElements,'selectedElements')
+    const fileUrl: string | null = localStorage.getItem('fileUrl');
+    console.log(fileUrl,'fileUrl')
+    if (fileUrl) {
+      const img = new Image();
+      img.onload = () => {
+        // Once the image is loaded, you can use it as the source for drawImage
+        const ctx = this.editor.ctx;
+        ctx.drawImage(img, 439, 125);
+      };
+      img.src = fileUrl;
+    }
     const isShiftPressing = this.editor.hostEventManager.isShiftPressing;
 
     this.startPoint = this.editor.getSceneCursorXY(e);

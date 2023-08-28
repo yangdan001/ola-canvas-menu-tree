@@ -45,17 +45,13 @@ export const InfoPanel: FC = () => {
     const localIsHide = Boolean(localStorage.getItem('isHide')) || true
     setFrameType(localFrameType)
     setIsHide(localIsHide)
-    console.log(localFrameType,localIsHide,33)
   }, [editor]);
   useEffect(() => {
     const localFrameType  = localStorage.getItem('frameType')
-    console.log(localFrameType,333)
     if(localFrameType=='meta'){
       setIsHide(false)
-    console.log(isHide,localFrameType,44)
     }else{
       setIsHide(true)
-    console.log(isHide,localFrameType,55)
     }
   }, [frameType]);
      
