@@ -80,7 +80,7 @@ class TextToImageStore {
       textToImageSocket: action,
     })
   }
-  //文生图
+  //文生图 
   textToImageSocket = async (backendData, controlnetFiles) => {
     await postImage(backendData, controlnetFiles).then((RES) => {
       try {
@@ -383,8 +383,9 @@ class TextToImageStore {
             }
             if (changeType === 'next') {
               let temp = this.currentOffset + this.page_size;
+              let currentOffset = this.currentOffset
               if (temp >= this.total) {
-                this.currentOffset = this.currentOffset;
+                this.currentOffset = currentOffset;
               } else {
                 this.currentOffset = temp;
               }
@@ -479,7 +480,7 @@ class TextToImageStore {
     this.status.controlnet.push({
       "file_url": null,
       "file": null,
-      "file_url": null,
+      // "file_url": null,
       "target_file": null,
       "target_file_url": null,
       "model_name": "",

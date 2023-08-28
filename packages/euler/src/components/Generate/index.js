@@ -29,6 +29,9 @@ import {
   postPreprocess, getAllDescription, getHistoryRecord, getRecordTotal,postImage,getRecord,
   getPreprocessRes, putTemplate, getTemplate, deleteEngineTemplate,deleteLora
 } from '../../../src/services/api';
+import textToImageStore from '../../../src/store/textToImageStore';
+import { SelectData, setDatas, defaultWidthHeight, setStoreDatas, manageControlnetFile, base64ToFile, base64ToFile2,getBase64Image} from '../../../src/data';
+import { toJS } from "mobx";
 import { EditorContext } from '../../context';
 import './index.scss';
 import fetchApi from '../../../src/services/fetch';
@@ -48,9 +51,6 @@ const formItemLayout = {
   },
 };
 
-const onFinish = (values) => {
-  console.log('Received values of form: ', values);
-};
 const Generate = () => {
   const editor = useContext(EditorContext);
   const [form] = Form.useForm();//表单的form实例
@@ -121,6 +121,11 @@ const Generate = () => {
           denoise:"0.75", //去噪强度 Denoising Strength
           widthHeight: '1'
         });
+        
+        let allValue = await form.getFieldsValue(true);
+        let value = await form.validateFields();
+        console.log(value,'value111')
+        console.log(allValue,'allValue111')
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
           /* eslint-disable-next-line no-debugger */
@@ -269,6 +274,43 @@ const Generate = () => {
       })
     }
   }
+
+  const SelectComponentOnChange = (value, option, type, index) => {
+    console.log(option.item);
+    if (type === 'basemodel') {
+      setBaseModelTips(option.item);
+      let targetVaeModalArray = JSON.parse(localStorage.getItem('config')).vae_model.filter(item => option.item.link === item.link);
+      form.setFieldsValue({
+        vae_model_name: undefined
+      })
+      // 设置联动默认值
+      if (targetVaeModalArray && targetVaeModalArray.length !== 0) {
+        form.setFieldsValue({
+          vae_model_name: targetVaeModalArray[0].title
+        })
+      } else {
+        form.setFieldsValue({
+          vae_model_name: undefined
+        })
+      }
+      setconfigOptions({
+        ...configOptions,
+        vae_model: targetVaeModalArray ? targetVaeModalArray : []
+      });
+    }
+    if (type === 'controlnet') {
+      textToImageStore.setControlNetitems(value)
+      let values = { controlnet: toJS(textToImageStore.status.controlnet), }
+      form.setFieldsValue(values);
+    }
+    if (type === 'lora') {
+      //lora的回填
+      textToImageStore.setLoaritems(value);
+      let values = { lora: toJS(textToImageStore.status.lora), }
+      form.setFieldsValue(values);
+    }
+  }
+
     //文生图
   const textToImageSocket = async (backendData, controlnetFiles) => {
       await postImage(backendData, controlnetFiles).then((RES) => {
@@ -363,136 +405,90 @@ const Generate = () => {
   //表单提交逻辑
   const onFinish = _.debounce(async (values) => {
     let frameType = localStorage.getItem("frameType")
-    let initValue = {
-      "isInpainting": "0",
-      "models": {
-        "base_model_name": "Base-V1-5.ckpt",
-        "vae_model_name": "disabled.pt"
-      },
-      "lora": [{
-        "model_name": "CreamTheRabbit.safetensors",
-        "unet_weights": 1,
-        "te_weights": 1
-      }],
-      "controlnet": [{
-        "model_name": "Control_V11p_Sd15s2_Lineart_Anime.pth",
-        "apply": {
-          "strength": 0.2
-        },
-        "preprocess": [],
-        "load_img_index": 1
-      }],
-      "image_names": {
-        "control_image_name": ["117d487c1263439b249a57f281fe6407.jpg"],
-        "custom_image_name": ["117d487c1263439b249a57f281fe6407.jpg"]
-      },
-      "prompts": {
-        "positive_prompt": "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
-        "negative_prompt": "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face"
-      },
-      "sampler_params": {
-        "number": 1,
-        "num_inference_steps": "60",
-        "cfg": "9.0",
-        "scheduler_name": "Euler_a",
-        "width": "512",
-        "height": "768",
-        "seed": "1234",
-        "denoise": "0.75"
+    let allValue = await form.getFieldsValue(true);
+      console.log(allValue,'allValue333')
+    if(fileObj&&fileObj.name){
+      if(allValue.controlnet){
+        localStorage.setItem('selectType', '3');
+      }else{
+        localStorage.setItem('selectType', '2');
       }
+    }else{
+      localStorage.setItem('selectType', '1');
     }
-    // if (clipEditStatus) {
-    //   message.warning('请先退出CLIP提示词编辑模式，再生成图片');
-    //   return false;
-    // }
+    let selectType = localStorage.getItem("selectType")
     try {
       //校验图生图是否上传了图片
-      if (frameType != 'meta' && !fileObj) {
-        message.error('请上传图片！');
-        return false;
-      }
-      let value = await form.validateFields();
-      console.log(value,'value33')
-      // let controlnetFiles={
-      //   name: '',
-      //   lastModified: '1692625729887',
-      //   lastModifiedDate: 'Mon Aug 21 2023 21: 48: 49 GMT + 0800(中国标准时间)',
-      //   webkitRelativePath: '',
-      // }
-      // let controlnetFiles=fileObj || {}
-      // textToImageSocket(initValue, controlnetFiles)
+      /* eslint-disable-next-line no-debugger */
+      debugger
+      let controlnetFormValue = [];
+      controlnetFormValue.push({
+        model_name: allValue.controlnet,
+        apply: {
+          strength: 0.2
+        },
+        preprocess: [],
+        load_img_index: 0
+      })
+      let loraFormValue = [];
+      loraFormValue.push({
+        model_name: allValue.lora,
+        unet_weights: 1,
+        te_weights: 1
+      })
       //拼接json对象，传递后端
-  // let datas = {
-  //   models: {
-  //     base_model_name: value.base_model_name,
-  //     vae_model_name: initValue.models.vae_model_name,
-  //   },
-  //   lora: value.lora ? value.lora : [],
-  //   controlnet: store.status.controlnet.length !== 0 ? controlNetArray : [],
-  //   image_names: {
-  //     control_image_name: store.status.controlnet.length !== 0 ? imageNamesArray : [],
-  //     custom_image_name: tempCheck(value, store, selectType),
-  //   },
-  //   prompts: {
-  //     positive_prompt: value.positive_prompt,
-  //     negative_prompt: value.negative_prompt ? value.negative_prompt : null,
-  //   },
-  //   sampler_params: {
-  //     number: value.number,
-  //     num_inference_steps: value.num_inference_steps,
-  //     cfg: value.cfg,
-  //     scheduler_name: value.scheduler_name,
-  //     width: value.width,
-  //     height: value.height,
-  //     seed: value.seed ? value.seed : 'disable',
-  //     denoise: value.denoise, //去噪强度 Denoising Strength
-  //   }
-  // }
-      //处理后端所需字段，用来传递给后端
-      // let backendData = setDatas(value, toJS(textToImageStore), selectType);
-      // //页面渲染所需数据
-      // let storeData = setStoreDatas(value, toJS(textToImageStore), selectType);
-      // //处理所有图片（target_file）
-      // const controlnetFiles = manageControlnetFile(toJS(textToImageStore.status), selectType);
-      // //处理前端页面所需数据
-      // textToImageStore.setStatus(storeData);
-      // //判断controlnet文件是否存在
-      // // return false
-      // console.log(backendData, controlnetFiles);
-      // return false
-      // if (toJS(textToImageStore.status.controlnet).length !== 0) {
-      //   const nullIndexes = toJS(textToImageStore.status.controlnet).filter(obj => obj.target_file === '' || obj.target_file === null || obj.target_file === undefined).map(obj => toJS(textToImageStore.status.controlnet).indexOf(obj));
-      //   const newIndexes = nullIndexes.map(index => index + 1);
-      //   if (newIndexes.length !== 0) {
-      //     return false
-      //   } else {
-      //     textToImageStore.changetextToLoading(true);//历史图片组件loading
-      //     textToImageStore.changeImageListLoading(true)//视图组件
-      //     // 更新表单值 
-
-      //     form.setFieldsValue({ lora: textToImageStore.status.lora, });
-      //     //文生图逻辑处理
-      //     if (selectType === '1') {
-      //       textToImageStore.textToImageSocket(backendData, controlnetFiles)
-      //     }
-      //     if (selectType === '2') {
-      //       textToImageStore.imageToImageSocket(backendData, controlnetFiles)
-      //     }
-      //   }
-      //   return false;
-      // } else {
-      //   textToImageStore.changetextToLoading(true);//历史图片组件loading
-      //   textToImageStore.changeImageListLoading(true)//视图组件
-      //   // 更新表单值 
-      //   form.setFieldsValue({ lora: textToImageStore.status.lora, });
-      //   //文生图逻辑处理
-      //   console.log(backendData, controlnetFiles);
-      //   if (selectType === '1') {
-      //     textToImageStore.textToImageSocket(backendData, controlnetFiles)
-      //   }
-      //   if (selectType === '2') {
-      //     textToImageStore.imageToImageSocket(backendData, controlnetFiles)
-      //   }
+        let datas = {
+          models: {
+            base_model_name: allValue.base_model_name,
+            vae_model_name: allValue.vae_model_name,
+          },
+          lora: allValue.lora ? loraFormValue : [],
+          controlnet: allValue.controlnet ? controlnetFormValue : [],
+          image_names: {
+            control_image_name:selectType==3&& fileObj&&fileObj.name?allValue.custom_image_name[0].name:[] ,
+            custom_image_name: selectType==2&& fileObj&&fileObj.name?allValue.custom_image_name[0].name:[] ,
+          },
+          prompts: {
+            positive_prompt: allValue.positive_prompt,
+            negative_prompt: allValue.negative_prompt ,
+          },
+          sampler_params: {
+            number: allValue.number,
+            num_inference_steps: allValue.num_inference_steps,
+            cfg: allValue.cfg,
+            scheduler_name: allValue.scheduler_name,
+            width: allValue.width,
+            height: allValue.height,
+            seed: allValue.seed ? allValue.seed : 'disable',
+            denoise: allValue.denoise, //去噪强度 Denoising Strength
+          }
+        }
+        let controlnetFiles = []
+        console.log(selectType,'selectType888888')
+        if (selectType === '1') {
+          if(allValue.controlnet){
+            if(fileObj&&fileObj.name){
+              textToImageStore.textToImageSocket(datas, controlnetFiles)
+            }else{
+              message.error('请上传图片！');
+              return false;
+            }
+          }else{
+            textToImageStore.textToImageSocket(datas, controlnetFiles)
+          }
+        }
+        if (selectType === '2') {
+          datas.isInpainting = 0
+          textToImageStore.imageToImageSocket(datas, controlnetFiles)
+        }
+        if (selectType === '3') {
+          if(fileObj&&fileObj.name){
+            textToImageStore.textToImageSocket(datas, controlnetFiles)
+          }else{
+            message.error('请上传图片！');
+            return false;
+          }
+        }
       // }
     } catch (errorInfo) {
       // textToImageStore.changeImageListLoading(false)//视图组件
@@ -507,44 +503,6 @@ return(
     name="validate_other"
     {...formItemLayout}
     onFinish={onFinish}
-    initialValues={{
-      // "isInpainting": "0",
-      // "models": {
-      //   "base_model_name": "Base-V1-5.ckpt",
-      //   "vae_model_name": "disabled.pt"
-      // },
-      // "lora": [{
-      //   "model_name": "CreamTheRabbit.safetensors",
-      //   "unet_weights": 1,
-      //   "te_weights": 1
-      // }],
-      // "controlnet": [{
-      //   "model_name": "Control_V11p_Sd15s2_Lineart_Anime.pth",
-      //   "apply": {
-      //     "strength": 0.2
-      //   },
-      //   "preprocess": [],
-      //   "load_img_index": 1
-      // }],
-      // "image_names": {
-      //   "control_image_name": ["117d487c1263439b249a57f281fe6407.jpg"],
-      //   "custom_image_name": ["117d487c1263439b249a57f281fe6407.jpg"]
-      // },
-      // "prompts": {
-      //   "positive_prompt": "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
-      //   "negative_prompt": "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face"
-      // },
-      // "sampler_params": {
-      //   "number": 1,
-      //   "num_inference_steps": "60",
-      //   "cfg": "9.0",
-      //   "scheduler_name": "Euler_a",
-      //   "width": "512",
-      //   "height": "768",
-      //   "seed": "1234",
-      //   "denoise": "0.75"
-      // }
-    }}
     style={{
       maxWidth: 600,
     }}
@@ -556,7 +514,6 @@ return(
     <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}  >
     <Form.Item
       name="base_model_name"
-      // label="Select"
       hasFeedback
       rules={[
         {
@@ -569,6 +526,7 @@ return(
       {baseModelTips.title&&<Select 
       placeholder="请选择模型"
       defaultValue={baseModelTips.title}
+      onChange={(value, option) => SelectComponentOnChange(value, option, 'basemodel')}
       >
       {checkOptionsType(configOptions.base_model || [])}
       </Select>}
@@ -660,7 +618,7 @@ return(
           <Select 
           // placeholder="请选择controlnet模型"
           >
-          {checkOptionsType(configOptions.preprocess || [])}
+          {checkOptionsType(configOptions.controlnet_model || [])}
           </Select>
           </Form.Item>
         </ConfigProvider>
@@ -668,6 +626,7 @@ return(
         <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
           <Form.Item name="lora" >
             <Select 
+            onChange={(value, option) => SelectComponentOnChange(value, option, 'lora')}
             // placeholder="请选择Lora模型"
             >
             {checkOptionsType(configOptions.lora_model || [])}
@@ -679,7 +638,13 @@ return(
       </div>
     </div>
     <Form.Item name="isInpainting" label="Inpainting" valuePropName="checked">
-      <Switch checked={inpaintingChecked} defaultChecked={false} onChange={onInpaintingChange}/>
+      <Switch 
+      checked={inpaintingChecked} 
+      defaultChecked={false} 
+      onChange={
+      (newChecked) => {
+        textToImageStore.updateInpainting(newChecked);
+      }}/>
     </Form.Item>
     <Form.Item name="Multidiffusion" label="Multidiffusion"  valuePropName="multidiffusionChecked">
       <Switch checked={multidiffusionChecked} defaultChecked={false} onChange={onMultidiffusionChange}/>
