@@ -75,10 +75,10 @@ export class SelectTool implements ITool {
      
     const sceneGraph = this.editor.sceneGraph;
     const selectedElements = this.editor.selectedElements;
-    console.log(sceneGraph,'sceneGraph')
-    console.log(selectedElements,'selectedElements')
-    const fileUrl: string | null = localStorage.getItem('fileUrl');
-    console.log(fileUrl,'fileUrl')
+    // console.log(sceneGraph,'sceneGraph')
+    // console.log(selectedElements,'selectedElements')
+    // const fileUrl: string | null = localStorage.getItem('fileUrl');
+    // console.log(fileUrl,'fileUrl')
     /**
      * 1、获取到选中的元素信息 如id、坐标、大小、是否为原形等；
      * 2、删除该元素：左侧目录树与画布均删除，参考右键删除；
@@ -86,15 +86,15 @@ export class SelectTool implements ITool {
      * */ 
 
 
-    if (fileUrl) {
-      const img = new Image();
-      img.onload = () => {
-        // Once the image is loaded, you can use it as the source for drawImage
-        const ctx = this.editor.ctx;
-        ctx.drawImage(img, 439, 125);
-      };
-      img.src = fileUrl;
-    }
+    // if (fileUrl) {
+    //   const img = new Image();
+    //   img.onload = () => {
+    //     // Once the image is loaded, you can use it as the source for drawImage
+    //     const ctx = this.editor.ctx;
+    //     ctx.drawImage(img, 439, 125);
+    //   };
+    //   img.src = fileUrl;
+    // }
     const isShiftPressing = this.editor.hostEventManager.isShiftPressing;
 
     this.startPoint = this.editor.getSceneCursorXY(e);

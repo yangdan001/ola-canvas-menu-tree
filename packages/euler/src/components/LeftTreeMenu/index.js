@@ -156,8 +156,6 @@ const LeftTree = () => {
           setRemoveGraphData(removeobj)
         }
       });
-
-      
     }
   }, [editor]);
   let treeData = []
