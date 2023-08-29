@@ -158,22 +158,20 @@ const Generate = () => {
     //监听uploadIMG  
 
       /**
-       * 第一步：获取到要删除的元素 执行下面两行代码。左侧目录树会自动删除 不用操作左侧目录树
+       * 第一步：获取到选中的元素信息 如id、坐标、大小、是否为原形等；
        * */
-      // TODO 获取到选中的元素信息 如id、坐标、大小、是否为原形等；
-      // 在这里写代码
       const sceneGraph = editor.sceneGraph;
       const selectedElements = editor.selectedElements;
       console.log('sceneGraph1',sceneGraph)
       console.log('selectedElements1',selectedElements)
 
       /**
-       * 第二步：获取到要删除的元素 执行下面两行代码即可。左侧目录树会自动删除 不用操作左侧目录树
+       * 第二步：获取到要删除的元素 执行下面代码即可。左侧目录树会自动删除 不用操作左侧目录树
        * */
       editor.selectedElements.removeFromScene();
 
       /**
-       * 第三步：将图片渲染在原来元素的位置，形状大小要同原来的元素；
+       * 第三步：将图片渲染在原来元素的位置，形状大小要同原来的元素；数据从第一步获取
        * */
       // 在这里写代码
 
