@@ -40,6 +40,7 @@ export class ToolManager {
 
     this._unbindEvent = this.bindEvent();
   }
+  // 注册事件 ：分别为 选中事件/画矩形/画原型/画椭圆/画线/画文本/拖拽事件
   registerToolAndHotKey(tool: ITool) {
     if (this.toolMap.has(tool.type)) {
       console.warn(`tool "${tool.type}" had exit, replace it!`);
@@ -51,6 +52,7 @@ export class ToolManager {
     }
     this.hotkeyMap.set(tool.hotkey, tool.type);
   }
+
   getActiveToolName() {
     return this.currentTool?.type;
   }
@@ -79,6 +81,7 @@ export class ToolManager {
       startPos = [e.clientX, e.clientY];
       this.currentTool.start(e);
     };
+
     const handleMove = (e: PointerEvent) => {
       if (!this.currentTool) {
         throw new Error('未设置当前使用工具');
@@ -124,6 +127,9 @@ export class ToolManager {
 
       this.isDragging = false;
     };
+
+
+    // 获取画布
     const canvas = this.editor.canvasElement;
     canvas.addEventListener('pointerdown', handleDown);
     window.addEventListener('pointermove', handleMove);
