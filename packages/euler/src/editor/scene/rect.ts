@@ -57,6 +57,6 @@ export class Rect extends Graph {
         }
       }
     }
-    ctx.closePath();
+    ctx.closePath();   
   }
 }

@@ -164,7 +164,14 @@ const Generate = () => {
       const selectedElements = editor.selectedElements;
       console.log('sceneGraph1',sceneGraph)
       console.log('selectedElements1',selectedElements)
-
+      console.log('editor',editor)
+      let width = selectedElements.items[0].width
+      let height = selectedElements.items[0].height
+      let x = selectedElements.items[0].x
+      let y = selectedElements.items[0].y
+      selectedElements.items[0].type = 'Image'
+      let elements = selectedElements.items[0]
+      console.log(elements,'elements33')
       /**
        * 第二步：获取到要删除的元素 执行下面代码即可。左侧目录树会自动删除 不用操作左侧目录树
        * */
@@ -174,9 +181,17 @@ const Generate = () => {
        * 第三步：将图片渲染在原来元素的位置，形状大小要同原来的元素；数据从第一步获取
        * */
       // 在这里写代码
-
-
-
+      var image = new Image(); // 创建一个新的Image对象
+      image.src = imgUrl // 图片的路径
+  
+      // 在图片加载完成后执行绘制操作
+      image.onload = function() {
+        editor.ctx.drawImage(image, x, y,width,height); // 在Canvas上绘制图片，参数依次为(image, x, y)
+      };
+      // sceneGraph.children.push(...elements)
+      // editor.sceneGraph.addItems(elements);
+      // editor.sceneGraph.addItems(elements);
+      // editor.selectedElements.setItems(elements);
 
 
   }, [imgUrl]);

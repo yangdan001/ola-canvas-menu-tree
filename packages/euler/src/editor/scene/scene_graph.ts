@@ -55,6 +55,8 @@ export class SceneGraph {
     this.grid = new Grid(editor);
   }
   addItems(element: Graph[], idx?: number) {
+    console.log(element,'element')
+    console.log(idx,'idx')
     if (idx === undefined) {
       this.children.push(...element);
     } else {
