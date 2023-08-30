@@ -2,6 +2,7 @@ import { IPoint } from '../../../type';
 import { noop } from '../../../utils/common';
 import { MoveElementsCommand } from '../../commands/move_elements';
 import { Editor } from '../../editor';
+import { Graph } from '../../scene/graph';
 import { IBaseTool } from '../type';
 
 /**
@@ -57,8 +58,10 @@ export class SelectMoveTool implements IBaseTool {
     this.dragPoint = this.editor.getCursorXY(e);
     this.move();
   }
+  
   private move() {
     this.editor.sceneGraph.showOutline = false;
+    
     const { x, y } = this.editor.viewportCoordsToScene(
       this.dragPoint!.x,
       this.dragPoint!.y,
@@ -88,40 +91,67 @@ export class SelectMoveTool implements IBaseTool {
     const selectedElements = this.editor.selectedElements.getItems();
     const startPoints = this.startPoints;
     for (let i = 0, len = selectedElements.length; i < len; i++) {
-      selectedElements[i].x = startPoints[i].x + dx;
-      selectedElements[i].y = startPoints[i].y + dy;
+      // selectedElements[i].x = startPoints[i].x + dx;
+      // selectedElements[i].y = startPoints[i].y + dy;
+      const element = selectedElements[i];
+      const ddx = startPoints[i].x + dx - element.x
+      const ddy = startPoints[i].y + dy - element.y
+      element.move(ddx, ddy); // 移动元素
     }
 
-    // 参照线处理（目前不处理 “吸附到像素网格的情况” 的特殊情况）
+    // 参照线处理（目前不处理 “吸附到像素网格的情况” 的特殊情况） TODO:修复吸附和偏移
 
     const { offsetX, offsetY } = this.editor.refLine.updateRefLine();
 
-    for (let i = 0, len = selectedElements.length; i < len; i++) {
-      selectedElements[i].x = startPoints[i].x + dx + offsetX;
-      selectedElements[i].y = startPoints[i].y + dy + offsetY;
-    }
+    // for (let i = 0, len = selectedElements.length; i < len; i++) {
+    //   selectedElements[i].x = startPoints[i].x + dx + offsetX;
+    //   selectedElements[i].y = startPoints[i].y + dy + offsetY;
+    // }
 
     this.editor.sceneGraph.render();
   }
+
   end(e: PointerEvent, isEnableDrag: boolean) {
     const selectedElements = this.editor.selectedElements.getItems();
     if (selectedElements.length === 0 || !isEnableDrag) {
-      // 移动的时候元素被删除了，或者撤销导致为空
-      // TODO: 属性复原
-      return;
+        // 移动的时候元素被删除了，或者撤销导致为空
+        // TODO: 属性复原
+        return;
+    }
+
+    for (const draggedElement of selectedElements) {
+        const potentialParent = this.editor.sceneGraph.getTopHitElement(draggedElement.x, draggedElement.y, draggedElement);
+
+        if (potentialParent && potentialParent !== draggedElement && potentialParent !== draggedElement.parent) {
+            // 如果被拖拽的元素现在位于另一个元素的范围内，且这个元素不是被拖拽的元素自己
+
+            // 从旧的父元素中移除
+            this.editor.sceneGraph.moveElement(draggedElement, potentialParent);
+        } else if (!potentialParent && draggedElement.parent) {
+            // 如果被拖拽的元素不再位于其父元素的范围内
+
+            this.editor.sceneGraph.moveElement(draggedElement);
+        }
+    }
+    const allElementsToMove: Graph[] = [...selectedElements];  // 先将selectedElements添加到allElementsToMove中
+
+    for (const element of selectedElements) {
+        allElementsToMove.push(...element.getAllDescendants());  // 使用扩展运算符来平坦化数组
     }
 
     if (this.dx !== 0 || this.dy !== 0) {
-      this.editor.commandManager.pushCommand(
-        new MoveElementsCommand(
-          'Move Elements',
-          selectedElements,
-          this.dx,
-          this.dy,
-        ),
-      );
+        this.editor.commandManager.pushCommand(
+            new MoveElementsCommand(
+                'Move Elements',
+                allElementsToMove,
+                this.dx,
+                this.dy,
+            ),
+        );
     }
-  }
+    
+}
+
   afterEnd() {
     this.dragPoint = null;
 

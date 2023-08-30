@@ -109,7 +109,7 @@ import { addEventEmitter } from '../../events';//事件中心
 //       "key": "标题-5"
 //   }
 // ]
-
+let _index = 0
 const LeftTree = () => {
   const editor = useContext(EditorContext);
   const [gData, setGData] = useState([]);//目录树 数据
@@ -120,41 +120,51 @@ const LeftTree = () => {
   useEffect(() => {
     if (editor) {
       // 右侧组件获取到的原始数据 -- 进行以下处理
-      let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
-      let ChangeDataStructureAfter = []
+      // let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
+      // let ChangeDataStructureAfter = []
+      // let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
+      // console.log(1,ChangeDataStructureBefore);
+      // let ChangeDataStructureAfter = []
       // 数据处理为树形结构
-      if (ChangeDataStructureBefore && ChangeDataStructureBefore.length > 0) {
-        ChangeDataStructureBefore.forEach((item, index) => {
-          ChangeDataStructureAfter.push({
-            "title": item.name,
-            "key": item.id
-          })
-        })
-        // 设置树状结构数据
-        setGData(ChangeDataStructureAfter);
-      }
+      // if (ChangeDataStructureBefore && ChangeDataStructureBefore.length > 0) {
+      //   ChangeDataStructureBefore.forEach((item, index) => {
+      //     ChangeDataStructureAfter.push({
+      //       "title": item.name,
+      //       "key": item.id
+      //     })
+      //   })
+      //   // 设置树状结构数据
+      //   setGData(ChangeDataStructureAfter);
+      // }
+      setGData(TreeDataSource(editor.sceneGraph.children));
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
         setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
       });
-      //监听到数据新增
-      addEventEmitter.on('addCanvas', (obj)=>{
+       //监听到画布变化
+       addEventEmitter.on('changeCanvas', (obj)=>{
+        /**
+         * 监听到画布拖拽
+         */ 
+        setGData(TreeDataSource(editor.sceneGraph.children))
+        console.log('gData',TreeDataSource(editor.sceneGraph.children));
+
         /* eslint-disable-next-line no-debugger */
         // 根据字段判断为新增
-        if(obj.desc.split(' ')[0] == 'Add'){
-          let appendobj = {
-            "title": obj.elements[0].objectName,
-            "key": obj.elements[0].id
-          }
-          setAddgraphData(appendobj)
-        }
-        else if(obj.desc.split(' ')[0] == 'Remove'){
-          let removeobj = {
-            "title": obj.removedElements[0].objectName,
-            "key": obj.removedElements[0].id
-          }
-          setRemoveGraphData(removeobj)
-        }
+        // if(obj.desc.split(' ')[0] == 'Add'){
+        //   let appendobj = {
+        //     "title": obj.elements[0].objectName,
+        //     "key": obj.elements[0].id
+        //   }
+        //   setAddgraphData(appendobj)
+        // }
+        // else if(obj.desc.split(' ')[0] == 'Remove'){
+        //   let removeobj = {
+        //     "title": obj.removedElements[0].objectName,
+        //     "key": obj.removedElements[0].id
+        //   }
+        //   setRemoveGraphData(removeobj)
+        // }
       });
     }
   }, [editor]);
@@ -193,6 +203,22 @@ const removeItemByKey = (arr, keyToDelete) => {
       }
   }
   return false; // Indicate that the item was not found
+}
+
+const TreeDataSource=(arr)=>{
+  /* eslint-disable-next-line no-debugger */
+  if(!Array.isArray(arr)){ return; }
+  _index = _index + 10 ;
+    return  arr.map((v,i)=>{
+        return {
+            ...v,
+            zIndex:_index,
+            key:v.id,
+            A:_index,
+            title:v.objectName,
+            children: v.children && v.children.length > 0 ?TreeDataSource(v.children):[]
+        }
+    })
 }
 
 

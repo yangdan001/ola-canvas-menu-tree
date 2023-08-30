@@ -85,7 +85,7 @@ export class CommandManager {
       canUndo: this.undoStack.length > 0,
     });
     // 监听到右侧画布新增元素，-- 将元素同步到左侧目录树（）
-    addEventEmitter.emit('addCanvas', this._command);
+    addEventEmitter.emit('changeCanvas', this._command);
   }
   on<T extends keyof Events>(eventName: T, listener: Events[T]) {
     this.emitter.on(eventName, listener);

@@ -6,6 +6,7 @@ import {
   getRectCenterPoint,
   normalizeRadian,
 } from '../../../utils/graphics';
+import {Graph} from '../../scene/graph';
 import { transformRotate } from '../../../utils/transform';
 import { SetElementsAttrs } from '../../commands/set_elements_attrs';
 import { Editor } from '../../editor';
@@ -44,18 +45,26 @@ export class SelectRotationTool implements IBaseTool {
     this.dRotation = 0;
 
     const selectedElements = this.editor.selectedElements.getItems();
+    const allElementsToRecord: Graph[] = [...selectedElements];
+
+    for (const element of selectedElements) {
+        allElementsToRecord.push(...element.getAllDescendants());
+    }
 
     this.prevRotations = [];
     this.prevElementCenters = [];
     this.prevElementHalfSizes = [];
+    this.prevElementXYs = [];
+
     // 记录旋转前所有元素的（1）旋转值、（2）中点、（3）宽高 / 2
-    for (let i = 0, len = selectedElements.length; i < len; i++) {
-      const el = selectedElements[i];
-      this.prevRotations[i] = el.rotation || 0;
-      const bBox = el.getBBoxWithoutRotation();
-      this.prevElementXYs[i] = [bBox.x, bBox.y];
-      this.prevElementCenters[i] = getRectCenterPoint(bBox);
-      this.prevElementHalfSizes[i] = [bBox.width / 2, bBox.height / 2];
+    for (const el of allElementsToRecord) {
+        this.prevRotations.push(el.rotation || 0);
+        if('getBBoxWithoutRotation' in el){
+          const bBox = el.getBBoxWithoutRotation();
+          this.prevElementXYs.push([bBox.x, bBox.y]);
+          this.prevElementCenters.push(getRectCenterPoint(bBox));
+          this.prevElementHalfSizes.push([bBox.width / 2, bBox.height / 2]);
+        }
     }
 
     // 记录组合包围盒的中心点
@@ -89,8 +98,12 @@ export class SelectRotationTool implements IBaseTool {
       }
       this.dRotation = dRotation;
 
-      element.rotation = dRotation;
-    } else if (selectedElements.length > 1) {
+      // element.rotation = dRotation;
+      const ddRotation = dRotation - (element.rotation ?? 0);
+      element.rotate(ddRotation)
+    }
+    // TODO：禁止多个元素的旋转。  目前旋转子元素还存在问题，好像显示的时候会向反方向旋转。
+    else if (selectedElements.length > 1) {
       /**** 旋转多个元素 ****/
       const selectedElementsBBox = this.editor.selectedElements.getBBox();
       if (selectedElementsBBox) {
@@ -139,13 +152,19 @@ export class SelectRotationTool implements IBaseTool {
   }
   end() {
     const selectedElements = this.editor.selectedElements.getItems();
+    
     const commandDesc = 'Rotate Elements';
     if (this.dRotation !== 0) {
+      const allElementsToMove: Graph[] = [...selectedElements];  // 先将selectedElements添加到allElementsToMove中
+
+    for (const element of selectedElements) {
+        allElementsToMove.push(...element.getAllDescendants());  // 使用扩展运算符来平坦化数组
+    }
       if (selectedElements.length === 0) {
         this.editor.commandManager.pushCommand(
           new SetElementsAttrs(
             commandDesc,
-            selectedElements,
+            allElementsToMove,
             {
               rotation: this.dRotation,
             },
@@ -156,8 +175,8 @@ export class SelectRotationTool implements IBaseTool {
         this.editor.commandManager.pushCommand(
           new SetElementsAttrs(
             commandDesc,
-            selectedElements,
-            selectedElements.map((el) => ({
+            allElementsToMove,
+            allElementsToMove.map((el) => ({
               rotation: el.rotation,
               x: el.x,
               y: el.y,

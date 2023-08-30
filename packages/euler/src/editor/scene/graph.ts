@@ -23,8 +23,12 @@ export interface GraphAttrs {
   fill?: ITexture[];
   stroke?: ITexture[];
   strokeWidth?: number;
+  visible?: boolean;
   // transform 相关
   rotation?: number;
+  children?: Graph[];
+  parent?: Graph | null;
+  zIndex?: number;
 }
 
 export class Graph {
@@ -35,12 +39,16 @@ export class Graph {
   y: number;
   width: number;
   height: number;
+  children: Graph[] = [];
+  parent: Graph | null = null;
   // color
   fill: ITexture[] = [];
   stroke: ITexture[] = [];
   strokeWidth?: number;
+  visible?: boolean = true; 
   // transform
-  rotation?: number;
+  rotation?: number = 0;
+  zIndex?: number;
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
@@ -51,7 +59,8 @@ export class Graph {
     } else {
       this.objectName = objectNameGenerator.gen(options.type ?? this.type);
     }
-
+    this.children = options.children ?? this.children;
+    this.parent = options.parent ?? this.parent;
     this.x = options.x;
     this.y = options.y;
     this.width = options.width;
@@ -66,12 +75,13 @@ export class Graph {
     if (options.strokeWidth) {
       this.strokeWidth = options.strokeWidth;
     }
-    if (options.rotation) {
-      this.rotation = options.rotation;
-    }
+    this.rotation = options.rotation ?? 0;
+    this.zIndex = options.zIndex ?? 0;
   }
   getAttrs(): GraphAttrs {
     return {
+      children: this.children,
+      parent: this.parent,
       type: this.type,
       id: this.id,
       objectName: this.objectName,
@@ -83,16 +93,65 @@ export class Graph {
       stroke: this.stroke,
       strokeWidth: this.strokeWidth,
       rotation: this.rotation,
+      zIndex: this.zIndex,
     };
   }
   setAttrs(attrs: Partial<GraphAttrs>) {
-    let key: keyof Partial<GraphAttrs>;
-    for (key in attrs) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias, @typescript-eslint/no-explicit-any
-      const self: any = this;
-      self[key] = attrs[key];
+    const dx = attrs.x !== undefined ? attrs.x - this.x : 0;
+    const dy = attrs.y !== undefined ? attrs.y - this.y : 0;
+    const dRotation = attrs.rotation !== undefined ? attrs.rotation - (this.rotation || 0) : 0;
+
+    for (const key in attrs) {
+        if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+            const attrKey = key as keyof GraphAttrs;
+            (this as any)[attrKey] = attrs[attrKey];
+        }
+    }
+
+    // 如果位置或旋转发生了变化，应用这些变化到所有子元素上
+    // if (dx !== 0 || dy !== 0 || dRotation !== 0) {
+    //     this.applyTransformToChildren(dx, dy, dRotation);
+    // }
+}
+move(dx: number, dy: number) {
+  this.x += dx;
+  this.y += dy;
+  for (const child of this.children) {
+    if('move' in child){
+      child.move(dx, dy);
     }
   }
+}
+rotate(dRotation: number) {
+  this.rotation = (this.rotation || 0) + dRotation;
+  for (const child of this.children) {
+      child.rotate(dRotation);
+  }
+}
+
+getAllDescendants(): Graph[] {
+  let descendants: Graph[] = [];
+  for (const child of this.children) {
+      descendants.push(child);
+      if('getAllDescendants' in child ){
+        descendants = descendants.concat(child.getAllDescendants());
+      }
+  }
+  return descendants;
+}
+
+private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
+    for (const child of this.children) {
+        child.x += dx;
+        child.y += dy;
+        if (child.rotation) {
+            child.rotation += dRotation;
+        } else {
+            child.rotation = dRotation;
+        }
+        child.applyTransformToChildren(dx, dy, dRotation);  // 递归地应用到子元素的子元素
+    }
+}
 
   /**
    * 计算包围盒（不考虑 strokeWidth）
@@ -291,6 +350,20 @@ export class Graph {
     );
   }
 
+  addChild(child: Graph) {
+    this.children.push(child);
+    child.parent = this;
+  }
+  
+  removeChild(child: Graph) {
+    const index = this.children.indexOf(child);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+      child.parent = null;
+    }
+  }
+  
+
   static dMove(graphs: Graph[], dx: number, dy: number) {
     for (const graph of graphs) {
       graph.x += dx;
@@ -302,122 +375,133 @@ export class Graph {
 /**
  * 修改元素并保存到历史记录
  */
+function getAllElementsWithChildren(element: Graph): Graph[] {
+  let elements = [element];
+  for (const child of element.children) {
+      elements = elements.concat(getAllElementsWithChildren(child));
+  }
+  return elements;
+}
 
 export const MutateElementsAndRecord = {
   setRotateX(editor: Editor, elements: Graph[], rotatedX: number) {
-    if (elements.length === 0) {
-      return;
-    }
-    // 1. 计算新的 x
-    const prevXs: { x: number }[] = new Array(elements.length);
-    for (let i = 0, len = elements.length; i < len; i++) {
-      const element = elements[i];
-      prevXs[i] = { x: element.x };
-      element.setRotatedX(rotatedX);
-    }
-    // 2. 保存到历史记录
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-        'Update X of Elements',
-        elements,
-        elements.map((el) => ({ x: el.x })),
-        prevXs,
-      ),
-    );
+      if (elements.length === 0) {
+          return;
+      }
+
+      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+      const prevStates = allAffectedElements.map(el => ({ x: el.x }));
+
+      for (const element of elements) {
+          element.setRotatedX(rotatedX);
+      }
+
+      const newStates = allAffectedElements.map(el => ({ x: el.x }));
+
+      editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update X of Elements',
+              allAffectedElements,
+              newStates,
+              prevStates,
+          ),
+      );
   },
+
   setRotateY(editor: Editor, elements: Graph[], rotatedY: number) {
-    if (elements.length === 0) {
-      return;
-    }
-    // 1. 计算新的 x
-    const prevXs: { y: number }[] = new Array(elements.length);
-    for (let i = 0, len = elements.length; i < len; i++) {
-      const element = elements[i];
-      prevXs[i] = { y: element.y };
-      element.setRotatedY(rotatedY);
-    }
-    // 2. 保存到历史记录
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-        'Update Y of Elements',
-        elements,
-        elements.map((el) => ({ y: el.y })),
-        prevXs,
-      ),
-    );
+      if (elements.length === 0) {
+          return;
+      }
+
+      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+      const prevStates = allAffectedElements.map(el => ({ y: el.y }));
+
+      for (const element of elements) {
+          element.setRotatedY(rotatedY);
+      }
+
+      const newStates = allAffectedElements.map(el => ({ y: el.y }));
+
+      editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update Y of Elements',
+              allAffectedElements,
+              newStates,
+              prevStates,
+          ),
+      );
   },
+
   setWidth(editor: Editor, elements: Graph[], width: number) {
-    if (elements.length === 0) {
-      return;
-    }
+      if (elements.length === 0) {
+          return;
+      }
 
-    const prevAttrs = elements.map((el) => ({
-      x: el.x,
-      y: el.y,
-      width: el.width,
-    }));
-    elements.forEach((el) => {
-      const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(el);
-      el.width = width;
-      const { x: rotatedX, y: rotatedY } = getElementRotatedXY(el);
-      const dx = rotatedX - preRotatedX;
-      const dy = rotatedY - preRotatedY;
-      el.x -= dx;
-      el.y -= dy;
-    });
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-        'Update Width of Elements',
-        elements,
-        elements.map((el) => ({ width: el.width, x: el.x, y: el.y })),
-        prevAttrs,
-      ),
-    );
+      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+      const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
+
+      for (const element of elements) {
+          element.resizeAndKeepRotatedXY({ width });
+      }
+
+      const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
+
+      editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update Width of Elements',
+              allAffectedElements,
+              newStates,
+              prevStates,
+          ),
+      );
   },
+
   setHeight(editor: Editor, elements: Graph[], height: number) {
-    if (elements.length === 0) {
-      return;
-    }
+      if (elements.length === 0) {
+          return;
+      }
 
-    const prevAttrs = elements.map((el) => ({
-      x: el.x,
-      y: el.y,
-      height: el.height,
-    }));
-    elements.forEach((el) => {
-      const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(el);
-      el.height = height;
-      const { x: rotatedX, y: rotatedY } = getElementRotatedXY(el);
-      const dx = rotatedX - preRotatedX;
-      const dy = rotatedY - preRotatedY;
-      el.x -= dx;
-      el.y -= dy;
-    });
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-        'update Height of Elements',
-        elements,
-        elements.map((el) => ({ height: el.height, x: el.x, y: el.y })),
-        prevAttrs,
-      ),
-    );
+      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+      const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
+
+      for (const element of elements) {
+          element.resizeAndKeepRotatedXY({ height });
+      }
+
+      const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
+
+      editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update Height of Elements',
+              allAffectedElements,
+              newStates,
+              prevStates,
+          ),
+      );
   },
-  setRotation(editor: Editor, elements: Graph[], rotation: number) {
-    if (elements.length === 0) {
-      return;
-    }
 
-    const prevAttrs = elements.map((el) => ({ rotation: el.rotation || 0 }));
-    elements.forEach((el) => {
-      el.rotation = rotation;
-    });
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-        'update Rotation',
-        elements,
-        { rotation },
-        prevAttrs,
-      ),
-    );
+  setRotation(editor: Editor, elements: Graph[], rotation: number) {
+      if (elements.length === 0) {
+          return;
+      }
+
+      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+      const prevStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
+
+      for (const element of elements) {
+          element.rotation = rotation;
+      }
+
+      const newStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
+
+      editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update Rotation of Elements',
+              allAffectedElements,
+              newStates,
+              prevStates,
+          ),
+      );
   },
 };
+

@@ -8,11 +8,16 @@ import { DrawSelectionBox } from './tool_select_selection';
 import { SelectMoveTool } from './tool_select_move';
 import { SelectRotationTool } from './tool_select_rotation';
 import { SelectScaleTool } from './tool_select_scale';
-  
+import { DoubleClickStrategy } from './tool_select_double_click';
+
 export class SelectTool implements ITool {
   static type = 'select';
   type = 'select';
   hotkey = 'v';
+
+  // double click 相关
+  private lastClickTime= 0;
+  private lastClickedElement: Graph | null = null;
 
   startPoint: IPoint = { x: -1, y: -1 };
   drawingRect: Rect | null = null;
@@ -22,6 +27,7 @@ export class SelectTool implements ITool {
   strategyDrawSelectionBox: DrawSelectionBox;
   strategySelectRotation: SelectRotationTool;
   strategySelectScale: SelectScaleTool;
+  strategyDoubleClick: DoubleClickStrategy;
 
   // 鼠标按下时选中的元素，在鼠标释放时可能会用到。shift 取消一个元素时需要使用
   topHitElementWhenStart: Graph | null = null;
@@ -32,6 +38,7 @@ export class SelectTool implements ITool {
     this.strategyDrawSelectionBox = new DrawSelectionBox(editor);
     this.strategySelectRotation = new SelectRotationTool(editor);
     this.strategySelectScale = new SelectScaleTool(editor);
+    this.strategyDoubleClick = new DoubleClickStrategy(editor);
   }
   active() {
     this.editor.setCursor('');
@@ -58,7 +65,18 @@ export class SelectTool implements ITool {
     }
     this.editor.setCursor(cursor);
   }, 50);
+  private handleDoubleClick(topHitElement: Graph) {
+    const selectedElements = this.editor.selectedElements;
+    if (topHitElement.children && topHitElement.children.length > 0) {
+        // 选择子元素
+        selectedElements.setItems(topHitElement.children);
+        this.editor.sceneGraph.render();
+    }
+}
   start(e: PointerEvent) {
+    console.log('init current time')
+    const currentTime = Date.now();
+    const DOUBLE_CLICK_THRESHOLD = 300; 
     this.currStrategy = null;
     this.topHitElementWhenStart = null;
     this.isDragHappened = false;
@@ -72,32 +90,22 @@ export class SelectTool implements ITool {
     // 3. 选中缩放或旋转控制点
     // 4. 选中 选中框 内部
     // 5. 按住 shift 键，可进行连选
-     
+
     const sceneGraph = this.editor.sceneGraph;
     const selectedElements = this.editor.selectedElements;
-    // console.log(sceneGraph,'sceneGraph')
-    // console.log(selectedElements,'selectedElements')
-    // const fileUrl: string | null = localStorage.getItem('fileUrl');
-    // console.log(fileUrl,'fileUrl')
-    /**
-     * 1、获取到选中的元素信息 如id、坐标、大小、是否为原形等；
-     * 2、删除该元素：左侧目录树与画布均删除，参考右键删除；
-     * 3、将图片渲染在原来元素的位置，形状大小要同原来的元素；
-     * */ 
-
-
-    // if (fileUrl) {
-    //   const img = new Image();
-    //   img.onload = () => {
-    //     // Once the image is loaded, you can use it as the source for drawImage
-    //     const ctx = this.editor.ctx;
-    //     ctx.drawImage(img, 439, 125);
-    //   };
-    //   img.src = fileUrl;
-    // }
     const isShiftPressing = this.editor.hostEventManager.isShiftPressing;
 
     this.startPoint = this.editor.getSceneCursorXY(e);
+
+    const topHitElement = sceneGraph.getTopHitElement(
+        this.startPoint.x,
+        this.startPoint.y,
+    );
+    console.log(currentTime - this.lastClickTime)
+    if (currentTime - this.lastClickTime <= DOUBLE_CLICK_THRESHOLD && this.lastClickedElement === topHitElement) {
+      this.currStrategy = this.strategyDoubleClick;
+      this.currStrategy.start(e);
+    }
 
     // 0. 点中 handle（旋转点）
     const handleName = sceneGraph.transformHandle.getNameByPoint(
@@ -152,6 +160,9 @@ export class SelectTool implements ITool {
     } else {
       throw new Error('没有根据判断选择策略，代码有问题');
     }
+    console.log('reinit current time')
+    this.lastClickTime = currentTime;
+    this.lastClickedElement = topHitElement;
   }
   drag(e: PointerEvent) {
     this.isDragHappened = true;
@@ -167,8 +178,7 @@ export class SelectTool implements ITool {
     }
   }
   end(e: PointerEvent, isEnableDrag: boolean) {
-    console.log('拖拽结束')
-
+    
     const currStrategy = this.currStrategy;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -186,9 +196,10 @@ export class SelectTool implements ITool {
     } else {
       throw new Error('没有根据判断选择策略，代码有问题');
     }
+
+
   }
   afterEnd() {
-    console.log('拖拽结束之后')
     if (!this.editor.hostEventManager.isDraggingCanvasBySpace) {
       this.editor.setCursor('');
     }
