@@ -96,6 +96,8 @@ addItems(elements: Graph[], parent?: Graph, idx?: number) {
   }
 }
 moveElement(element: Graph, parent?: Graph) {
+  /* eslint-disable-next-line no-debugger */
+  debugger
   // 1. 首先从当前位置移除元素
   this.removeElementFromItsParent(element);
 
@@ -165,8 +167,9 @@ removeItems(elements: Graph[]) {
   getElementById(id: string) {
     return this.children.find((item) => item.id === id);
   }
-
+     
   render = rafThrottle(() => {
+    console.log('zoule')
     // 获取视口区域
     const {
       viewportManager,
@@ -177,7 +180,8 @@ removeItems(elements: Graph[]) {
     const viewport = viewportManager.getViewport();
     const zoom = this.editor.zoomManager.getZoom();
     const viewportBoxInScene = this.editor.viewportManager.getBbox();
-  
+    /* eslint-disable-next-line no-debugger */
+  debugger
     const visibleElements: Graph[] = [];
     // 1. 找出视口下所有元素
     this.findVisibleElements(this.children, viewportBoxInScene, visibleElements);

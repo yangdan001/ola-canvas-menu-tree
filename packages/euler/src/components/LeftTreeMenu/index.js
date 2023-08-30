@@ -119,27 +119,13 @@ const LeftTree = () => {
   const [selectedKeys, setSelectedKeys] = useState(['']);
   useEffect(() => {
     if (editor) {
-      // 右侧组件获取到的原始数据 -- 进行以下处理
-      // let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
-      // let ChangeDataStructureAfter = []
-      // let ChangeDataStructureBefore = editor.sceneGraph.getObjects()
-      // console.log(1,ChangeDataStructureBefore);
-      // let ChangeDataStructureAfter = []
-      // 数据处理为树形结构
-      // if (ChangeDataStructureBefore && ChangeDataStructureBefore.length > 0) {
-      //   ChangeDataStructureBefore.forEach((item, index) => {
-      //     ChangeDataStructureAfter.push({
-      //       "title": item.name,
-      //       "key": item.id
-      //     })
-      //   })
-      //   // 设置树状结构数据
-      //   setGData(ChangeDataStructureAfter);
-      // }
       setGData(TreeDataSource(editor.sceneGraph.children));
+      // editor.sceneGraph.render();
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
-        setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
+        console.log('render')
+        setGData(TreeDataSource(editor.sceneGraph.children));
+        // setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
       });
        //监听到画布变化
        addEventEmitter.on('changeCanvas', (obj)=>{
@@ -168,25 +154,25 @@ const LeftTree = () => {
       });
     }
   }, [editor]);
-  let treeData = []
-  // 新增处理
-  useEffect(() => {
-    let newdata = JSON.parse(JSON.stringify(gData))
-    newdata.push(addGraphData);
-    setGData(newdata)
-  }, [addGraphData]);
-  // 删除处理
-  useEffect(() => {
-    let newdata = JSON.parse(JSON.stringify(gData))
-    // 做删除处理
-    const itemRemoved = removeItemByKey(newdata,removeGraphData.key)
-    if (itemRemoved) {
-      setGData(newdata)
-    } else {
-      console.log('Item not found.');
-      setGData([])
-    }
-  }, [removeGraphData]);
+  // let treeData = []
+  // // 新增处理
+  // useEffect(() => {
+  //   let newdata = JSON.parse(JSON.stringify(gData))
+  //   newdata.push(addGraphData);
+  //   setGData(newdata)
+  // }, [addGraphData]);
+  // // 删除处理
+  // useEffect(() => {
+  //   let newdata = JSON.parse(JSON.stringify(gData))
+  //   // 做删除处理
+  //   const itemRemoved = removeItemByKey(newdata,removeGraphData.key)
+  //   if (itemRemoved) {
+  //     setGData(newdata)
+  //   } else {
+  //     console.log('Item not found.');
+  //     setGData([])
+  //   }
+  // }, [removeGraphData]);
   
 // 递归删除  根据key
 const removeItemByKey = (arr, keyToDelete) => {

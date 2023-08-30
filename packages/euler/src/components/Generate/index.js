@@ -66,7 +66,9 @@ const Generate = () => {
   const [scaleVal, setScaleVal] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [imgUrl, setImgUrl] = useState("");
+  const [imgData, setImgData] = useState({});
 
+  
 
   useEffect(() => {
     const setVhToState = () => {
@@ -391,6 +393,8 @@ const Generate = () => {
                       recorc_id: item.record_id
                     })
                   })
+                  let fileUrl = window.URL.createObjectURL(res.params.images[0])
+                  setImgUrl(fileUrl)
                   //tempImagesArr 处理下方展示所需图片(取每个item中的第一个)
                   //temp 所有历史的record
                   changeHistoryImages([...tempImagesArr], temp);
@@ -477,8 +481,8 @@ const Generate = () => {
         lora: allValue.lora ? loraFormValue : [],
         controlnet: allValue.controlnet ? controlnetFormValue : [],
         image_names: {
-          control_image_name: selectType == 3 && fileObj && fileObj.name ? allValue.custom_image_name[0].name : [],
-          custom_image_name: selectType == 2 && fileObj && fileObj.name ? allValue.custom_image_name[0].name : [],
+          control_image_name: selectType == 3 && fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
+          custom_image_name: selectType == 2 && fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
         },
         prompts: {
           positive_prompt: allValue.positive_prompt,
@@ -496,6 +500,7 @@ const Generate = () => {
         }
       }
       let controlnetFiles = []
+      controlnetFiles.push(imgData)
       if (selectType === '1') {
         if (allValue.controlnet) {
           if (fileObj && fileObj.name) {
@@ -528,26 +533,14 @@ const Generate = () => {
   }, 300)
 
   const onChangeHandler = (info) => {
-
     let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
-
+    setImgData(info.file.originFileObj)
     setImgUrl(fileUrl)
-
-
-
-
-
-
-
-
-
-
     // localStorage.setItem('fileUrl',fileUrl)
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList, 'uploading');
     }
     if (info.file.status === 'done') {
-
       // let cvs = document.getElementById('cvs');
       // var ctx = cvs!.getContext('2d');
       // let fileUrl = window.URL.createObjectURL(info.file.originFileObj!);
@@ -723,9 +716,14 @@ const Generate = () => {
           // label="Upload"
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          extra=""
+          // extra=""
         >
-          <Upload name="logo" maxCount={1} action="/upload.do" listType="picture" onChange={onChangeHandler}>
+          <Upload 
+          action={""}
+          showUploadList={false}
+          maxCount={1} 
+          multiple={false} 
+          onChange={onChangeHandler}>
             <div className='upload-box'>
               <PlusOutlined style={{ fontSize: '24px', color: '#985EFF' }} />
             </div>
