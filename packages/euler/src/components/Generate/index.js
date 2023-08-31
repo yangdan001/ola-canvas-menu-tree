@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
+// import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import shortid from 'shortid';
 import {
   notification,
@@ -26,11 +26,9 @@ import {
 import _ from 'lodash';
 import { EditOutlined, DownOutlined, UpOutlined, MenuOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  postPreprocess, getAllDescription, getHistoryRecord, getRecordTotal, postImage, getRecord,
-  getPreprocessRes, putTemplate, getTemplate, deleteEngineTemplate, deleteLora
+  getAllDescription, postImage, getRecord,postImageToImage,
 } from '../../../src/services/api';
 import textToImageStore from '../../../src/store/textToImageStore';
-import { SelectData, setDatas, defaultWidthHeight, setStoreDatas, manageControlnetFile, base64ToFile, base64ToFile2, getBase64Image } from '../../../src/data';
 import { toJS } from "mobx";
 import { EditorContext } from '../../context';
 import './index.scss';
@@ -67,9 +65,9 @@ const Generate = () => {
   const [fileObj, setFileObj] = useState({});
   const [imgUrl, setImgUrl] = useState("");
   const [imgData, setImgData] = useState({});
-
-  
-
+  const [imageToImageDataRes, setImageToImageDataRes] = useState({});
+  const [textToImageDataRes, setTextToImageDataRes] = useState({});
+ 
   useEffect(() => {
     const setVhToState = () => {
       setVh(window.innerHeight * 0.01);
@@ -149,6 +147,7 @@ const Generate = () => {
 
 // 图片上传后逻辑处理
   useEffect(() => {
+    console.log(imgUrl,'imgUrl999999')
     if( imgUrl == '' ){
       return
     }
@@ -239,76 +238,12 @@ const Generate = () => {
   const onInpaintingChange = (value) => {
     console.log(value, 'value888')
     setInpaintingChecked(value)
-    // if()
   }
 
   const onMultidiffusionChange = (value) => {
     setMultidiffusionChecked(value)
   }
 
-  //存储历史图片和处理后需要渲染的图片列表
-  const changeHistoryImages = (process, history) => {
-    // runInAction(() => {
-    //   this.processHistoryImages = process.reverse();
-    //   this.historyImages = history;
-    // });
-    localStorage.setItem('processHistoryImages', process.reverse())
-    localStorage.setItem('historyImages', history)
-  }
-
-  //点击ImageGallery下方滑动视图组件时方法
-  const ImageGalleryClick = (record, type) => {
-    let tempHistoryImages = localStorage.getItem('historyImages')[localStorage.getItem('historyImages').length - 1];
-    if (type && type === 'again') {
-      if (tempHistoryImages && tempHistoryImages.img_files && tempHistoryImages.img_files.length !== 0) {
-        this.targetImages = {
-          ...tempHistoryImages,
-          images: tempHistoryImages.img_files.map((item, index) => {
-            return {
-              id: tempHistoryImages.images_id[index],
-              url: item,
-              record_id: record.record_id
-            }
-          })
-        }
-      } else if (tempHistoryImages && tempHistoryImages.images.length !== 0) {
-        this.targetImages = {
-          ...tempHistoryImages,
-          images: tempHistoryImages.images.map((item, index) => {
-            return {
-              id: tempHistoryImages.images_id[index],
-              url: item,
-              record_id: record.record_id
-            }
-          })
-        }
-      } else {
-        this.targetImages = { images: [] }
-      }
-    } else {
-      localStorage.getItem('historyImages').map((item) => {
-        if (record.id === item.record_id) {
-          this.targetImages = {
-            ...item,
-            images: item.images && item.images.length !== 0 ? item.images.map((image_item, index) => {
-              return {
-                id: item.images_id[index],
-                url: image_item,
-                record_id: record.record_id
-              }
-            }) :
-              item.images.map((image_item, index) => {
-                return {
-                  id: item.images_id[index],
-                  url: image_item,
-                  record_id: record.record_id
-                }
-              })
-          };
-        }
-      })
-    }
-  }
 
   const SelectComponentOnChange = (value, option, type, index) => {
     console.log(option.item);
@@ -345,99 +280,122 @@ const Generate = () => {
       form.setFieldsValue(values);
     }
   }
-
-  //文生图
-  const textToImageSocket = async (backendData, controlnetFiles) => {
-    await postImage(backendData, controlnetFiles).then((RES) => {
-      try {
-        if (!RES || RES.code !== 0) {
-          notification.error({
-            message: '请求错误',
-            description: `${RES && RES.message ? RES.message : ''}`,
-          });
-          // this.changeImageListLoading(false)//视图组件
-          // this.changetextToLoading(false);//历史图片组件loading
-          return false;
-        } else {
-          if (RES.params.task_id) {
-            const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
-            const socket = new WebSocket(socketUrl);
-            socket.onopen = () => {
-              console.log('WebSocket连接已打开');
-            };
-            socket.onmessage = (event) => {
-              console.log('触发', JSON.parse(event.data));
-              if (event && JSON.parse(event.data) && JSON.parse(event.data) != {}) {
-                // runInAction(() => {
-                //   this.textToImageDataRes = event && JSON.parse(event.data);
-                // });
-                let textToImageDataRes = event && JSON.parse(event.data);
-                localStorage.setItem('textToImageDataRes', textToImageDataRes)
-              }
-            };
-            socket.onclose = async (event) => {
-              console.log('close');
-              console.log(localStorage.getItem('textToImageDataRes'));
-              if (localStorage.getItem('textToImageDataRes') && localStorage.getItem('textToImageDataRes').status === 'COMPLETED') {
-                const res = await getRecord(RES.params.task_id);
-                let tempImagesArr = [];
-                var temp = _.clone(localStorage.getItem('historyImages'));
-                if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
-                  //处理历史
-                  if (temp.length >= 5) { temp.splice(0, 1) }
-                  temp.push(res.params);
-                  temp.map(item => {
-                    tempImagesArr.push({
-                      id: item.record_id,
-                      url: item.images && item.images.length !== 0 ? item.images[0] : item.images[0],
-                      recorc_id: item.record_id
-                    })
-                  })
-                  let fileUrl = window.URL.createObjectURL(res.params.images[0])
-                  setImgUrl(fileUrl)
-                  //tempImagesArr 处理下方展示所需图片(取每个item中的第一个)
-                  //temp 所有历史的record
-                  changeHistoryImages([...tempImagesArr], temp);
-                  ImageGalleryClick(res.params, 'again')
-                  // this.changeImageListLoading(false)//视图组件
-                  // this.changetextToLoading(false);//历史图片组件loading
-                  getRecordTotal().then((res) => {
-                    if (res && res.code === 0) {
-                      this.total = res.params.total;
-                    }
-                  })
-                } else {
-                  notification.error({
-                    message: '操作失败',
-                    description: `${res && res.message ? res.message : '请求异常'}`,
-                  });
-                  // this.changeImageListLoading(false)//视图组件
-                  // this.changetextToLoading(false);//历史图片组件loading
-                }
+ //文生图 
+ const textToImageSocket = async (backendData, controlnetFiles) => {
+  await postImage(backendData, controlnetFiles).then((RES) => {
+    try {
+      if (!RES || RES.code !== 0) {
+        notification.error({
+          message: '请求错误',
+          description: `${RES && RES.message ? RES.message : ''}`,
+        });
+        return false;
+      } else {
+        if (RES.params.task_id) {
+          const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
+          const socket = new WebSocket(socketUrl);
+          socket.onopen = () => {
+            console.log('WebSocket连接已打开');
+          };
+          socket.onmessage = (event) => {
+            console.log('触发', JSON.parse(event.data));
+            if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
+              event && setTextToImageDataRes(JSON.parse(event.data))
+            }
+          };
+          socket.onclose = async (event) => {
+            console.log('close');
+            console.log(toJS(textToImageDataRes));
+            if (toJS(textToImageDataRes) && toJS(textToImageDataRes).status === 'COMPLETED') {
+              const res = await getRecord(RES.params.task_id);
+              if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+                let fileUrl = res.params.images[0]
+                setImgUrl(fileUrl)
+                localStorage.setItem('fileUrl', fileUrl)
               } else {
                 notification.error({
                   message: '操作失败',
-                  description: `请求失败`,
+                  description: `${res && res.message ? res.message : '请求异常'}`,
                 });
-                // this.changeImageListLoading(false)//视图组件
-                // this.changetextToLoading(false);//历史图片组件loading
               }
-            };
-          } else {
-            notification.error({
-              message: '接口错误',
-              description: `task_id不存在或发生异常`,
-            });
-            // this.changeImageListLoading(false)//视图组件
-            // this.changetextToLoading(false);//历史图片组件loading
-          }
+            } else {
+              notification.error({
+                message: '操作失败',
+                description: `请求失败`,
+              });
+            }
+          };
+        } else {
+          notification.error({
+            message: '接口错误',
+            description: `task_id不存在或发生异常`,
+          });
         }
-      } catch (err) {
-        this.changeImageListLoading(false)//视图组件
-        this.changetextToLoading(false);//历史图片组件loading
       }
-    })
-  }
+    } catch (err) {
+      console.log(err);
+    }
+  })
+}
+
+//图生图
+const imageToImageSocket = async (backendData, controlnetFiles, files) => {
+  await postImageToImage(backendData, controlnetFiles, files).then((RES) => {
+    try {
+      if (!RES || RES.code !== 0) {
+        notification.error({
+          message: '请求错误',
+          description: `${RES && RES.message ? RES.message : ''}`,
+        });
+        return false;
+      } else {
+        if (RES.params.task_id) {
+          const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
+          const socket = new WebSocket(socketUrl);
+          socket.onopen = () => {
+            console.log('WebSocket连接已打开');
+          };
+          socket.onmessage = (event) => {
+            console.log('触发', JSON.parse(event.data));
+              if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
+                event && setImageToImageDataRes(JSON.parse(event.data))
+              }
+          };
+          socket.onclose = async (event) => {
+            console.log(toJS(imageToImageDataRes),'000000');
+            if (toJS(imageToImageDataRes) && toJS(imageToImageDataRes).status === 'COMPLETED') {
+              const res = await getRecord(RES.params.task_id);
+              let tempImagesArr = [];
+              if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+                console.log(res.params.images[0],'res.params.images[0]')
+                let fileUrl = res.params.images[0]
+                setImgUrl(fileUrl)
+                localStorage.setItem('fileUrl', fileUrl)
+              } else {
+                notification.error({
+                  message: '操作失败',
+                  description: `${res && res.message ? res.message : '请求异常'}`,
+                });
+              }
+            } else {
+              notification.error({
+                message: '操作失败',
+                description: `请求失败`,
+              });
+            }
+          };
+        } else {
+          notification.error({
+            message: '接口错误',
+            description: `task_id不存在或发生异常`,
+          });
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  })
+}
 
   //表单提交逻辑
   const onFinish = _.debounce(async (values) => {
@@ -504,31 +462,29 @@ const Generate = () => {
       if (selectType === '1') {
         if (allValue.controlnet) {
           if (fileObj && fileObj.name) {
-            textToImageStore.textToImageSocket(datas, controlnetFiles)
+            textToImageSocket(datas, controlnetFiles)
           } else {
             message.error('请上传图片！');
             return false;
           }
         } else {
-          textToImageStore.textToImageSocket(datas, controlnetFiles)
+          textToImageSocket(datas, controlnetFiles)
         }
       }
       if (selectType === '2') {
-        datas.isInpainting = 0
-        textToImageStore.imageToImageSocket(datas, controlnetFiles)
+        datas.isInpainting = '0'
+        imageToImageSocket(datas, controlnetFiles)
       }
       if (selectType === '3') {
         if (fileObj && fileObj.name) {
-          textToImageStore.textToImageSocket(datas, controlnetFiles)
+          textToImageSocket(datas, controlnetFiles)
         } else {
           message.error('请上传图片！');
           return false;
         }
       }
-      // }
     } catch (errorInfo) {
-      // textToImageStore.changeImageListLoading(false)//视图组件
-      // textToImageStore.changetextToLoading(false);//历史图片组件loading
+      console.error(errorInfo)
     }
   }, 300)
 
@@ -550,8 +506,7 @@ const Generate = () => {
       //   console.info('xxx');
       //   ctx.drawImage(img, 0, 0);//this即是imgObj,保持图片的原始大小：470*480
     }
-    //   message.success(`${info.file.name} file uploaded successfully`);
-    // }
+    
     else if (info.file.status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }

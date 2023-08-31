@@ -28,7 +28,8 @@ import { getDevicePixelRatio } from '../../utils/common';
 import { TextGraph } from './text';
 import { HALF_PI } from '../../constant';
 import { Line } from './line';
-
+import { TextureType } from '../texture';
+import { parseRGBAStr } from '../../utils/color';
 interface Events {
   render(): void;
 }
@@ -282,22 +283,73 @@ findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements
   }
 }
 
+
+renderFillAndStrokeTextureChild(element: Graph, ctx: CanvasRenderingContext2D, smooth: boolean) {
+  if (element.rotation) {
+    const cx = element.x + element.width / 2;
+    const cy = element.y + element.height / 2;
+
+    rotateInCanvas(ctx, element.rotation, cx, cy);
+  }
+  ctx.beginPath();
+  const textY = Number(element.y)-2
+  ctx.fillText(element.objectName, element.x, textY);
+  ctx.rect(element.x, element.y, element.width, element.height);
+  for (const texture of element.fill) {
+    switch (texture.type) {
+      case TextureType.Solid: {
+        ctx.fillStyle = parseRGBAStr(texture.attrs);
+        ctx.fill();
+        break;
+      }
+      case TextureType.Image: {
+        'fillImage' in element && element.fillImage(ctx, texture, smooth);
+      }
+    }
+  }
+  if (element.strokeWidth) {
+    ctx.lineWidth = element.strokeWidth;
+    for (const texture of element.stroke) {
+      switch (texture.type) {
+        case TextureType.Solid: {
+          ctx.strokeStyle = parseRGBAStr(texture.attrs);
+          ctx.stroke();
+          break;
+        }
+        case TextureType.Image: {
+          // TODO: stroke image
+        }
+      }
+    }
+  }
+  ctx.closePath();   
+}
+
 renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
   ctx.save();
   
-  // 如果元素有子元素，设置裁剪区域
-  if (element.children && element.children.length > 0 && ("getBBox" in element)) {
+  // // 如果元素有子元素，设置裁剪区域
+  // if (element.children && element.children.length > 0 && ("getBBox" in element)) {
 
-      const bbox = element.getBBox();
-      ctx.beginPath();
-      ctx.rect(bbox.x, bbox.y, bbox.width, bbox.height);
-      ctx.clip();
-  }
+  //     const bbox = element.getBBox();
+  //     ctx.beginPath();
+  //     ctx.rect(bbox.x, bbox.y, bbox.width, bbox.height);
+  //     ctx.clip();
+  // }
 
   // 抗锯齿
   const smooth = zoom <= 1;
-  element.renderFillAndStrokeTexture(ctx, smooth);
 
+  if(element.children && element.children.length > 0){
+    for (const el of element.children ) {
+      this.renderElement(el, ctx, zoom);
+  }
+  }
+    if(element.renderFillAndStrokeTexture){
+      element.renderFillAndStrokeTexture(ctx, smooth);
+    }else{
+      // this.renderFillAndStrokeTextureChild(element,ctx, smooth)
+    }
   ctx.restore();
   
 }

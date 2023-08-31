@@ -115,6 +115,8 @@ class TextToImageStore {
                 let tempImagesArr = [];
                 var temp = _.clone(toJS(this.historyImages));
                 if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+                  let fileUrl = res.params.images[0]
+                  localStorage.setItem('fileUrl', fileUrl)
                   //处理历史
                   if (temp.length >= 5) { temp.splice(0, 1) }
                   temp.push(res.params);
@@ -213,6 +215,9 @@ class TextToImageStore {
                       recorc_id: item.record_id
                     })
                   })
+                  console.log(res.params.images[0],'res.params.images[0]')
+                  let fileUrl = res.params.images[0]
+                  localStorage.setItem('fileUrl', fileUrl)
                   //tempImagesArr 处理下方展示所需图片(取每个item中的第一个)
                   //temp 所有历史的record
                   this.changeHistoryImages([...tempImagesArr], temp);

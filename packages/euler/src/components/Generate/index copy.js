@@ -527,7 +527,7 @@ const Generate = () => {
         }
       }
       if (selectType === '2') {
-        datas.isInpainting = 0
+        datas.isInpainting = '0'
         textToImageStore.imageToImageSocket(datas, controlnetFiles)
       }
       if (selectType === '3') {
