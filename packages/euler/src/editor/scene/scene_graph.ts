@@ -328,31 +328,31 @@ renderFillAndStrokeTextureChild(element: Graph, ctx: CanvasRenderingContext2D, s
 renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
   ctx.save();
   
-  // // 如果元素有子元素，设置裁剪区域
-  // if (element.children && element.children.length > 0 && ("getBBox" in element)) {
-
-  //     const bbox = element.getBBox();
-  //     ctx.beginPath();
-  //     ctx.rect(bbox.x, bbox.y, bbox.width, bbox.height);
-  //     ctx.clip();
-  // }
+  // 如果元素有子元素，设置裁剪区域
+  if (element.children && element.children.length > 0) {
+      const bbox = element.getBBox();
+      ctx.beginPath();
+      ctx.rect(bbox.x, bbox.y, bbox.width, bbox.height);
+      ctx.clip();
+  }
 
   // 抗锯齿
   const smooth = zoom <= 1;
 
-  if(element.children && element.children.length > 0){
-    for (const el of element.children ) {
-      this.renderElement(el, ctx, zoom);
-  }
-  }
-    if(element.renderFillAndStrokeTexture){
-      element.renderFillAndStrokeTexture(ctx, smooth);
-    }else{
-      // this.renderFillAndStrokeTextureChild(element,ctx, smooth)
-    }
+  // if(element.children && element.children.length > 0){
+  //   for (const el of element.children ) {
+  //     this.renderElement(el, ctx, zoom);
+  // }
+  // }
+  //   if(element.renderFillAndStrokeTexture){
+  element.renderFillAndStrokeTexture(ctx, smooth);
+    // }else{
+    //   // this.renderFillAndStrokeTextureChild(element,ctx, smooth)
+    // }
   ctx.restore();
   
 }
+
 
   /**
    * 光标是否落在旋转控制点上
