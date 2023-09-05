@@ -2,13 +2,16 @@
   .locale-selector {
     margin-right: 4px;
     padding: 2px;
-
+    background-color: #7F39FB;
     font-size: 0;
     cursor: pointer;
+    div,span{
+      color: #fff;
+    }
 
     &:hover,
     &.active {
-      background-color: #f5f5f5;
+      background-color: #7F39FB;
     }
   }
 
@@ -25,13 +28,13 @@
       display: block;
       padding: 4px 16px;
       font-size: 14px;
-      color: #333;
+      color: #7F39FB;
       text-decoration: none;
 
       cursor: pointer;
       &:hover {
         color: #fff;
-        background-color: #0f8fff;
+        background-color: #7F39FB;
       }
     }
   }

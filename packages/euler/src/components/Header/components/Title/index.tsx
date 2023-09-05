@@ -6,7 +6,7 @@ const Title: FC = () => {
   return (
     <div className="euler-header-title">
       <GithubOutlined />
-      <a href="https://github.com/F-star/euler" target="_blank">
+      <a href="#" target="_blank">
         euler
       </a>
     </div>

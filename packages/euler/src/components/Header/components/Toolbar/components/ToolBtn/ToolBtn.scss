@@ -34,13 +34,13 @@
     }
 
     &:hover {
-      background-color: #f2f2f2;
+      background-color: #7F39FB;
       .tooltip {
         display: block;
       }
     }
     &.active {
-      background-color: #0f8fff;
+      background-color: #7F39FB;
       color: #fff;
     }
   }
