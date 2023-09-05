@@ -456,6 +456,7 @@ export class SceneGraph {
      * }
      */
   }
+  
 
   on(eventName: 'render', handler: () => void) {
     this.eventEmitter.on(eventName, handler);
