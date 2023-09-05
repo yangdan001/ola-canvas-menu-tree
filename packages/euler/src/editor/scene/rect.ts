@@ -20,6 +20,8 @@ export class Rect extends Graph {
   }
 
   renderFillAndStrokeTexture(ctx: CanvasRenderingContext2D, smooth: boolean) {
+    /* eslint-disable-next-line no-debugger */
+    // debugger
     if (this.rotation) {
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;

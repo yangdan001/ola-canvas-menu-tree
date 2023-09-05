@@ -625,6 +625,30 @@ getPointElements(point: IPoint): Graph[] {
 
 
 
+  // addGraphsByStr(str: string) {
+  //   const ctorMap = {
+  //     [GraphType.Graph]: Graph,
+  //     [GraphType.Rect]: Rect,
+  //     [GraphType.Ellipse]: Ellipse,
+  //     [GraphType.Line]: Line,
+  //     [GraphType.Text]: TextGraph,
+  //   };
+
+  //   const data: GraphAttrs[] = JSON.parse(str);
+  //   const newChildren = data.map((attrs) => {
+  //     const type = attrs.type;
+  //     const Ctor = ctorMap[type!];
+  //     if (!Ctor) {
+  //       throw new Error('found wrong type of graph');
+  //     }
+
+  //     return new Ctor(attrs as any);
+  //   });
+
+  //   this.children.push(...newChildren);
+  //   return newChildren;
+  // }
+
   addGraphsByStr(str: string) {
     const ctorMap = {
       [GraphType.Graph]: Graph,
@@ -633,32 +657,32 @@ getPointElements(point: IPoint): Graph[] {
       [GraphType.Line]: Line,
       [GraphType.Text]: TextGraph,
     };
-
-    const data: GraphAttrs[] = JSON.parse(str);
-    const newChildren = data.map((attrs) => {
-      const type = attrs.type;
-      const Ctor = ctorMap[type!];
-      //todo需要写个递归让attrs.children的object类型变成Graph类型
-      // if (attrs.children && attrs.children.length > 0) {
-      //   attrs.children.forEach((child) => {
-      //     const type = child.type;
-      //     const Ctor = ctorMap[type!];
-      //     if (!Ctor) {
-      //       throw new Error('found wrong type of graph');
-      //     }
-      //     return new Ctor(attrs as any);
-      //   })
-      // }
+  
+    const parseGraph = (attrs: any) => {
+      const type = attrs.type as GraphType; // 使用类型断言
+      const Ctor = ctorMap[type];
       if (!Ctor) {
-        throw new Error('found wrong type of graph');
+        throw new Error('Found wrong type of graph');
       }
-
-      return new Ctor(attrs as any);
-    });
-
+    
+      const graph = new Ctor(attrs);
+    
+      if (attrs.children && Array.isArray(attrs.children)) {
+        graph.children = [];
+        const childGraphs = attrs.children.map((child: any) => parseGraph(child));
+        graph.children.push(...childGraphs);
+      }
+    
+      return graph;
+    };
+  
+    const data: GraphAttrs[] = JSON.parse(str);
+    const newChildren: Graph[] = data.map((attrs) => parseGraph(attrs));
+  
     this.children.push(...newChildren);
     return newChildren;
   }
+  
 
   load(str: string) {
     this.children = [];
