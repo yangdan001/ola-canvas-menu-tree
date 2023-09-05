@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Tree } from 'antd';
 import { EditorContext } from '../../context';
 import { addEventEmitter } from '../../events';//事件中心
+import './index.scss';
+
 
 // const defaultData = [
 //   {
@@ -297,7 +299,7 @@ const TreeDataSource=(arr)=>{
   return (
     <Tree
       className="draggable-tree"
-      style={{ width: 240 }}
+      rootStyle={{ width: 240, background:"000", color:'#fff'}}
       defaultExpandAll={true}
       selectedKeys={selectedKeys}
       // defaultSelectedKeys={selectedKeys}

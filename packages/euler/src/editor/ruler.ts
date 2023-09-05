@@ -48,7 +48,8 @@ class Ruler {
     ctx.fillStyle = setting.get('rulerBgColor');
     ctx.fillRect(0, 0, viewportWidth, setting.get('rulerWidth'));
     ctx.fillRect(0, 0, setting.get('rulerWidth'), viewportHeight);
-
+    //  取消绘制坐标轴
+    return
     this.drawXRuler();
     this.drawYRuler();
 

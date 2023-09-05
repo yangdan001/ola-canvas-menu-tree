@@ -105,7 +105,7 @@ export const InfoPanel: FC = () => {
             </div>
           </TabPane>
           <TabPane key="2" tab="Tab 2"  disabled={!isHide}> 
-            <div className="right-tab" onKeyDown={(e) => e.stopPropagation()} style={{overflowY:'scroll',height:'500px'}}>
+            <div className="right-tab" onKeyDown={(e) => e.stopPropagation()} style={{overflowY:'scroll',height:'calc(100vh - 150px)'}}>
             {type === PanelType.SelectedElements && (
                 <>
               <Generate/>

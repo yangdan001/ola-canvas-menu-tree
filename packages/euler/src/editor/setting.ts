@@ -9,7 +9,8 @@ export class Setting {
   private eventEmitter = new EventEmitter<Events>();
   private value = {
     /***** texture ****/
-    canvasBgColor: '#f4f4f4',
+    // canvasBgColor: '#f4f4f4', 
+    canvasBgColor: '#202125', //canvas 背景色
     firstStroke: {
       type: TextureType.Solid,
       attrs: { r: 0, g: 0, b: 0, a: 1 },
@@ -18,14 +19,15 @@ export class Setting {
 
     firstFill: {
       type: TextureType.Solid,
-      attrs: { r: 217, g: 217, b: 217, a: 1 },
+      // attrs: { r: 217, g: 217, b: 217, a: 1 },//灰色图形背景
+      attrs: { r: 0, g: 0, b: 0, a: 1 }, //黑色图形背景
     } as ITexture,
 
     addedTexture: {
       type: TextureType.Solid,
       attrs: { r: 0, g: 0, b: 0, a: 0.2 },
     } as ITexture,
-
+    //选中后的高亮色
     guideBBoxStroke: '#1592fe',
     selectionStroke: '#0f8eff',
     selectionFill: '#0f8eff33',
@@ -63,9 +65,12 @@ export class Setting {
     /**** 标尺相关 ****/
     enableRuler: true,
     minStepInViewport: 50, // 视口区域下的最小步长
-    rulerBgColor: '#fff',
-    rulerStroke: '#e6e6e6',
-    rulerMarkStroke: '#c1c1c1',
+    // rulerBgColor: '#fff',
+    rulerBgColor: '#202125',
+    // rulerStroke: '#e6e6e6',
+    rulerStroke: '#fff',
+    // rulerMarkStroke: '#c1c1c1',
+    rulerMarkStroke: '#fff',
     rulerWidth: 20, // 宽度
     rulerMarkSize: 4, // 刻度高度
 

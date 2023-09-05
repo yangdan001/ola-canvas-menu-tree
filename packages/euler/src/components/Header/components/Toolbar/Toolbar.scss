@@ -2,8 +2,14 @@
   .euler-tool-bar {
     display: flex;
     align-items: center;
-
     margin-left: 24px;
     height: 48px;
+    svg{
+      color: #fff;
+    }
+    svg:hover{
+      color: #000;
+    }
+
   }
 }
