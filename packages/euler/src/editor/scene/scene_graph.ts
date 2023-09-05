@@ -623,7 +623,7 @@ getPointElements(point: IPoint): Graph[] {
 }
 
 
-  
+
 
   addGraphsByStr(str: string) {
     const ctorMap = {
@@ -638,7 +638,17 @@ getPointElements(point: IPoint): Graph[] {
     const newChildren = data.map((attrs) => {
       const type = attrs.type;
       const Ctor = ctorMap[type!];
-
+      //todo需要写个递归让attrs.children的object类型变成Graph类型
+      // if (attrs.children && attrs.children.length > 0) {
+      //   attrs.children.forEach((child) => {
+      //     const type = child.type;
+      //     const Ctor = ctorMap[type!];
+      //     if (!Ctor) {
+      //       throw new Error('found wrong type of graph');
+      //     }
+      //     return new Ctor(attrs as any);
+      //   })
+      // }
       if (!Ctor) {
         throw new Error('found wrong type of graph');
       }

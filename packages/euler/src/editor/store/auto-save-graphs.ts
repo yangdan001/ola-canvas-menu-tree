@@ -19,9 +19,11 @@ export class AutoSaveGraphs {
     this.editor.commandManager.off('change', this.listener);
   }
   save() {
+    //画布数据存的位置
     localStorage.setItem(STORE_KEY, this.editor.sceneGraph.toJSON());
   }
   load() {
+    //画布数据取的位置
     const dataStr = localStorage.getItem(STORE_KEY);
     if (!dataStr) return null;
     const data = JSON.parse(dataStr) as IEditorPaperData;

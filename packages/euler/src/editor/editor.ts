@@ -94,6 +94,9 @@ export class Editor {
 
     this.autoSaveGraphs = new AutoSaveGraphs(this);
     const data = this.autoSaveGraphs.load();
+    /* eslint-disable-next-line no-debugger */
+    debugger
+    //todo的入口
     if (data) {
       this.sceneGraph.load(data.data);
       this.paperId = data.paperId;
