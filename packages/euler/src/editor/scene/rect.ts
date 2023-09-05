@@ -29,7 +29,8 @@ export class Rect extends Graph {
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
     ctx.beginPath();
-    const textY = Number(this.y)-2
+    const textY = Number(this.y)-2;
+    console.log('this.objectName',this.objectName);
     ctx.fillText(this.objectName, this.x, textY);
     ctx.rect(this.x, this.y, this.width, this.height);
     for (const texture of this.fill) {
