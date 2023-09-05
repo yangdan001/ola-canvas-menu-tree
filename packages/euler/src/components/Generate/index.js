@@ -36,6 +36,7 @@ import fetchApi from '../../../src/services/fetch';
 const socketBaseURL = fetchApi.socketBaseURL;
 const { Option } = Select;
 const { TextArea } = Input;
+let globalData = {}
 // 然后在需要使用这些图标的地方使用它们
 // const iconEdit = <EditOutlined />;
 // const iconDown = <DownOutlined />;
@@ -291,7 +292,7 @@ const Generate = () => {
         });
         return false;
       } else {
-        if (RES.params.task_id) {
+        if (RES.params.task_id && RES.params.status!='FAILED') {
           const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
           const socket = new WebSocket(socketUrl);
           socket.onopen = () => {
@@ -301,14 +302,15 @@ const Generate = () => {
             console.log('触发', JSON.parse(event.data));
             if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
               event && setTextToImageDataRes(JSON.parse(event.data))
+              globalData = JSON.parse(event.data) 
             }
           };
           socket.onclose = async (event) => {
             console.log('close');
-            console.log(toJS(textToImageDataRes));
-            if (toJS(textToImageDataRes) && toJS(textToImageDataRes).status === 'COMPLETED') {
+            console.log(globalData);
+            if (globalData && globalData.status === 'COMPLETED') {
               const res = await getRecord(RES.params.task_id);
-              if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+              if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
                 let fileUrl = res.params.images[0]
                 setImgUrl(fileUrl)
                 localStorage.setItem('fileUrl', fileUrl)
@@ -359,14 +361,14 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
             console.log('触发', JSON.parse(event.data));
               if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
                 event && setImageToImageDataRes(JSON.parse(event.data))
+                globalData = JSON.parse(event.data)
               }
           };
           socket.onclose = async (event) => {
-            console.log(toJS(imageToImageDataRes),'000000');
-            if (toJS(imageToImageDataRes) && toJS(imageToImageDataRes).status === 'COMPLETED') {
+            console.log(globalData,'000000');
+            if (globalData && globalData.status === 'COMPLETED') {
               const res = await getRecord(RES.params.task_id);
-              let tempImagesArr = [];
-              if (res && res.code === 0 && res.params && res.params.images && res.params.images.length !== 0) {
+              if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
                 console.log(res.params.images[0],'res.params.images[0]')
                 let fileUrl = res.params.images[0]
                 setImgUrl(fileUrl)
@@ -413,8 +415,7 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
     let selectType = localStorage.getItem("selectType")
     try {
       //校验图生图是否上传了图片
-      /* eslint-disable-next-line no-debugger */
-      // debugger
+
       let controlnetFormValue = [];
       controlnetFormValue.push({
         model_name: allValue.controlnet,
@@ -458,7 +459,9 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
         }
       }
       let controlnetFiles = []
-      controlnetFiles.push(imgData)
+      if(Object.keys(imgData).length !== 0) {
+        controlnetFiles.push(imgData)
+      }
       if (selectType === '1') {
         if (allValue.controlnet) {
           if (fileObj && fileObj.name) {
