@@ -28,6 +28,7 @@ export class Line extends Graph {
       rotateInCanvas(ctx, rotation, cx, cy);
     }
     const textY = Number(y)-2
+    ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, x, textY);
     ctx.beginPath();
     ctx.moveTo(x, y);

@@ -30,6 +30,7 @@ export class Rect extends Graph {
     }
     ctx.beginPath();
     const textY = Number(this.y)-2
+    ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
     ctx.rect(this.x, this.y, this.width, this.height);
     for (const texture of this.fill) {

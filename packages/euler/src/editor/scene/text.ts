@@ -56,6 +56,7 @@ export class TextGraph extends Graph {
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
     const textY = Number(this.y)-2
+    ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
     ctx.beginPath();
     ctx.textBaseline = 'top';

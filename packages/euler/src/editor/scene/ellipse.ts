@@ -23,6 +23,7 @@ export class Ellipse extends Graph {
     }
     const textY = Number(cy)-this.height / 2
     const textX = Number(cx)-this.width / 2
+    ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, textX, textY);
     ctx.beginPath();
     ctx.ellipse(cx, cy, this.width / 2, this.height / 2, 0, 0, DOUBLE_PI);

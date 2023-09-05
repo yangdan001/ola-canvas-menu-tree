@@ -293,6 +293,7 @@ renderFillAndStrokeTextureChild(element: Graph, ctx: CanvasRenderingContext2D, s
   }
   ctx.beginPath();
   const textY = Number(element.y)-2
+  ctx.fillStyle = '#7F39FB';
   ctx.fillText(element.objectName, element.x, textY);
   ctx.rect(element.x, element.y, element.width, element.height);
   for (const texture of element.fill) {
