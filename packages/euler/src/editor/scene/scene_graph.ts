@@ -294,7 +294,7 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
       const bbox = element.getBBox();
       ctx.beginPath();
       ctx.rect(bbox.x, bbox.y, bbox.width, bbox.height);
-      ctx.clip();
+      // ctx.clip();
   }
 
   // 抗锯齿
