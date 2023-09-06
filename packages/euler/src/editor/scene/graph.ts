@@ -10,6 +10,7 @@ import {
 } from '../../utils/graphics';
 import { transformRotate } from '../../utils/transform';
 import { DEFAULT_IMAGE, ITexture, TextureImage } from '../texture';
+import { ImgManager } from '../Img_manager';
 
 export interface GraphAttrs {
   type?: GraphType;
@@ -299,6 +300,8 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ctx: CanvasRenderingContext2D,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    imgManager: ImgManager,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     smooth: boolean,
   ) {
     throw new Error('Method not implemented.');
@@ -309,28 +312,31 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     throw new Error('Method not implemented.');
   }
 
-  fillImage(
+  protected fillImage(
     ctx: CanvasRenderingContext2D,
     texture: TextureImage,
+    imgManager: ImgManager,
     smooth: boolean,
   ) {
     const src = texture.attrs.src;
     const width = this.width;
     const height = this.height;
-    let img: CanvasImageSource;
+    let img: CanvasImageSource | undefined = undefined;
 
     // anti-aliasing
     ctx.imageSmoothingEnabled = smooth;
 
     if (src) {
-      img = new Image();
-      img.src = src;
+      imgManager.addImg(src);
+      img = imgManager.getImg(src);
       // TODO: rerender when image loaded, but notice endless loop
     } else {
       ctx.imageSmoothingEnabled = false;
       img = DEFAULT_IMAGE;
     }
-
+    if (!img) {
+      return;
+    }
     // reference: https://mp.weixin.qq.com/s/TSpZv_0VJtxPTCCzEqDl8Q
     const scale = calcCoverScale(img.width, img.height, width, height);
 

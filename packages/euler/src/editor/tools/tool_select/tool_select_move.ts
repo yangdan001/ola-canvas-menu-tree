@@ -153,8 +153,9 @@ export class SelectMoveTool implements IBaseTool {
 }
 
   afterEnd() {
+    /* eslint-disable-next-line no-debugger */
+    debugger
     this.dragPoint = null;
-
     this.editor.sceneGraph.showOutline = true;
     this.editor.refLine.clear();
     this.editor.sceneGraph.render();

@@ -28,7 +28,7 @@ export class Setting {
       attrs: { r: 0, g: 0, b: 0, a: 0.2 },
     } as ITexture,
     //选中后的高亮色
-    guideBBoxStroke: '#1592fe',
+    guideBBoxStroke: '#7F39FB',
     selectionStroke: '#0f8eff',
     selectionFill: '#0f8eff33',
     selectionMode: 'intersect' as 'intersect' | 'contain',
@@ -37,7 +37,7 @@ export class Setting {
     selectionHitPadding: 4,
 
     /******** transform ********/
-    handleRotationStroke: '#1592fe',
+    handleRotationStroke: '#7F39FB',
     handleRotationFill: '#fff',
     handleStrokeWidth: 2,
     handleStrokePadding: 4,

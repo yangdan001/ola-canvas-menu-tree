@@ -18,6 +18,7 @@ import { TextEditor } from './text/text_editor';
 import { RefLine } from './ref_line';
 import { ClipboardManager } from './clipboard';
 import { KeyBindingManager } from './key_binding_manager';
+import { ImgManager } from './Img_manager';
 
 interface IEditorOptions {
   containerElement: HTMLDivElement;
@@ -44,6 +45,7 @@ export class Editor {
   toolManager: ToolManager;
   commandManager: CommandManager;
   zoomManager: ZoomManager;
+  imgManager: ImgManager;
 
   keybindingManager: KeyBindingManager;
   hostEventManager: HostEventManager;
@@ -80,6 +82,7 @@ export class Editor {
     this.toolManager = new ToolManager(this);
     this.commandManager = new CommandManager(this);
     this.zoomManager = new ZoomManager(this);
+    this.imgManager = new ImgManager();
 
     this.selectedElements = new SelectedElements(this);
     this.ruler = new Ruler(this);
@@ -93,9 +96,14 @@ export class Editor {
     this.clipboard.bindEvents();
 
     this.autoSaveGraphs = new AutoSaveGraphs(this);
+
+    this.imgManager.eventEmitter.on('added', () => {
+      this.sceneGraph.render();
+    });
+
     const data = this.autoSaveGraphs.load();
     /* eslint-disable-next-line no-debugger */
-    debugger
+    // debugger
     //todo的入口
     if (data) {
       this.sceneGraph.load(data.data);

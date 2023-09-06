@@ -187,6 +187,8 @@ export abstract class DrawGraphTool implements ITool {
   }
 
   afterEnd() {
+    /* eslint-disable-next-line no-debugger */
+    // debugger
     this.isDragging = false;
     this.editor.hostEventManager.enableDelete();
     this.editor.hostEventManager.enableContextmenu();

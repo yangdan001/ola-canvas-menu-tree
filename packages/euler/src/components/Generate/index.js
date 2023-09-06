@@ -162,10 +162,10 @@ const Generate = () => {
       /**
        * 第一步：获取到选中的元素信息 如id、坐标、大小、是否为原形等；
        * */
+      /* eslint-disable-next-line no-debugger */
+          // debugger
       const sceneGraph = editor.sceneGraph;
       const selectedElements = editor.selectedElements;
-      let width = selectedElements.items[0].width
-      let height = selectedElements.items[0].height
       /**
        * 第2步：将图片填充在原来元素上，形状大小要同原来的元素；
        * */
@@ -173,8 +173,15 @@ const Generate = () => {
       image.src = imgUrl // 图片的路径
       // // 在图片加载完成后执行绘制操作
       image.onload = function() {
-          selectedElements.items[0].fill[0].type = 'Image'
-          selectedElements.items[0].fill[0].attrs = {src:imgUrl,opacity:0.7}
+        editor.sceneGraph.children.forEach((item)=>{
+          if(item.objectName == selectedElements.items[0].objectName){
+            item.fill[0].type = 'Image'
+            item.fill[0].attrs = {src:imgUrl,opacity:0.7}
+          }
+        })
+        console.log(editor.sceneGraph.children,'editor.sceneGraph.children2222222')
+          // selectedElements.items[0].fill[0].type = 'Image'
+          // selectedElements.items[0].fill[0].attrs = {src:imgUrl,opacity:0.7}
           // 重新渲染右侧画布
           editor.sceneGraph.render();
       };
@@ -495,11 +502,21 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
     let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
     setImgData(info.file.originFileObj)
     setImgUrl(fileUrl)
+    //读取base64图
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const base64Data = event.target.result.split(',')[1]; // 获取 Base64 数据部分
+      console.log(base64Data,'base64Data');
+      // setImgUrl(base64Data)
+      // 这里你可以将 base64Data 用于其他操作，或者将其传递给其他函数
+    };
+    reader.readAsDataURL(info.file.originFileObj);
     // localStorage.setItem('fileUrl',fileUrl)
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList, 'uploading');
     }
     if (info.file.status === 'done') {
+      console.log(info.file, info.fileList, 'done');
       // let cvs = document.getElementById('cvs');
       // var ctx = cvs!.getContext('2d');
       // let fileUrl = window.URL.createObjectURL(info.file.originFileObj!);
@@ -510,9 +527,9 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
       //   ctx.drawImage(img, 0, 0);//this即是imgObj,保持图片的原始大小：470*480
     }
     
-    else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
+    // else if (info.file.status === 'error') {
+    //   message.error(`${info.file.name} file upload failed.`);
+    // }
   }
 
   return (

@@ -77,6 +77,8 @@ export class SceneGraph {
     return result;
 }
 addItems(elements: Graph[], parent?: Graph, idx?: number) {
+  /* eslint-disable-next-line no-debugger */
+  // debugger
   if (parent) {
     // 如果有指定父元素，将元素添加为父元素的子元素
     if (idx === undefined) {
@@ -170,7 +172,7 @@ removeItems(elements: Graph[]) {
   }
      
   render = rafThrottle(() => {
-    console.log('zoule')
+    console.log('zoule',this.editor)
     // 获取视口区域
     const {
       viewportManager,
@@ -205,7 +207,8 @@ removeItems(elements: Graph[]) {
     const dy = -viewport.y;
     ctx.scale(dpr * zoom, dpr * zoom);
     ctx.translate(dx, dy);
-  
+
+    
     for (const element of visibleElements) {
         this.renderElement(element, ctx, zoom);
     }
@@ -283,49 +286,6 @@ findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements
   }
 }
 
-
-renderFillAndStrokeTextureChild(element: Graph, ctx: CanvasRenderingContext2D, smooth: boolean) {
-  if (element.rotation) {
-    const cx = element.x + element.width / 2;
-    const cy = element.y + element.height / 2;
-
-    rotateInCanvas(ctx, element.rotation, cx, cy);
-  }
-  ctx.beginPath();
-  const textY = Number(element.y)-2
-  ctx.fillStyle = '#7F39FB';
-  ctx.fillText(element.objectName, element.x, textY);
-  ctx.rect(element.x, element.y, element.width, element.height);
-  for (const texture of element.fill) {
-    switch (texture.type) {
-      case TextureType.Solid: {
-        ctx.fillStyle = parseRGBAStr(texture.attrs);
-        ctx.fill();
-        break;
-      }
-      case TextureType.Image: {
-        'fillImage' in element && element.fillImage(ctx, texture, smooth);
-      }
-    }
-  }
-  if (element.strokeWidth) {
-    ctx.lineWidth = element.strokeWidth;
-    for (const texture of element.stroke) {
-      switch (texture.type) {
-        case TextureType.Solid: {
-          ctx.strokeStyle = parseRGBAStr(texture.attrs);
-          ctx.stroke();
-          break;
-        }
-        case TextureType.Image: {
-          // TODO: stroke image
-        }
-      }
-    }
-  }
-  ctx.closePath();   
-}
-
 renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
   ctx.save();
   
@@ -339,17 +299,8 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
 
   // 抗锯齿
   const smooth = zoom <= 1;
-
-  // if(element.children && element.children.length > 0){
-  //   for (const el of element.children ) {
-  //     this.renderElement(el, ctx, zoom);
-  // }
-  // }
-  //   if(element.renderFillAndStrokeTexture){
-  element.renderFillAndStrokeTexture(ctx, smooth);
-    // }else{
-    //   // this.renderFillAndStrokeTextureChild(element,ctx, smooth)
-    // }
+  const imgManager = this.editor.imgManager;
+  element.renderFillAndStrokeTexture(ctx, imgManager, smooth);
   ctx.restore();
   
 }
@@ -452,6 +403,8 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
     return isPointInRect(point, composedBBox);
   }
   getTopHitElement(x: number, y: number, excludeElement?: Graph): Graph | null {
+    /* eslint-disable-next-line no-debugger */
+  // debugger
     const allElementsWithLevel = this.getAllElements();
     allElementsWithLevel.sort((a, b) => {
         // 根据层级和z方向排序
