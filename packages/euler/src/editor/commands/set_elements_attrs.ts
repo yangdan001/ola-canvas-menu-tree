@@ -29,6 +29,8 @@ export class SetElementsAttrs implements ICommand {
     }
   }
   redo() {
+     /* eslint-disable-next-line no-debugger */
+    //  debugger
     const { elements, attrs } = this;
     for (let i = 0, len = this.elements.length; i < len; i++) {
       if (Array.isArray(attrs)) {
@@ -39,6 +41,8 @@ export class SetElementsAttrs implements ICommand {
     }
   }
   undo() {
+     /* eslint-disable-next-line no-debugger */
+    //  debugger
     const { elements, prevAttrs } = this;
     for (let i = 0, len = this.elements.length; i < len; i++) {
       elements[i].setAttrs(prevAttrs[i]);

@@ -25,6 +25,7 @@ export interface GraphAttrs {
   stroke?: ITexture[];
   strokeWidth?: number;
   visible?: boolean;
+  disabled?: boolean;
   // transform 相关
   rotation?: number;
   children?: Graph[];
@@ -47,13 +48,13 @@ export class Graph {
   stroke: ITexture[] = [];
   strokeWidth?: number;
   visible?: boolean = true; 
+  disabled?: boolean = false; 
   // transform
   rotation?: number = 0;
   zIndex?: number;
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
-
     if (options.objectName) {
       this.objectName = options.objectName;
       objectNameGenerator.setMaxIdx(options.objectName);
@@ -303,6 +304,8 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     imgManager: ImgManager,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     smooth: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    canvas: HTMLCanvasElement
   ) {
     throw new Error('Method not implemented.');
   }

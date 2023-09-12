@@ -4,17 +4,17 @@ import CryptoJS from 'crypto-js';
 import { notification, message } from 'antd';
 import { signup, login, getUserInfo } from '../services/api';
 // console.log(process.env.VITE_API_URL,'process.env.VITE_API_URL');
-console.log('fetch----process.env', process.env) // > prod
+// console.log('fetch----process.env', process.env) // > prod
 // const baseUrl = process.env.REACT_APP_ENV === "production" ? process.env.REACT_APP_BASE_URL: "http://test.com";
 // console.log(baseUrl,'baseUrl')
 const SECRET_KEY = 'my_key';
 // // 访问 NODE_ENV 环境变量
-// console.log(import.meta,'环境变量');
+console.log(process.env.NODE_ENV,'环境变量');
   let BASE_URL='http://13.212.144.219:8907'
   let CREATE_MODAL_BASE_URL = 'http://13.250.52.38:8885'
   let SOCKET_BASE_URL= 'ws://13.212.144.219:8907'
   let CREATE_MODAL_SOCKET_BASE_URL= 'ws://13.250.52.38:8885'
-if (process.env.NODE_ENV == "production") {
+if (process.env.REACT_APP_ENV == "production") {
   BASE_URL= 'http://13.212.236.53:8906'
   CREATE_MODAL_BASE_URL= 'http://13.250.52.38:8870'
   SOCKET_BASE_URL='http://13.212.236.53:8906'
@@ -99,8 +99,6 @@ const fetchWrapper = {
     skipTokenCheck = true, // 添加一个新参数skipTokenCheck，默认值为false
     useTempUrl = false, // 新增参数，用于判断是否使用createModalBaseURL，默认值为false
   ) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     // const url = `${this.baseURL}${endpoint}`;
     const url = useTempUrl ? `${this.createModalBaseURL}${endpoint}` : `${this.baseURL}${endpoint}`; // 根据useTempUrl判断使用哪个URL
     const token = localStorage.getItem('token');
@@ -299,8 +297,6 @@ const fetchWrapper = {
 };
 
 fetchWrapper.get = function (endpoint, customHeaders, skipTokenCheck, useTempUrl = false) {
-  /* eslint-disable-next-line no-debugger */
-  // debugger
   return this._request('GET', endpoint, null, customHeaders, null, null, skipTokenCheck, useTempUrl);
 };
 fetchWrapper.post = function (endpoint, data, customHeaders, skipTokenCheck, useTempUrl = false) {

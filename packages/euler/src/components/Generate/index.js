@@ -31,6 +31,7 @@ import {
 import textToImageStore from '../../../src/store/textToImageStore';
 import { toJS } from "mobx";
 import { EditorContext } from '../../context';
+import { SetElementsAttrs } from '../../editor/commands/set_elements_attrs';
 import './index.scss';
 import fetchApi from '../../../src/services/fetch';
 const socketBaseURL = fetchApi.socketBaseURL;
@@ -107,23 +108,43 @@ const Generate = () => {
           setconfigOptions(config);
           localStorage.setItem('config', JSON.stringify(config));
         }
-        //表单默认值
-        form.setFieldsValue({
-          base_model_name: 'Base-V1-5.ckpt',
-          vae_model_name: 'disabled.pt',
-          positive_prompt: "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
-          negative_prompt: "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face",
-          number: 1,
-          num_inference_steps: "60",
-          cfg: "9.0",
-          scheduler_name: 'Euler_a',
-          width: "512",
-          height: "768",
-          seed: "1234",
-          denoise: "0.75", //去噪强度 Denoising Strength
-          widthHeight: '1'
-        });
-
+        let formData = localStorage.getItem('formData')
+        console.log(formData,'formData8888')
+        if(formData && formData.length>0){
+          //表单默认值
+          form.setFieldsValue({
+            base_model_name: formData.base_model_name,
+            vae_model_name: formData.vae_model_name,
+            positive_prompt: formData.positive_prompt,
+            negative_prompt: formData.negative_prompt,
+            number: formData.number,
+            num_inference_steps: formData.num_inference_steps,
+            cfg: formData.cfg,
+            scheduler_name: formData.scheduler_name,
+            width: formData.width,
+            height: formData.height,
+            seed: formData.seed,
+            denoise: formData.denoise, //去噪强度 Denoising Strength
+            widthHeight: formData.widthHeight
+          });
+        }else{
+          //表单默认值
+          form.setFieldsValue({
+            base_model_name: 'Base-V1-5.ckpt',
+            vae_model_name: 'disabled.pt',
+            positive_prompt: "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
+            negative_prompt: "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face",
+            number: 1,
+            num_inference_steps: "60",
+            cfg: "9.0",
+            scheduler_name: 'Euler_a',
+            width: "512",
+            height: "768",
+            seed: "1234",
+            denoise: "0.75", //去噪强度 Denoising Strength
+            widthHeight: '1'
+          });
+        }
         let allValue = await form.getFieldsValue(true);
         let value = await form.validateFields();
         //基础模型,Vae模型中的提示 
@@ -166,6 +187,7 @@ const Generate = () => {
           // debugger
       const sceneGraph = editor.sceneGraph;
       const selectedElements = editor.selectedElements;
+      const prevStates = selectedElements.items[0].fill[0].attrs
       /**
        * 第2步：将图片填充在原来元素上，形状大小要同原来的元素；
        * */
@@ -173,15 +195,23 @@ const Generate = () => {
       image.src = imgUrl // 图片的路径
       // // 在图片加载完成后执行绘制操作
       image.onload = function() {
-        editor.sceneGraph.children.forEach((item)=>{
-          if(item.objectName == selectedElements.items[0].objectName){
-            item.fill[0].type = 'Image'
-            item.fill[0].attrs = {src:imgUrl,opacity:0.7}
-          }
-        })
-        console.log(editor.sceneGraph.children,'editor.sceneGraph.children2222222')
-          // selectedElements.items[0].fill[0].type = 'Image'
-          // selectedElements.items[0].fill[0].attrs = {src:imgUrl,opacity:0.7}
+        // editor.sceneGraph.children.forEach((item)=>{
+        //   if(item.objectName == selectedElements.items[0].objectName){
+        //     item.fill[0].type = 'Image'
+        //     item.fill[0].attrs = {src:imgUrl,opacity:0.7}
+        //   }
+        // })
+        selectedElements.items[0].fill[0].type = 'Image'
+        selectedElements.items[0].fill[0].attrs = {src:imgUrl,opacity:0.7}
+        const newStates = selectedElements.items[0].fill[0].attrs
+        editor.commandManager.pushCommand(
+          new SetElementsAttrs(
+              'Update Type of Elements',
+              selectedElements.items[0],
+              newStates,
+              prevStates,
+          ),
+      );
           // 重新渲染右侧画布
           editor.sceneGraph.render();
       };
@@ -409,7 +439,16 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
   //表单提交逻辑
   const onFinish = _.debounce(async (values) => {
     let frameType = localStorage.getItem("frameType")
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
+    const selectedWidth = selectedElements.items[0].width
+    const selectedHeight = selectedElements.items[0].height
+    form.setFieldsValue({
+      width: selectedWidth,
+      height: selectedHeight,
+    })
     let allValue = await form.getFieldsValue(true);
+    localStorage.setItem('formData',allValue)
     if (fileObj && fileObj.name) {
       if (allValue.controlnet) {
         localStorage.setItem('selectType', '3');

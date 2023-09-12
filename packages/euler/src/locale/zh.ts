@@ -11,6 +11,7 @@ export const zh: typeof en = {
 
   'tool.select': '选择',
   'tool.rectangle': '矩形',
+  'tool.brush': '画笔',
   'tool.ellipse': '圆',
   'tool.line': '直线',
   'tool.text': '文字',

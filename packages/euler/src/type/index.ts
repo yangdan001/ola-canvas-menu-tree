@@ -5,6 +5,13 @@ export interface IRect {
   height: number;
 }
 
+export interface IBrush {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}
+
 export type IBox = IRect;
 
 export interface IBox2 {
@@ -46,6 +53,7 @@ export enum GraphType {
   Ellipse = 'Ellipse',
   Text = 'Text',
   Line = 'Line',
+  Brush = 'Brush',
 }
 
 /**

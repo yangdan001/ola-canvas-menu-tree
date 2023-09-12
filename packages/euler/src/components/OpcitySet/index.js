@@ -4,20 +4,53 @@ import {
   Divider
 } from 'antd';
 import './index.scss';
-
+import { EditorContext } from '../../context';
+import { SetElementsAttrs } from '../../editor/commands/set_elements_attrs';
 const OpcitySet = () => {
-  const [sliderVal, setSliderVal] = useState(0);
+  const editor = useContext(EditorContext);
+  const selectedElements = editor.selectedElements;
+  const defaultVal = selectedElements.items[0].fill[0].attrs.a
+  const [sliderVal, setSliderVal] = useState(defaultVal);
   // useEffect(() => {
     
   // }, []); 
 
   const onTransparency = (value) => {
     console.log('onChange: ', value);
+    const selectedElements = editor.selectedElements;
+    const prevStates = selectedElements.items[0].fill[0].attrs
+    selectedElements.items[0].fill[0].attrs.a = value
+    selectedElements.items[0].fill[0].attrs.opacity = value
+    const newStates = selectedElements.items[0].fill[0].attrs
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+          'Update Opacity of Elements',
+          selectedElements.items[0],
+          newStates,
+          prevStates,
+      ),
+  );
+    // 重新渲染右侧画布
+    editor.sceneGraph.render();
     setSliderVal(value)
   }
 
   const onAfterTransparency = (value) => {
-    console.log('onAfterChange: ', value);
+    const selectedElements = editor.selectedElements;
+    const prevStates = selectedElements.items[0].fill[0].attrs
+    selectedElements.items[0].fill[0].attrs.a = value
+    selectedElements.items[0].fill[0].attrs.opacity = value
+    const newStates = selectedElements.items[0].fill[0].attrs
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+          'Update Opacity of Elements',
+          selectedElements.items[0],
+          newStates,
+          prevStates,
+      ),
+  );
+    // 重新渲染右侧画布
+    editor.sceneGraph.render();
     setSliderVal(value)
   }
 
@@ -25,7 +58,7 @@ const OpcitySet = () => {
 return(
    <div className='slider-box'>
        <div className='slider-box-title'>Transparency {sliderVal}</div>
-        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onTransparency} onAfterChange={onAfterTransparency} />
+        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={sliderVal} onChange={onTransparency} onAfterChange={onAfterTransparency} />
         <Divider style={{marginTop: 10,marginBottom: 10,background:'#444'}}/>
    </div>
       )

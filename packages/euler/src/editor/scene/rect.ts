@@ -25,8 +25,6 @@ export class Rect extends Graph {
     imgManager: ImgManager,
     smooth: boolean,
   ) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     if (this.rotation) {
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;
@@ -38,8 +36,6 @@ export class Rect extends Graph {
     ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
     ctx.rect(this.x, this.y, this.width, this.height);
-     /* eslint-disable-next-line no-debugger */
-    //  debugger
     for (const texture of this.fill) {
       switch (texture.type) {
         case TextureType.Solid: {

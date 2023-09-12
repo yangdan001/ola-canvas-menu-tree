@@ -80,8 +80,7 @@ export class SelectTool implements ITool {
     this.currStrategy = null;
     this.topHitElementWhenStart = null;
     this.isDragHappened = false;
-    /* eslint-disable-next-line no-debugger */
-// debugger
+   
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
       return;
     }
@@ -179,7 +178,8 @@ export class SelectTool implements ITool {
     }
   }
   end(e: PointerEvent, isEnableDrag: boolean) {
-    
+     /* eslint-disable-next-line no-debugger */
+// debugger
     const currStrategy = this.currStrategy;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {

@@ -180,6 +180,8 @@ export abstract class DrawGraphTool implements ITool {
     }
 
     if (this.drawingGraph) {
+      /* eslint-disable-next-line no-debugger */
+      // debugger
       this.editor.commandManager.pushCommand(
         new AddShapeCommand(this.commandDesc, this.editor, [this.drawingGraph]),
       );

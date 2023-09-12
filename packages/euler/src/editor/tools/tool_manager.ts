@@ -4,6 +4,7 @@ import { Editor } from '../editor';
 import { DragCanvasTool } from './tool_drag_canvas';
 import { DrawEllipseTool } from './tool_draw_ellipse';
 import { DrawRectTool } from './tool_draw_rect';
+import { DrawBrushTool } from './tool_draw_brush';
 import { SelectTool } from './tool_select';
 import { ITool } from './type';
 import { DrawTextTool } from './tool_draw_text';
@@ -31,6 +32,7 @@ export class ToolManager {
   constructor(private editor: Editor) {
     this.registerToolAndHotKey(new SelectTool(editor));
     this.registerToolAndHotKey(new DrawRectTool(editor));
+    this.registerToolAndHotKey(new DrawBrushTool(editor));
     this.registerToolAndHotKey(new DrawEllipseTool(editor));
     this.registerToolAndHotKey(new DrawLineTool(editor));
     this.registerToolAndHotKey(new DrawTextTool(editor));

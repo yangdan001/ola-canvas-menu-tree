@@ -28,6 +28,7 @@ import { getDevicePixelRatio } from '../../utils/common';
 import { TextGraph } from './text';
 import { HALF_PI } from '../../constant';
 import { Line } from './line';
+import { Brush } from './brush';
 import { TextureType } from '../texture';
 import { parseRGBAStr } from '../../utils/color';
 interface Events {
@@ -210,7 +211,7 @@ removeItems(elements: Graph[]) {
 
     
     for (const element of visibleElements) {
-        this.renderElement(element, ctx, zoom);
+        this.renderElement(element, ctx, zoom, canvas);
     }
   
     /******************* 绘制辅助线层 ********************/
@@ -276,7 +277,9 @@ removeItems(elements: Graph[]) {
 
 findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements: Graph[]) {
   for (const element of elements) {
-    if(!("getBBox" in element)){ continue}
+    if(!(element !== null && element !== undefined && "getBBox" in element)){ continue}
+    /* eslint-disable-next-line no-debugger */
+    //  debugger
       if ( isRectIntersect(element.getBBox(), viewportBoxInScene)) {
           visibleElements.push(element);
           if (element.children && element.children.length > 0) {
@@ -286,7 +289,7 @@ findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements
   }
 }
 
-renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
+renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number,canvas: HTMLCanvasElement) {
   ctx.save();
   
   // 如果元素有子元素，设置裁剪区域
@@ -300,7 +303,7 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
   // 抗锯齿
   const smooth = zoom <= 1;
   const imgManager = this.editor.imgManager;
-  element.renderFillAndStrokeTexture(ctx, imgManager, smooth);
+  element.renderFillAndStrokeTexture(ctx, imgManager, smooth, canvas);
   ctx.restore();
   
 }
@@ -403,8 +406,6 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number) {
     return isPointInRect(point, composedBBox);
   }
   getTopHitElement(x: number, y: number, excludeElement?: Graph): Graph | null {
-    /* eslint-disable-next-line no-debugger */
-  // debugger
     const allElementsWithLevel = this.getAllElements();
     allElementsWithLevel.sort((a, b) => {
         // 根据层级和z方向排序
@@ -609,10 +610,13 @@ getPointElements(point: IPoint): Graph[] {
       [GraphType.Rect]: Rect,
       [GraphType.Ellipse]: Ellipse,
       [GraphType.Line]: Line,
+      [GraphType.Brush]: Brush,
       [GraphType.Text]: TextGraph,
     };
   
     const parseGraph = (attrs: any) => {
+      /* eslint-disable-next-line no-debugger */
+      // debugger
       const type = attrs.type as GraphType; // 使用类型断言
       const Ctor = ctorMap[type];
       if (!Ctor) {

@@ -3,114 +3,9 @@ import { Tree } from 'antd';
 import { EditorContext } from '../../context';
 import { addEventEmitter } from '../../events';//事件中心
 import './index.scss';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { SetElementsAttrs } from '../../editor/commands/set_elements_attrs';
 
-
-// const defaultData = [
-//   {
-//       "title": "标题-1",
-//       "key": "标题-1",
-//       "children": [
-//           {
-//               "title": "标题-1-0",
-//               "key": "标题-1-0",
-//               "children": [
-//                   {
-//                       "title": "标题-1-0-0",
-//                       "key": "标题-1-0-0"
-//                   },
-//                   {
-//                       "title": "标题-1-0-1",
-//                       "key": "标题-1-0-1"
-//                   },
-//                   {
-//                       "title": "标题-1-0-2",
-//                       "key": "标题-1-0-2"
-//                   }
-//               ]
-//           },
-//           {
-//               "title": "标题-1-1",
-//               "key": "标题-1-1",
-//               "children": [
-//                   {
-//                       "title": "标题-1-1-0",
-//                       "key": "标题-1-1-0"
-//                   },
-//                   {
-//                       "title": "标题-1-1-1",
-//                       "key": "标题-1-1-1"
-//                   },
-//                   {
-//                       "title": "标题-1-1-2",
-//                       "key": "标题-1-1-2"
-//                   }
-//               ]
-//           },
-//           {
-//               "title": "标题-1-2",
-//               "key": "标题-1-2"
-//           }
-//       ]
-//   },
-//   {
-//       "title": "标题-2",
-//       "key": "标题-2",
-//       "children": [
-//           {
-//               "title": "标题-2-0",
-//               "key": "标题-2-0",
-//               "children": [
-//                   {
-//                       "title": "标题-2-0-0",
-//                       "key": "标题-2-0-0"
-//                   },
-//                   {
-//                       "title": "标题-2-0-1",
-//                       "key": "标题-2-0-1"
-//                   },
-//                   {
-//                       "title": "标题-2-0-2",
-//                       "key": "标题-2-0-2"
-//                   }
-//               ]
-//           },
-//           {
-//               "title": "标题-2-1",
-//               "key": "标题-2-1",
-//               "children": [
-//                   {
-//                       "title": "标题-2-1-0",
-//                       "key": "标题-2-1-0"
-//                   },
-//                   {
-//                       "title": "标题-2-1-1",
-//                       "key": "标题-2-1-1"
-//                   },
-//                   {
-//                       "title": "标题-2-1-2",
-//                       "key": "标题-2-1-2"
-//                   }
-//               ]
-//           },
-//           {
-//               "title": "标题-2-2",
-//               "key": "标题-2-2"
-//           }
-//       ]
-//   },
-//   {
-//       "title": "标题-3",
-//       "key": "标题-3"
-//   },
-//   {
-//       "title": "标题-4",
-//       "key": "标题-4"
-//   },
-//   {
-//       "title": "标题-5",
-//       "key": "标题-5"
-//   }
-// ]
 let _index = 0
 const LeftTree = () => {
   const editor = useContext(EditorContext);
@@ -125,19 +20,28 @@ const LeftTree = () => {
       // editor.sceneGraph.render();
       // 监听右侧画布变化
       editor.sceneGraph.on('render', () => {
-        console.log('render')
         setGData(TreeDataSource(editor.sceneGraph.children));
-        // setSelectedKeys(Array.from(editor.selectedElements.getIdSet()))
       });
        //监听到画布变化
        addEventEmitter.on('changeCanvas', (obj)=>{
         /**
          * 监听到画布拖拽
          */ 
-        setGData(TreeDataSource(editor.sceneGraph.children))
-        console.log('gData',TreeDataSource(editor.sceneGraph.children));
-
-        /* eslint-disable-next-line no-debugger */
+        // if(obj.desc=='Update Children of Elements'){
+        //   setGData(TreeDataSource(obj.elements))
+        // }
+        if(obj.desc=='Update disabled of Elements'){
+          const changeData = editor.sceneGraph.children.map((item)=>{
+            if(item.id == obj.elements.id){
+              item.disabled = obj.elements.disabled
+              item.visible = obj.elements.visible
+            }
+            return item
+          })
+          setGData(TreeDataSource(changeData))
+        }
+        
+        
         // 根据字段判断为新增
         // if(obj.desc.split(' ')[0] == 'Add'){
         //   let appendobj = {
@@ -195,12 +99,15 @@ const removeItemByKey = (arr, keyToDelete) => {
 
 const TreeDataSource=(arr)=>{
   /* eslint-disable-next-line no-debugger */
+    // debugger
   if(!Array.isArray(arr)){ return; }
   _index = _index + 10 ;
     return  arr.map((v,i)=>{
         return {
             ...v,
             zIndex:_index,
+            disabled: v.disabled,
+            visible: v.visible,
             key:v.id,
             A:_index,
             title:v.objectName,
@@ -212,7 +119,6 @@ const TreeDataSource=(arr)=>{
 
   const onDragEnd = (info) => {
     console.log('info', info, gData);
-    // console.log(info);
     // expandedKeys, set it when controlled is needed
     // setExpandedKeys(info.expandedKeys)
   };
@@ -221,9 +127,11 @@ const TreeDataSource=(arr)=>{
     console.log('拖拽');
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
+    const nodeKey = info.node.key;
     const dropPos = info.node.pos.split('-');
     const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
     const loop = (
       data,
       key,
@@ -280,7 +188,39 @@ const TreeDataSource=(arr)=>{
       }
     }
     setGData(data);
-    // console.log('更改之后的数据结构',defaultData);
+    console.log('更改之后的数据结构',data);
+     /* eslint-disable-next-line no-debugger */
+  //    debugger
+  //   let newParentNode = {}
+  //   let prevParentNode = {}
+  //   editor.sceneGraph.children.forEach((item)=>{
+  //     // if(item.id == dragKey){
+  //     //   elementNode = item
+  //     // }
+  //     if(item.id == nodeKey){
+  //       prevParentNode = item
+  //     }
+  // })
+  //   data.forEach((item)=>{
+  //       // if(item.id == dragKey){
+  //       //   elementNode = item
+  //       // }
+  //       if(item.id == nodeKey){
+  //         newParentNode = item
+  //       }
+  //   })
+  //   console.log('elementNode',prevParentNode,newParentNode);
+
+  //   editor.commandManager.pushCommand(
+  //     new SetElementsAttrs(
+  //         'Update Children of Elements',
+  //         data,
+  //         newParentNode.children,
+  //         data,
+  //     ),
+  // );
+  //  // 重新渲染右侧画布
+  //   editor.sceneGraph.render();
   };
   //选中属性item
   const onSelectTree = (selectedKeys, e) => {
@@ -296,6 +236,61 @@ const TreeDataSource=(arr)=>{
    * 3、defaultSelectedKeys ：默认选中的值
    * */
   // eslint-disable-next-line
+  const handleIconClick = (key) => {
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
+    let prevStates = {};
+    let newStates = {};
+    let elementNode = {};
+    const updatedTreeData = gData.map((item) => {
+      if (item.key === key) {
+        prevStates = item
+        elementNode = {
+          ...item,
+          visible: !item.visible,
+          disabled: !item.disabled,
+        };
+        newStates = {
+          ...item,
+          visible: !item.visible,
+          disabled: !item.disabled,
+        };
+        // 点击图标时，将当前选中行的 disabled 属性取反
+        return {
+          ...item,
+          visible: !item.visible,
+          disabled: !item.disabled,
+        };
+      }
+      return item;
+    });
+    setGData(updatedTreeData);
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+          'Update disabled of Elements',
+          elementNode,
+          newStates,
+          prevStates,
+      ),
+  );
+    // 重新渲染右侧画布
+    editor.sceneGraph.render();
+  };
+  const renderTitle = (title, key, visible, disabled) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      {title}
+      <div
+        style={{ marginLeft: '8px', cursor: 'pointer' }}
+        onClick={() => handleIconClick(key)}
+      >
+        {disabled ? (
+          <EyeInvisibleOutlined />
+        ) : (
+          <EyeOutlined />
+        )}
+        </div>
+    </div>
+  );
   return (
     <Tree
       className="draggable-tree"
@@ -309,6 +304,9 @@ const TreeDataSource=(arr)=>{
       onDrop={onDrop}
       onSelect={onSelectTree}
       treeData={gData}
+      titleRender={({ title, key, visible, disabled }) =>
+        renderTitle(title, key, visible, disabled)
+      }
     />
   );
 };

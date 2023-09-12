@@ -104,7 +104,21 @@ class SelectedElements {
     if (this.isEmpty()) {
       return null;
     }
+    /* eslint-disable-next-line no-debugger */
+    //  debugger
     const bBoxesWithRotation = this.items.map((element) => element.getBBox());
+  //   const bBoxesWithRotation = this.items
+  // .filter((element) => element !== null && element !== undefined)
+  // .map((element) => {
+  //   const bbox = element!.getBBox(); // 使用非空断言运算符确保不为 null 或 undefined
+  //   if (typeof bbox === 'object' && 'x' in bbox && 'y' in bbox && 'width' in bbox && 'height' in bbox) {
+  //     // 确保 bbox 是有效的 IRect 对象
+  //     return bbox;
+  //   } else {
+  //     // 对于无效的元素或者 getBBox 返回非 IRect 的情况，返回一个默认的空 Rect
+  //     return { x: 0, y: 0, width: 0, height: 0 };
+  //   }
+  // });
     return getRectsBBox(...bBoxesWithRotation);
   }
   getRotation() {

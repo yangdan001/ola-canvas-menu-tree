@@ -12,7 +12,7 @@ import {
   SelectOutlined,
   TextFilled,
 } from '@euler/icons';
-
+import { HighlightFilled } from '@ant-design/icons';
 export const ToolBar = () => {
   const editor = useContext(EditorContext);
   const intl = useIntl();
@@ -44,17 +44,23 @@ export const ToolBar = () => {
             icon: <RectOutlined />,
           },
           {
-            name: 'drawEllipse',
-            hotkey: 'O',
-            intlId: 'tool.ellipse',
-            icon: <EllipseOutlined />,
+            name: 'drawBrush',
+            hotkey: 'B',
+            intlId: 'tool.brush',
+            icon: <HighlightFilled />,
           },
-          {
-            name: 'drawLine',
-            hotkey: 'L',
-            intlId: 'tool.line',
-            icon: <LineOutlined />,
-          },
+          // {
+          //   name: 'drawEllipse',
+          //   hotkey: 'O',
+          //   intlId: 'tool.ellipse',
+          //   icon: <EllipseOutlined />,
+          // },
+          // {
+          //   name: 'drawLine',
+          //   hotkey: 'L',
+          //   intlId: 'tool.line',
+          //   icon: <LineOutlined />,
+          // },
           {
             name: 'drawText',
             hotkey: 'T',
