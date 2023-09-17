@@ -37,8 +37,8 @@ const OpcitySet = () => {
   }
 return(
    <div className='slider-box'>
-       <div className='slider-box-title'>Transparency {sliderVal}</div>
-        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={sliderVal} onChange={onTransparency} />
+       <div className='slider-box-title'>Transparency {sliderVal === 0.001 ? 0 : sliderVal}</div>
+        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={sliderVal === 0.001 ? 0 : sliderVal} onChange={onTransparency} />
         <Divider style={{marginTop: 10,marginBottom: 10,background:'#444'}}/>
    </div>
       )
