@@ -34,6 +34,7 @@ import { toJS } from "mobx";
 import { EditorContext } from '../../context';
 import { SetElementsAttrs } from '../../editor/commands/set_elements_attrs';
 import './index.scss';
+import { MutateElementsAndRecord } from '../../editor/scene/graph';
 import fetchApi from '../../../src/services/fetch';
 const socketBaseURL = fetchApi.socketBaseURL;
 const { Option } = Select;
@@ -90,7 +91,7 @@ const Generate = () => {
   const [isPromptsOpen, setIsPromptsOpen] = useState(false);
   const [isGenerationParametersOpen, setIsGenerationParametersOpen] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [inpaintingChecked, setInpaintingChecked] = useState(false);
+  const [inpaintingchecked, setinpaintingchecked] = useState(false);
   const [multidiffusionChecked, setMultidiffusionChecked] = useState(false);
   const [stepsVal, setStepsVal] = useState(0);
   const [scaleVal, setScaleVal] = useState(0);
@@ -100,6 +101,10 @@ const Generate = () => {
   const [imageToImageDataRes, setImageToImageDataRes] = useState({});
   const [textToImageDataRes, setTextToImageDataRes] = useState({});
   const [soketData, setSoketData] = useState({});
+  const [formData, setFormData] = useState({});
+  useEffect(() => {
+    getFormData()
+  }, [editor]);
   useEffect(() => {
     const setVhToState = () => {
       setVh(window.innerHeight * 0.01);
@@ -138,8 +143,21 @@ const Generate = () => {
           setconfigOptions(config);
           localStorage.setItem('config', JSON.stringify(config));
         }
-        let formData = localStorage.getItem('formData')
-        console.log(formData,'formData8888')
+
+        // if (editor) {
+        //   const handler = () => {
+        //     const items = editor.selectedElements.getItems();
+        //     if (items.length > 0) {
+        //       let newFormData = items[0].formData;
+        //       setFormData(newFormData);
+        //     }
+        //   };
+        //   editor.sceneGraph.on('render', handler);
+        //   return () => {
+        //     editor.sceneGraph.off('render', handler);
+        //   };
+        // }
+        getFormData()
         if(formData && formData.length>0){
           //表单默认值
           form.setFieldsValue({
@@ -182,7 +200,6 @@ const Generate = () => {
           const index = config.base_model.findIndex(item => item.title === 'Base-V1-5.ckpt');
           if (index !== -1) {
             setBaseModelTips(config.base_model[index]);
-            console.log(config.base_model[index], 'config.base_model[index]')
           } else {
             setBaseModelTips(config.base_model[0]);
           }
@@ -195,9 +212,25 @@ const Generate = () => {
     }
   }, []);
 
+//取formdata数据
+const getFormData = () => {
+  if (editor) {
+    const handler = () => {
+      const items = editor.selectedElements.getItems();
+      if (items.length > 0) {
+        let newFormData = items[0].formData;
+        setFormData(newFormData);
+      }
+    };
+    editor.sceneGraph.on('render', handler);
+    return () => {
+      editor.sceneGraph.off('render', handler);
+    };
+  }
+}
+
 // 图片上传后逻辑处理
   useEffect(() => {
-    console.log(imgUrl,'imgUrl999999')
     if( imgUrl == '' ){
       return
     }
@@ -245,7 +278,6 @@ const Generate = () => {
   }, [imgUrl]);
 
   const normFile = (e) => {
-    // console.log('Upload event:', e);
     if (e && e.file) {
       setFileObj(e.file)
     }
@@ -255,7 +287,6 @@ const Generate = () => {
     return e?.fileList;
   };
   const checkOptionsType = (model) => {
-    // console.log(model,'model')
     return model && model.map(item => {
       const { image } = item;
       return <Option value={item.title} key={item.title} item={item}>
@@ -279,23 +310,19 @@ const Generate = () => {
 
   //
   const onChangeSteps = (value) => {
-    console.log('onChange: ', value);
     setStepsVal(value)
   }
   //
   const onAfterChangeSteps = (value) => {
-    console.log('onAfterChange: ', value);
     setStepsVal(value)
   }
 
   //
   const onChangeScale = (value) => {
-    console.log('onChange: ', value);
     setScaleVal(value)
   }
   //
   const onAfterChangeScale = (value) => {
-    console.log('onAfterChange: ', value);
     setScaleVal(value)
 
   }
@@ -357,14 +384,11 @@ const Generate = () => {
 
   //   // 将图像元素添加到页面上
   //   document.body.appendChild(resultImage);
-  //   setInpaintingChecked(value)
+  //   setinpaintingchecked(value)
   //   }
   // }
   //获取嵌套图
 const onInpaintingChange = (value) => {
-    console.log(value, 'value888')
-    /* eslint-disable-next-line no-debugger */
-    //  debugger
     if(value==true) {
     const sceneGraph = editor.sceneGraph;
     const selectedElements = editor.selectedElements;
@@ -376,7 +400,6 @@ const onInpaintingChange = (value) => {
     // 获取选中矩形区域的像素数据
     const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
     for (let i = 0; i < selectedImageData.data.length; i += 4) {
-      // Set the alpha (transparency) value to 0
       selectedImageData.data[i + 3] = 0;
     }
 
@@ -398,8 +421,6 @@ const onInpaintingChange = (value) => {
         const rectY = child.y;
         const rectWidth = child.width;
         const rectHeight = child.height;
-        console.log(rectWidth,rectWidth,'子元素的大小')
-        console.log(rectX,rectY,'子元素的位置')
         // 根据两个坐标位置计算出两个矩形在像素数据中的位置
         const rectXInImageData = rectX - selectedX;
         const rectYInImageData = rectY - selectedY;
@@ -418,7 +439,7 @@ const onInpaintingChange = (value) => {
 
     // 将图像元素添加到页面上
     document.body.appendChild(resultImage);
-    setInpaintingChecked(value)
+    setinpaintingchecked(value)
     }
   }
   const onMultidiffusionChange = (value) => {
@@ -427,7 +448,6 @@ const onInpaintingChange = (value) => {
 
 
   const SelectComponentOnChange = (value, option, type, index) => {
-    console.log(option.item);
     if (type === 'basemodel') {
       setBaseModelTips(option.item);
       let targetVaeModalArray = JSON.parse(localStorage.getItem('config')).vae_model.filter(item => option.item.link === item.link);
@@ -488,7 +508,6 @@ const onInpaintingChange = (value) => {
           };
           socket.onclose = async (event) => {
             console.log('close');
-            console.log(globalData);
             if (globalData && globalData.status === 'COMPLETED') {
               const res = await getRecord(RES.params.task_id);
               if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
@@ -547,11 +566,9 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
               }
           };
           socket.onclose = async (event) => {
-            console.log(globalData,'000000');
             if (globalData && globalData.status === 'COMPLETED') {
               const res = await getRecord(RES.params.task_id);
               if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
-                console.log(res.params.images[0],'res.params.images[0]')
                 let fileUrl = res.params.images[0]
                 setImgUrl(fileUrl)
                 localStorage.setItem('fileUrl', fileUrl)
@@ -583,7 +600,6 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
 
   //表单提交逻辑
   const onFinish = _.debounce(async (values) => {
-    let frameType = localStorage.getItem("frameType")
     const sceneGraph = editor.sceneGraph;
     const selectedElements = editor.selectedElements;
     const selectedWidth = selectedElements.items[0].width
@@ -593,7 +609,11 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
       height: selectedHeight,
     })
     let allValue = await form.getFieldsValue(true);
-    localStorage.setItem('formData',allValue)
+    if (editor) {
+      const elements = editor.selectedElements.getItems();
+      MutateElementsAndRecord.setFormdata(editor, elements, allValue);
+      editor.sceneGraph.render();
+    }
     if (fileObj && fileObj.name) {
       if (allValue.controlnet) {
         localStorage.setItem('selectType', '3');
@@ -688,32 +708,13 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
     setImgUrl(fileUrl)
     //读取base64图
     const reader = new FileReader();
-    reader.onload = function(event) {
-      const base64Data = event.target.result.split(',')[1]; // 获取 Base64 数据部分
-      console.log(base64Data,'base64Data');
-      // setImgUrl(base64Data)
-      // 这里你可以将 base64Data 用于其他操作，或者将其传递给其他函数
-    };
     reader.readAsDataURL(info.file.originFileObj);
-    // localStorage.setItem('fileUrl',fileUrl)
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList, 'uploading');
     }
     if (info.file.status === 'done') {
       console.log(info.file, info.fileList, 'done');
-      // let cvs = document.getElementById('cvs');
-      // var ctx = cvs!.getContext('2d');
-      // let fileUrl = window.URL.createObjectURL(info.file.originFileObj!);
-      // var img = document.getElementById('uploadedImg');
-      // this.setState({ imgUrl: fileUrl });
-      // img!.onload = function() {
-      //   console.info('xxx');
-      //   ctx.drawImage(img, 0, 0);//this即是imgObj,保持图片的原始大小：470*480
     }
-    
-    // else if (info.file.status === 'error') {
-    //   message.error(`${info.file.name} file upload failed.`);
-    // }
   }
 
   return (
@@ -859,7 +860,7 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
         </div>
         <Form.Item name="isInpainting" label="Inpainting" valuePropName="checked">
           <Switch
-            checked={inpaintingChecked}
+            checked={inpaintingchecked}
             defaultChecked={false}
             onChange={onInpaintingChange}
             // onChange={

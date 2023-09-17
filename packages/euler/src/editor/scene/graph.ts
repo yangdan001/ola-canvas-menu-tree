@@ -1,6 +1,6 @@
 import { SetElementsAttrs } from '../commands/set_elements_attrs';
 import { Editor } from '../editor';
-import { IBox, IBox2, SelectType, GraphType, IPoint } from '../../type';
+import { IBox, IBox2, SelectType, GraphType, IPoint, IFormData } from '../../type';
 import { calcCoverScale, genId, objectNameGenerator } from '../../utils/common';
 import {
   getAbsoluteCoords,
@@ -35,6 +35,7 @@ export interface GraphAttrs {
   zIndex?: number;
   brushPath?: Path2D | null;
   iframeType?: string;
+  formData?:IFormData
 }
 
 export class Graph {
@@ -58,6 +59,22 @@ export class Graph {
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
   iframeType = "Meta";
+  formData = {
+    base_model_name: 'Base-V1-5.ckpt',
+    vae_model_name: 'disabled.pt',
+    positive_prompt: "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
+    negative_prompt: "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face",
+    number: 1,
+    num_inference_steps: "60",
+    cfg: "9.0",
+    scheduler_name: 'Euler_a',
+    width: "512",
+    height: "768",
+    seed: "1234",
+    denoise: "0.75", //去噪强度 Denoising Strength
+    widthHeight: '1'
+  }
+
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
@@ -74,6 +91,7 @@ export class Graph {
     this.width = options.width;
     this.height = options.height;
     this.iframeType = options.iframeType ?? this.iframeType;
+    this.formData = options.formData ?? this.formData;
 
     if (options.fill) {
       this.fill = options.fill;
@@ -107,7 +125,8 @@ export class Graph {
       rotation: this.rotation,
       zIndex: this.zIndex,
       brushPath: this.brushPath,
-      iframeType: this.iframeType
+      iframeType: this.iframeType,
+      formData: this.formData,
     };
   }
   setAttrs(attrs: Partial<GraphAttrs>) {
@@ -296,10 +315,12 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     width,
     height,
     iframeType,
+    formData,
   }: {
     width?: number;
     height?: number;
     iframeType?: string;
+    formData?: IFormData;
   }) {
     // 获取原来x y 坐标
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
@@ -311,6 +332,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     }
     if (iframeType) {
       this.iframeType = iframeType;
+    }
+    if (formData) {
+      this.formData = formData;
     }
     const { x: rotatedX, y: rotatedY } = getElementRotatedXY(this);
 
@@ -660,6 +684,31 @@ export const MutateElementsAndRecord = {
             prevStates,
         ),
     );
+},
+
+// 设置接口formData数据 
+setFormdata(editor: Editor, elements: Graph[], formData: IFormData) {
+  if (elements.length === 0) {
+      return;
+  }
+
+  const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+  const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
+
+  for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ formData });
+  }
+
+  const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
+
+  editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+          'Update formData of Elements',
+          allAffectedElements,
+          newStates,
+          prevStates,
+      ),
+  );
 },
 //   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
 //     // 创建新的 Path2D 对象来存储画笔路径

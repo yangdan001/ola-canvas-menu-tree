@@ -87,3 +87,19 @@ export interface IHorizontalLine {
   y: number;
   xs: number[];
 }
+
+export interface IFormData {
+  base_model_name: string,
+  vae_model_name: string,
+  positive_prompt: string,
+  negative_prompt: string,
+  number: number,
+  num_inference_steps:string,
+  cfg: string,
+  scheduler_name: string,
+  width: string,
+  height: string,
+  seed: string,
+  denoise: string, //去噪强度 Denoising Strength
+  widthHeight: string
+}
