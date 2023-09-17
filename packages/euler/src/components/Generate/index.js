@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 // import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import shortid from 'shortid';
+import styled from 'styled-components';
 import {
   notification,
   Input,
@@ -51,6 +52,35 @@ const formItemLayout = {
   },
 };
 
+//进度条按钮
+const ProgressBarButton = styled(Button)`
+  background: linear-gradient(
+    90deg,
+    #985EFF ${(props) => props.percent || 0}%,
+    #6200EE ${(props) => props.percent || 0}%,
+    #6200EE 100%
+  )
+  no-repeat;
+  width: 274px;
+  height: 46px;
+  border-radius: 4px;
+  border: 1px solid #5858E6;
+  background: var(--400, #7F39FB);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.07);
+`;
+
+const ProgressButton = ({ percent, children, ...rest }) => {
+  return (
+    <div  style={{ width: '274px', position: 'relative',marginTop: 10 }}>
+      <ProgressBarButton percent={percent} {...rest}>
+        {/* {children} */}
+      </ProgressBarButton>
+      <div  style={{ position: 'absolute', zIndex: 1, top:'50%', left:'50%', transform:'translate(-50%,-50%)',color: '#FFFFFF',width: 100}}>{children}</div>
+    </div>
+    
+  );
+};
+
 const Generate = () => {
   const editor = useContext(EditorContext);
   const [form] = Form.useForm();//表单的form实例
@@ -69,7 +99,7 @@ const Generate = () => {
   const [imgData, setImgData] = useState({});
   const [imageToImageDataRes, setImageToImageDataRes] = useState({});
   const [textToImageDataRes, setTextToImageDataRes] = useState({});
- 
+  const [soketData, setSoketData] = useState({});
   useEffect(() => {
     const setVhToState = () => {
       setVh(window.innerHeight * 0.01);
@@ -453,6 +483,7 @@ const onInpaintingChange = (value) => {
             if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
               event && setTextToImageDataRes(JSON.parse(event.data))
               globalData = JSON.parse(event.data) 
+              setSoketData(globalData)
             }
           };
           socket.onclose = async (event) => {
@@ -512,6 +543,7 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
               if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
                 event && setImageToImageDataRes(JSON.parse(event.data))
                 globalData = JSON.parse(event.data)
+                setSoketData(globalData)
               }
           };
           socket.onclose = async (event) => {
@@ -864,11 +896,14 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
             offset: 6,
           }}
         >
-          {/* <Space> */}
-          <Button type="primary" htmlType="submit" className='generate-btn'>
+        {(soketData && 
+            soketData.status === 'RUNNING') ?(
+            <div>
+          <ProgressButton percent={soketData&& soketData.progress && soketData.progress.progress}>Progress {soketData&& soketData.progress && Math.round(Number(soketData.progress.progress))}%</ProgressButton>
+        </div>
+       ):<Button type="primary" htmlType="submit" className='generate-btn'>
             Submit
-          </Button>
-          {/* </Space> */}
+          </Button>} 
         </Form.Item>
       </Form>
     </div>
