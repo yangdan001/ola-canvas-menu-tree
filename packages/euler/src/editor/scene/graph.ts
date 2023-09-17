@@ -11,7 +11,9 @@ import {
 import { transformRotate } from '../../utils/transform';
 import { DEFAULT_IMAGE, ITexture, TextureCanvas, TextureImage } from '../texture';
 import { ImgManager } from '../Img_manager';
-
+/**
+ * 画布元素节点属性接口
+ * */ 
 export interface GraphAttrs {
   type?: GraphType;
   id?: string;
@@ -283,6 +285,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     const { y: prevRotatedY } = getElementRotatedXY(this);
     this.y = this.y + rotatedY - prevRotatedY;
   }
+  /**
+   * 调整大小并保持旋转XY
+   * */ 
   resizeAndKeepRotatedXY({
     width,
     height,
@@ -290,6 +295,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     width?: number;
     height?: number;
   }) {
+    // 获取原来x y 坐标
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
     if (width) {
       this.width = width;
@@ -298,6 +304,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
       this.height = height;
     }
     const { x: rotatedX, y: rotatedY } = getElementRotatedXY(this);
+
     const dx = rotatedX - preRotatedX;
     const dy = rotatedY - preRotatedY;
     this.x -= dx;
@@ -479,8 +486,8 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
 }
 
 /**
- * 修改元素并保存到历史记录
- */
+ * 获取所有受影响的元素
+ * */ 
 function getAllElementsWithChildren(element: Graph): Graph[] {
   let elements = [element];
   for (const child of element.children) {
@@ -488,8 +495,13 @@ function getAllElementsWithChildren(element: Graph): Graph[] {
   }
   return elements;
 }
-
+/**
+ * 修改元素并保存到历史记录
+ */
 export const MutateElementsAndRecord = {
+
+
+  // 设置旋转X
   setRotateX(editor: Editor, elements: Graph[], rotatedX: number) {
       if (elements.length === 0) {
           return;
@@ -513,7 +525,7 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-
+// 设置旋转Y
   setRotateY(editor: Editor, elements: Graph[], rotatedY: number) {
       if (elements.length === 0) {
           return;
@@ -537,15 +549,18 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-
+// 设置宽度
   setWidth(editor: Editor, elements: Graph[], width: number) {
+    console.log('width',width);
+    
+    /* eslint-disable-next-line no-debugger */
       if (elements.length === 0) {
           return;
       }
 
       const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
       const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
-
+      
       for (const element of elements) {
           element.resizeAndKeepRotatedXY({ width });
       }
@@ -561,7 +576,7 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-
+// 设置高度
   setHeight(editor: Editor, elements: Graph[], height: number) {
       if (elements.length === 0) {
           return;
@@ -585,7 +600,7 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-
+// 设置旋转
   setRotation(editor: Editor, elements: Graph[], rotation: number) {
       if (elements.length === 0) {
           return;
@@ -609,6 +624,7 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
+
   
 //   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
 //     // 创建新的 Path2D 对象来存储画笔路径
