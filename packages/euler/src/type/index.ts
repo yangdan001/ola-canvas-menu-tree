@@ -56,6 +56,12 @@ export enum GraphType {
   Brush = 'Brush',
 }
 
+export enum SelectType {
+  Meta = 'Meta',
+  Mask = 'Mask',
+  Image = 'Image',
+}
+
 /**
  * set some optional property
  *
