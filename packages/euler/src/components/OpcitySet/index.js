@@ -14,13 +14,14 @@ const OpcitySet = () => {
   // useEffect(() => {
     
   // }, []); 
-
+  /**
+   * 正在滑动事件
+   * */ 
   const onTransparency = (value) => {
-    console.log('onChange: ', value);
     const selectedElements = editor.selectedElements;
     const prevStates = selectedElements.items[0].fill[0].attrs
-    selectedElements.items[0].fill[0].attrs.a = value
-    selectedElements.items[0].fill[0].attrs.opacity = value
+    selectedElements.items[0].fill[0].attrs.a = value === 0 ? 0.001 : value;
+    selectedElements.items[0].fill[0].attrs.opacity = value === 0 ? 0.001 : value;
     const newStates = selectedElements.items[0].fill[0].attrs
     editor.commandManager.pushCommand(
       new SetElementsAttrs(
@@ -34,31 +35,10 @@ const OpcitySet = () => {
     editor.sceneGraph.render();
     setSliderVal(value)
   }
-
-  const onAfterTransparency = (value) => {
-    const selectedElements = editor.selectedElements;
-    const prevStates = selectedElements.items[0].fill[0].attrs
-    selectedElements.items[0].fill[0].attrs.a = value
-    selectedElements.items[0].fill[0].attrs.opacity = value
-    const newStates = selectedElements.items[0].fill[0].attrs
-    editor.commandManager.pushCommand(
-      new SetElementsAttrs(
-          'Update Opacity of Elements',
-          selectedElements.items[0],
-          newStates,
-          prevStates,
-      ),
-  );
-    // 重新渲染右侧画布
-    editor.sceneGraph.render();
-    setSliderVal(value)
-  }
-
-
 return(
    <div className='slider-box'>
        <div className='slider-box-title'>Transparency {sliderVal}</div>
-        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={sliderVal} onChange={onTransparency} onAfterChange={onAfterTransparency} />
+        <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={sliderVal} onChange={onTransparency} />
         <Divider style={{marginTop: 10,marginBottom: 10,background:'#444'}}/>
    </div>
       )
