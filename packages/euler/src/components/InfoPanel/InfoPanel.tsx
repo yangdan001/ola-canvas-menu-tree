@@ -20,59 +20,35 @@ enum PanelType {
   Global = 'Global',
   SelectedElements = 'SelectedElements',
 }
-
+import { useIntl } from 'react-intl';
 export const InfoPanel: FC = () => {
   const editor = useContext(EditorContext);
+  const intl = useIntl();
+  const MIXED = intl.formatMessage({ id: 'mixed' });
   const [type, setType] = useState(PanelType.Global);
   const [key, setKey] = useState('1');
-  const [frameType, setFrameType] = useState('image');
-  const [isHide, setIsHide] = useState(false);
+  const [frameType, setIframeType] = useState('image');
   // 根据是否选中元素，来决定面板类型
   useEffect(() => {
     if (editor) {
       const handler = (items: GraphAttrs[]) => {
         setType(items.length ? PanelType.SelectedElements : PanelType.Global);
-      };type
+        if (items.length > 0) {
+          // 处理当type为Meta时 才可以点击tab2
+          const Element = editor.selectedElements.getItems();
+          const newIframeType: string | typeof MIXED = Element[0].iframeType;
+          setIframeType(newIframeType);
+        }
+      };
       editor.selectedElements.on('itemsChange', handler);
-      setFrameType(type)
       return () => {
         editor.selectedElements.off('itemsChange', handler);
       };
     }
   }, [editor]);
-  useEffect(() => {
-    const localFrameType = localStorage.getItem('frameType') || 'image'
-    const localIsHide = Boolean(localStorage.getItem('isHide')) || true
-    setFrameType(localFrameType)
-    setIsHide(localIsHide)
-  }, [editor]);
-  useEffect(() => {
-    const localFrameType  = localStorage.getItem('frameType')
-    if(localFrameType=='meta'){
-      setIsHide(false)
-    }else{
-      setIsHide(true)
-    }
-  }, [frameType]);
      
   return (
-    // <div className="info-panel" onKeyDown={(e) => e.stopPropagation()}>
-    //   {type === PanelType.SelectedElements && (
-    //     <>
-    //       <AlignCard />
-    //       <ElementsInfoCards />
-    //       <FillCard key="fill" />
-    //       <StrokeCard key="stroke" />
-    //     </>
-    //   )}
-    //   {type === PanelType.Global && (
-    //     <div className="empty-text">
-    //       <FormattedMessage id="noSelectedShapes" />
-    //     </div>
-    //   )}
-    // </div>
     <div className="info-panel">
-      
         <Tabs 
         defaultActiveKey={'1'}
         activeKey={key} 
@@ -104,7 +80,7 @@ export const InfoPanel: FC = () => {
               )}
             </div>
           </TabPane>
-          <TabPane key="2" tab="Tab 2"  disabled={!isHide}> 
+          <TabPane key="2" tab="Tab 2"  disabled={frameType !== "Meta"}> 
             <div className="right-tab" onKeyDown={(e) => e.stopPropagation()} style={{overflowY:'scroll',height:'calc(100vh - 150px)'}}>
             {type === PanelType.SelectedElements && (
                 <>

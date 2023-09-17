@@ -637,7 +637,7 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-  // 设置元素类型 mate / image / 
+  // 设置元素类型 Meta / image / 
   setIframeType(editor: Editor, elements: Graph[], iframeType: string) {
     if (elements.length === 0) {
         return;

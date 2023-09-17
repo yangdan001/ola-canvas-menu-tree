@@ -27,8 +27,6 @@ const ElementsInfoCards: FC = () => {
           let newIframeType: string | typeof MIXED = items[0].iframeType;
           for (let i = 0, len = items.length; i < len; i++) {
             const element = items[i];
-            const { x: currentRotatedX, y: currentRotatedY } =
-              getElementRotatedXY(element);
             if (newIframeType !==  element.iframeType ) {
               newIframeType = MIXED;
             }
