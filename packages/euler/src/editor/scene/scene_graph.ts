@@ -173,7 +173,7 @@ removeItems(elements: Graph[]) {
   }
      
   render = rafThrottle(() => {
-    console.log('zoule',this.editor)
+    // console.log('zoule',this.editor)
     // 获取视口区域
     const {
       viewportManager,
@@ -185,7 +185,7 @@ removeItems(elements: Graph[]) {
     const zoom = this.editor.zoomManager.getZoom();
     const viewportBoxInScene = this.editor.viewportManager.getBbox();
     /* eslint-disable-next-line no-debugger */
-  debugger
+  // debugger
     const visibleElements: Graph[] = [];
     // 1. 找出视口下所有元素
     this.findVisibleElements(this.children, viewportBoxInScene, visibleElements);
