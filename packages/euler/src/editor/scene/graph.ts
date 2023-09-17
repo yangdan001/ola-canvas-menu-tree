@@ -1,6 +1,6 @@
 import { SetElementsAttrs } from '../commands/set_elements_attrs';
 import { Editor } from '../editor';
-import { IBox, IBox2, GraphType, IPoint } from '../../type';
+import { IBox, IBox2, SelectType, GraphType, IPoint } from '../../type';
 import { calcCoverScale, genId, objectNameGenerator } from '../../utils/common';
 import {
   getAbsoluteCoords,
@@ -31,7 +31,8 @@ export interface GraphAttrs {
   children?: Graph[];
   parent?: Graph | null;
   zIndex?: number;
-  brushPath?: Path2D | null
+  brushPath?: Path2D | null;
+  iframeType?: SelectType;
 }
 
 export class Graph {
@@ -54,6 +55,7 @@ export class Graph {
   rotation?: number = 0;
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
+  iframeType = SelectType.Meta;
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
@@ -69,6 +71,7 @@ export class Graph {
     this.y = options.y;
     this.width = options.width;
     this.height = options.height;
+    this.iframeType = options.iframeType ?? this.iframeType;
 
     if (options.fill) {
       this.fill = options.fill;
@@ -101,7 +104,8 @@ export class Graph {
       strokeWidth: this.strokeWidth,
       rotation: this.rotation,
       zIndex: this.zIndex,
-      brushPath: this.brushPath
+      brushPath: this.brushPath,
+      iframeType: this.iframeType
     };
   }
   setAttrs(attrs: Partial<GraphAttrs>) {
@@ -286,9 +290,11 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
   resizeAndKeepRotatedXY({
     width,
     height,
+    iframeType,
   }: {
     width?: number;
     height?: number;
+    iframeType?: SelectType;
   }) {
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
     if (width) {
@@ -296,6 +302,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     }
     if (height) {
       this.height = height;
+    }
+    if (iframeType) {
+      this.iframeType = iframeType;
     }
     const { x: rotatedX, y: rotatedY } = getElementRotatedXY(this);
     const dx = rotatedX - preRotatedX;
@@ -609,7 +618,29 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-  
+  setIframeType(editor: Editor, elements: Graph[], iframeType: SelectType) {
+    if (elements.length === 0) {
+        return;
+    }
+
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, iframeType: el.iframeType }));
+
+    for (const element of elements) {
+        element.resizeAndKeepRotatedXY({ iframeType });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, iframeType: el.iframeType }));
+
+    editor.commandManager.pushCommand(
+        new SetElementsAttrs(
+            'Update iframeType of Elements',
+            allAffectedElements,
+            newStates,
+            prevStates,
+        ),
+    );
+},
 //   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
 //     // 创建新的 Path2D 对象来存储画笔路径
 //     this.brushPath = new Path2D();

@@ -6,10 +6,13 @@ import {
   Divider
 } from 'antd';
 import './index.scss';
+import { EditorContext } from '../../context';
+import { MutateElementsAndRecord } from '../../editor/scene/graph';
 const { Option } = Select;
 
 const ActionType = () => {
-  const [defaultType, setDefaultType] = useState('image');
+  const editor = useContext(EditorContext);
+  const [defaultType, setDefaultType] = useState('Meta');
   // useEffect(() => {
     
   // }, []); 
@@ -17,17 +20,19 @@ const ActionType = () => {
   const handleChange = (value) => {
     console.log(`selected ${value}`);
     setDefaultType(value)
-    if(value){
-      localStorage.setItem('frameType', value)
-      if(value == 'meta'){
-        localStorage.setItem('isHide', false)
-      }else{
-        localStorage.setItem('isHide', true)
-      }
-    }else{
-      localStorage.setItem('frameType', 'image')
-      localStorage.setItem('isHide', true)
-    }
+    const elements = editor.selectedElements.getItems();
+    MutateElementsAndRecord.setIframeType(editor, elements, value);
+    // if(value){
+    //   localStorage.setItem('frameType', value)
+    //   if(value == 'meta'){
+    //     localStorage.setItem('isHide', false)
+    //   }else{
+    //     localStorage.setItem('isHide', true)
+    //   }
+    // }else{
+    //   localStorage.setItem('frameType', 'image')
+    //   localStorage.setItem('isHide', true)
+    // }
   };
 
 return(
@@ -40,7 +45,7 @@ return(
         // dropdownStyle={{ backgroundColor: '#1E2022' }}
         defaultValue={defaultType}
         onChange={handleChange}
-        options={[{ value: 'image', label: 'image' },{ value: 'meta', label: 'meta' },{ value: 'mask', label: 'mask' }]}
+        options={[{ value: 'Image', label: 'image' },{ value: 'Meta', label: 'meta' },{ value: 'Mask', label: 'mask' }]}
       >
       {/* <Option value="image" label="image" style={{ color: '#FFFFFF' }}>
       image
