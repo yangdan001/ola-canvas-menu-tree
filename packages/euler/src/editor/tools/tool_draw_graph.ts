@@ -76,6 +76,8 @@ export abstract class DrawGraphTool implements ITool {
   }
 
   drag(e: PointerEvent) {
+     /* eslint-disable-next-line no-debugger */
+    //  debugger
     this.editor.hostEventManager.disableDelete();
     this.editor.hostEventManager.disableContextmenu();
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -116,6 +118,8 @@ export abstract class DrawGraphTool implements ITool {
   }
 
   private updateRect() {
+     /* eslint-disable-next-line no-debugger */
+    //  debugger
     const { x, y } = this.lastDragPoint;
     const sceneGraph = this.editor.sceneGraph;
     const { x: startX, y: startY } = this.startPoint;
@@ -148,6 +152,8 @@ export abstract class DrawGraphTool implements ITool {
   }
 
   end(e: PointerEvent) {
+     /* eslint-disable-next-line no-debugger */
+    //  debugger
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
       return;
     }

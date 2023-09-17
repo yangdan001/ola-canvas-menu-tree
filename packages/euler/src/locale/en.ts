@@ -37,4 +37,5 @@ export const en = {
 
   'textureType.solid': 'Solid',
   'textureType.image': 'Image',
+  'textureType.canvas': 'Canvas',
 };

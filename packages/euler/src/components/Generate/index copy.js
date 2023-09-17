@@ -127,8 +127,6 @@ const Generate = () => {
         let value = await form.validateFields();
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
-          /* eslint-disable-next-line no-debugger */
-          // debugger
           const index = config.base_model.findIndex(item => item.title === 'Base-V1-5.ckpt');
           if (index !== -1) {
             setBaseModelTips(config.base_model[index]);
@@ -469,8 +467,6 @@ const Generate = () => {
     let selectType = localStorage.getItem("selectType")
     try {
       //校验图生图是否上传了图片
-      /* eslint-disable-next-line no-debugger */
-      // debugger
       let controlnetFormValue = [];
       controlnetFormValue.push({
         model_name: allValue.controlnet,

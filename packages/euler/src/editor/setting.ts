@@ -1,5 +1,5 @@
 import EventEmitter from '../utils/event_emitter';
-import { ITexture, TextureType } from './texture';
+import { ITexture, TextureType, TextureCanvas } from './texture';
 
 interface Events {
   update(attrs: SettingValue): void;
@@ -16,13 +16,20 @@ export class Setting {
       attrs: { r: 0, g: 0, b: 0, a: 1 },
     } as ITexture,
     strokeWidth: 1,
-
     firstFill: {
       type: TextureType.Solid,
       // attrs: { r: 217, g: 217, b: 217, a: 1 },//灰色图形背景
       attrs: { r: 0, g: 0, b: 0, a: 1 }, //黑色图形背景
     } as ITexture,
-
+    drawPathFill: {
+      type: TextureType.Canvas,
+      // attrs: { r: 217, g: 217, b: 217, a: 1 },//灰色图形背景
+      attrs: { 
+        strokeStyle : 'white', // 画笔颜色
+        lineWidth : 2 ,// 画笔线宽
+        lineJoin : 'round' // 连接线的样式，可选值有'round', 'bevel', 'miter'}, //黑色图形背景
+      },
+    } as TextureCanvas,
     addedTexture: {
       type: TextureType.Solid,
       attrs: { r: 0, g: 0, b: 0, a: 0.2 },

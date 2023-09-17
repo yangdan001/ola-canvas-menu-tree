@@ -14,4 +14,5 @@ export const addEventEmitter = new EventEmitter();
 // 监听右侧tab2 uploadImg 
 export const uploadImgEmitter = new EventEmitter();
 
-
+// 监听画布选中iframe生成图片
+export const maskImageEventEmitter = new EventEmitter();

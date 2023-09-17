@@ -9,7 +9,7 @@ import {
   isPointInRect,
 } from '../../utils/graphics';
 import { transformRotate } from '../../utils/transform';
-import { DEFAULT_IMAGE, ITexture, TextureImage } from '../texture';
+import { DEFAULT_IMAGE, ITexture, TextureCanvas, TextureImage } from '../texture';
 import { ImgManager } from '../Img_manager';
 
 export interface GraphAttrs {
@@ -31,6 +31,7 @@ export interface GraphAttrs {
   children?: Graph[];
   parent?: Graph | null;
   zIndex?: number;
+  brushPath?: Path2D | null
 }
 
 export class Graph {
@@ -52,6 +53,7 @@ export class Graph {
   // transform
   rotation?: number = 0;
   zIndex?: number;
+  brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
@@ -79,6 +81,9 @@ export class Graph {
     }
     this.rotation = options.rotation ?? 0;
     this.zIndex = options.zIndex ?? 0;
+    if (options.brushPath) {
+      this.brushPath = options.brushPath;
+    }
   }
   getAttrs(): GraphAttrs {
     return {
@@ -96,6 +101,7 @@ export class Graph {
       strokeWidth: this.strokeWidth,
       rotation: this.rotation,
       zIndex: this.zIndex,
+      brushPath: this.brushPath
     };
   }
   setAttrs(attrs: Partial<GraphAttrs>) {
@@ -307,6 +313,10 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     canvas: HTMLCanvasElement
   ) {
+    // 如果正在绘制画笔路径，则绘制它
+    if (this.brushPath) {
+      ctx.stroke(this.brushPath);
+    }
     throw new Error('Method not implemented.');
   }
 
@@ -357,6 +367,93 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
       width,
       height,
     );
+  }
+
+  protected fillbrush(
+    ctx: CanvasRenderingContext2D,
+    texture: TextureCanvas,
+    imgManager: ImgManager,
+    smooth: boolean,
+    canvas:HTMLCanvasElement,
+  ) {
+    /* eslint-disable-next-line no-debugger */
+    debugger
+    // ctx.beginPath();
+    // ctx.moveTo(startPoint.x, startPoint.y);
+    // ctx.lineTo(endPoint.x, endPoint.y);
+    // ctx.lineWidth = brushSize * 2; // Brush size affects line thickness
+    // ctx.lineCap = 'round'; // Rounded line ends for a brush effect
+    // ctx.strokeStyle = 'black'; // Set brush color (you can customize this)
+    // ctx.stroke();
+    // ctx.closePath();
+    // // 1. 获取选中的Canvas元素和上下文
+    // const brushPath = texture.attrs.brushPath;
+    // const width = this.width;
+    // const height = this.height;
+
+    // // 2. 定义画笔属性
+    // if (texture.attrs.strokeStyle !== undefined) {
+    //   ctx.strokeStyle = texture.attrs.strokeStyle;
+    // } else {
+    //   ctx.strokeStyle = 'black'; 
+    // }
+    // if (texture.attrs.lineWidth !== undefined) {
+    //   ctx.lineWidth = texture.attrs.lineWidth;
+    // } else {
+    //   ctx.lineWidth = 2; 
+    // }
+    // if (texture.attrs.lineJoin !== undefined) {
+    //   ctx.lineJoin = texture.attrs.lineJoin as CanvasLineJoin;
+    // } else {
+    //   ctx.lineJoin = 'round'; 
+    // }
+
+    // ctx.beginPath();
+    // ctx.moveTo(startPoint.x, startPoint.y);
+    // ctx.lineTo(endPoint.x, endPoint.y);
+    // ctx.lineWidth = texture.attrs.lineWidth; // Brush size affects line thickness
+    // ctx.lineCap = 'round'; // Rounded line ends for a brush effect
+    // ctx.strokeStyle = 'black'; // Set brush color (you can customize this)
+    // ctx.stroke();
+    // ctx.closePath();
+
+    // ctx.strokeStyle = texture.attrs.strokeStyle; // 画笔颜色
+    // ctx.lineWidth = texture.attrs.lineWidth; // 画笔线宽
+    // ctx.lineJoin = texture.attrs.lineJoin; // 连接线的样式，可选值有'round', 'bevel', 'miter'
+
+    // // 标志是否正在绘制
+    // let isDrawing = false;
+
+    // // 存储上一个点的坐标
+    // let lastX = 0;
+    // let lastY = 0;
+
+    // // 添加鼠标事件监听器
+    // canvas.addEventListener('mousedown', (e) => {
+    //   isDrawing = true;
+    //   [lastX, lastY] = [e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop];
+    // });
+
+    // canvas.addEventListener('mousemove', draw);
+
+    // canvas.addEventListener('mouseup', () => isDrawing = false);
+    // canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    // // 3. 绘制函数
+    // function draw(e:any) {
+    //   if (!isDrawing) return;
+
+    //   ctx.beginPath();
+    //   ctx.moveTo(lastX, lastY);
+
+    //   const currentX = e.clientX - canvas.offsetLeft;
+    //   const currentY = e.clientY - canvas.offsetTop;
+
+    //   ctx.lineTo(currentX, currentY);
+    //   ctx.stroke();
+
+    //   [lastX, lastY] = [currentX, currentY];
+    // }
   }
 
   addChild(child: Graph) {
@@ -512,5 +609,63 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
+  
+//   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
+//     // 创建新的 Path2D 对象来存储画笔路径
+//     this.brushPath = new Path2D();
+//     this.brushPath.moveTo(x, y);
+  
+//     // 设置画笔属性，例如颜色和宽度
+//     ctx.strokeStyle = this.brushColor;  // 设置画笔颜色
+//     ctx.lineWidth = this.brushWidth;    // 设置画笔宽度
+//     ctx.lineJoin = 'round';             // 设置线条连接方式为圆角
+  
+//     // 开始绘制画笔路径
+//     ctx.beginPath();
+//     // 添加鼠标移动事件监听器，用于实时更新路径
+//   document.addEventListener('mousemove', this.handleMouseMove);
+//   },
+  
+//   stopDrawingBrush() {
+//     // 停止绘制画笔路径
+//     this.brushPath = null;
+//   },
+
+//   // 处理鼠标按下事件，开始绘制画笔路径
+// handleMouseDown(event: MouseEvent) {
+//   if (this.brushPath) {
+//     return;
+//   }
+
+//   const x = event.clientX - this.canvas.getBoundingClientRect().left;
+//   const y = event.clientY - this.canvas.getBoundingClientRect().top;
+
+//   this.startDrawingBrush(this.ctx, x, y);
+// },
+
+// // 处理鼠标移动事件，绘制画笔路径
+// handleMouseMove(event: MouseEvent) {
+//   if (!this.brushPath) {
+//     return;
+//   }
+
+//   const x = event.clientX - this.canvas.getBoundingClientRect().left;
+//   const y = event.clientY - this.canvas.getBoundingClientRect().top;
+
+//   // 绘制画笔路径
+//   this.ctx.lineTo(x, y);
+//   this.ctx.stroke();
+// },
+
+// // 处理鼠标释放事件，停止绘制画笔路径
+// handleMouseUp(event: MouseEvent) {
+//   if (!this.brushPath) {
+//     return;
+//   }
+
+//   this.stopDrawingBrush();
+// }
+
+  
 };
 

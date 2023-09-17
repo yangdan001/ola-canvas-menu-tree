@@ -149,8 +149,6 @@ const Generate = () => {
         let value = await form.validateFields();
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
-          /* eslint-disable-next-line no-debugger */
-          // debugger
           const index = config.base_model.findIndex(item => item.title === 'Base-V1-5.ckpt');
           if (index !== -1) {
             setBaseModelTips(config.base_model[index]);
@@ -183,8 +181,6 @@ const Generate = () => {
       /**
        * 第一步：获取到选中的元素信息 如id、坐标、大小、是否为原形等；
        * */
-      /* eslint-disable-next-line no-debugger */
-          // debugger
       const sceneGraph = editor.sceneGraph;
       const selectedElements = editor.selectedElements;
       const prevStates = selectedElements.items[0].fill[0].attrs
@@ -273,11 +269,128 @@ const Generate = () => {
     setScaleVal(value)
 
   }
-  const onInpaintingChange = (value) => {
-    console.log(value, 'value888')
-    setInpaintingChecked(value)
-  }
+  //获取mask图
+  // const onInpaintingChange = (value) => {
+  //   console.log(value, 'value888')
+  //   /* eslint-disable-next-line no-debugger */
+  //    debugger
+  //   if(value==true) {
+  //   const sceneGraph = editor.sceneGraph;
+  //   const selectedElements = editor.selectedElements;
+  //   const selectedWidth = selectedElements.items[0].width
+  //   const selectedHeight = selectedElements.items[0].height
+  //   const selectedX = selectedElements.items[0].x
+  //   const selectedY = selectedElements.items[0].y
+  //   const originalCtx = editor.sceneGraph.editor.ctx;
+  //   // 获取选中矩形区域的像素数据
+  //   const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
+  //   for (let i = 0; i < selectedImageData.data.length; i += 4) {
+  //     // Set the alpha (transparency) value to 0
+  //     selectedImageData.data[i + 3] = 0;
+  //   }
 
+  //   // 创建新Canvas元素来显示选中区域
+  //   const resultCanvas = document.createElement('canvas');
+  //   resultCanvas.width = selectedWidth;
+  //   resultCanvas.height = selectedHeight;
+  //   const resultCtx = resultCanvas.getContext('2d');
+  //   // 清空Canvas，使背景透明
+  //   resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+  //   // 将选中区域的像素数据放置在新Canvas上
+  //   resultCtx.putImageData(selectedImageData, 0, 0);
+  //   // 遍历每个矩形元素并绘制到新 Canvas 上
+  //   // 将选中元素的子元素绘制到Canvas上
+  //   const children = selectedElements.items[0].children;
+  //   for (let i = 0; i < children.length; i++) {
+  //       const child = children[i];
+  //       const rectX = child.x;
+  //       const rectY = child.y;
+  //       const rectWidth = child.width;
+  //       const rectHeight = child.height;
+  //       console.log(rectWidth,rectWidth,'子元素的大小')
+  //       console.log(rectX,rectY,'子元素的位置')
+  //       // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+  //       const rectXInImageData = rectX - selectedX;
+  //       const rectYInImageData = rectY - selectedY;
+  //        // 绘制矩形
+  //       resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+  //       resultCtx.fillStyle = `rgba(${child.fill[0].attrs.r},${child.fill[0].attrs.g},${child.fill[0].attrs.b},${child.fill[0].attrs.a})`;
+  //       resultCtx.fillRect(rectXInImageData, rectYInImageData, rectWidth, rectHeight);
+  //   }
+
+  //   // 将新Canvas转化为数据URL
+  //   const dataURL = resultCanvas.toDataURL('image/png');
+
+  //   // 创建一个新的图像元素，并设置其src属性为数据URL
+  //   const resultImage = new Image();
+  //   resultImage.src = dataURL;
+
+  //   // 将图像元素添加到页面上
+  //   document.body.appendChild(resultImage);
+  //   setInpaintingChecked(value)
+  //   }
+  // }
+  //获取嵌套图
+const onInpaintingChange = (value) => {
+    console.log(value, 'value888')
+    /* eslint-disable-next-line no-debugger */
+    //  debugger
+    if(value==true) {
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
+    const selectedWidth = selectedElements.items[0].width
+    const selectedHeight = selectedElements.items[0].height
+    const selectedX = selectedElements.items[0].x
+    const selectedY = selectedElements.items[0].y
+    const originalCtx = editor.sceneGraph.editor.ctx;
+    // 获取选中矩形区域的像素数据
+    const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
+    for (let i = 0; i < selectedImageData.data.length; i += 4) {
+      // Set the alpha (transparency) value to 0
+      selectedImageData.data[i + 3] = 0;
+    }
+
+    // 创建新Canvas元素来显示选中区域
+    const resultCanvas = document.createElement('canvas');
+    resultCanvas.width = selectedWidth;
+    resultCanvas.height = selectedHeight;
+    const resultCtx = resultCanvas.getContext('2d');
+    // 清空Canvas，使背景透明
+    resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+    // 将选中区域的像素数据放置在新Canvas上
+    resultCtx.putImageData(selectedImageData, 0, 0);
+    // 遍历每个矩形元素并绘制到新 Canvas 上
+    // 将选中元素的子元素绘制到Canvas上
+    const children = selectedElements.items[0].children;
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const rectX = child.x;
+        const rectY = child.y;
+        const rectWidth = child.width;
+        const rectHeight = child.height;
+        console.log(rectWidth,rectWidth,'子元素的大小')
+        console.log(rectX,rectY,'子元素的位置')
+        // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+        const rectXInImageData = rectX - selectedX;
+        const rectYInImageData = rectY - selectedY;
+         // 绘制矩形
+        resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+        resultCtx.fillStyle = `rgba(${child.fill[0].attrs.r},${child.fill[0].attrs.g},${child.fill[0].attrs.b},${child.fill[0].attrs.a})`;
+        resultCtx.fillRect(rectXInImageData, rectYInImageData, rectWidth, rectHeight);
+    }
+
+    // 将新Canvas转化为数据URL
+    const dataURL = resultCanvas.toDataURL('image/png');
+
+    // 创建一个新的图像元素，并设置其src属性为数据URL
+    const resultImage = new Image();
+    resultImage.src = dataURL;
+
+    // 将图像元素添加到页面上
+    document.body.appendChild(resultImage);
+    setInpaintingChecked(value)
+    }
+  }
   const onMultidiffusionChange = (value) => {
     setMultidiffusionChecked(value)
   }
@@ -716,10 +829,12 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
           <Switch
             checked={inpaintingChecked}
             defaultChecked={false}
-            onChange={
-              (newChecked) => {
-                textToImageStore.updateInpainting(newChecked);
-              }} />
+            onChange={onInpaintingChange}
+            // onChange={
+            //   (newChecked) => {
+            //     textToImageStore.updateInpainting(newChecked);
+            //   }} 
+            />
         </Form.Item>
         <Form.Item name="Multidiffusion" label="Multidiffusion" valuePropName="multidiffusionChecked">
           <Switch checked={multidiffusionChecked} defaultChecked={false} onChange={onMultidiffusionChange} />

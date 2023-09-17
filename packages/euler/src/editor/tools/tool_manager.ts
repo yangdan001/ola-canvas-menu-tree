@@ -85,6 +85,7 @@ export class ToolManager {
     };
 
     const handleMove = (e: PointerEvent) => {
+      
       if (!this.currentTool) {
         throw new Error('未设置当前使用工具');
       }
@@ -104,6 +105,9 @@ export class ToolManager {
         if (this.isDragging) {
           this.enableSwitchTool = false;
           this.editor.hostEventManager.disableDragBySpace();
+          console.log(this.currentTool,'this.currentTool')
+          /* eslint-disable-next-line no-debugger */
+    //  debugger
           this.currentTool.drag(e);
         }
       } else {
@@ -163,7 +167,8 @@ export class ToolManager {
     if (!this.enableSwitchTool || this.getActiveToolName() === toolName) {
       return;
     }
-
+    /* eslint-disable-next-line no-debugger */
+    // debugger
     const prevTool = this.currentTool;
     const currentTool = (this.currentTool = this.toolMap.get(toolName) || null);
     if (!currentTool) {

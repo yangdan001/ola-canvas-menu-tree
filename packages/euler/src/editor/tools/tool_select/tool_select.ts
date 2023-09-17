@@ -165,6 +165,8 @@ export class SelectTool implements ITool {
     this.lastClickedElement = topHitElement;
   }
   drag(e: PointerEvent) {
+    /* eslint-disable-next-line no-debugger */
+    // debugger
     this.isDragHappened = true;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {

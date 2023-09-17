@@ -98,8 +98,6 @@ const removeItemByKey = (arr, keyToDelete) => {
 }
 
 const TreeDataSource=(arr)=>{
-  /* eslint-disable-next-line no-debugger */
-    // debugger
   if(!Array.isArray(arr)){ return; }
   _index = _index + 10 ;
     return  arr.map((v,i)=>{
@@ -189,8 +187,6 @@ const TreeDataSource=(arr)=>{
     }
     setGData(data);
     console.log('更改之后的数据结构',data);
-     /* eslint-disable-next-line no-debugger */
-  //    debugger
   //   let newParentNode = {}
   //   let prevParentNode = {}
   //   editor.sceneGraph.children.forEach((item)=>{

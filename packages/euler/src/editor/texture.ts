@@ -1,6 +1,7 @@
 export enum TextureType {
   Solid = 'Solid',
   Image = 'Image',
+  Canvas = 'Canvas',
 }
 
 export interface IRGBA {
@@ -15,6 +16,18 @@ export interface TextureSolid {
   attrs: IRGBA;
 }
 
+export interface TextureCanvas {
+  type: TextureType.Canvas;
+  attrs: {
+    src?: string;
+    opacity?: number;
+    strokeStyle?: string; // 画笔颜色
+    lineWidth?: number; // 画笔线宽
+    lineJoin?: string; // 连接线的样式，可选值有'round', 'bevel', 'miter'
+    brushPath?: Path2D | null
+  };
+}
+
 export interface TextureImage {
   type: TextureType.Image;
   attrs: {
@@ -23,7 +36,7 @@ export interface TextureImage {
   };
 }
 
-export type ITexture = TextureSolid | TextureImage;
+export type ITexture = TextureSolid | TextureImage | TextureCanvas;
 
 export const DEFAULT_SOLID_TEXTURE: TextureSolid = {
   type: TextureType.Solid,
@@ -35,9 +48,16 @@ export const DEFAULT_IMAGE_TEXTURE: TextureImage = {
   attrs: {},
 };
 
+export const DEFAULT_CANVAS_TEXTURE: TextureCanvas = {
+  type: TextureType.Canvas,
+  attrs: {},
+};
+
 export const DEFAULT_TEXTURES = {
   [TextureType.Solid]: DEFAULT_SOLID_TEXTURE,
   [TextureType.Image]: DEFAULT_IMAGE_TEXTURE,
+  [TextureType.Canvas]: DEFAULT_CANVAS_TEXTURE,
+
 };
 
 export const DEFAULT_IMAGE = (() => {

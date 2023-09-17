@@ -39,4 +39,5 @@ export const zh: typeof en = {
 
   'textureType.solid': '纯色',
   'textureType.image': '图片',
+  'textureType.canvas': '画笔',
 };

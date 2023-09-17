@@ -24,6 +24,7 @@ export class Rect extends Graph {
     ctx: CanvasRenderingContext2D,
     imgManager: ImgManager,
     smooth: boolean,
+    canvas: HTMLCanvasElement
   ) {
     if (this.rotation) {
       const cx = this.x + this.width / 2;
@@ -45,6 +46,10 @@ export class Rect extends Graph {
         }
         case TextureType.Image: {
           this.fillImage(ctx, texture, imgManager, smooth);
+          break;
+        }
+        case TextureType.Canvas: {
+          this.fillbrush(ctx, texture, imgManager, smooth, canvas);
         }
       }
     }
@@ -60,6 +65,11 @@ export class Rect extends Graph {
           case TextureType.Image: {
             // TODO: stroke image
             this.fillImage(ctx, texture, imgManager, smooth);
+            break;
+          }
+          case TextureType.Canvas: {
+            // TODO: stroke image
+            this.fillbrush(ctx, texture, imgManager, smooth, canvas);
           }
         }
       }

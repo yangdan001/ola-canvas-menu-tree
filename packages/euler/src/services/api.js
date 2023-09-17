@@ -31,8 +31,6 @@ export const postImage = async (data, storeData) => {
 
 //图生图
 export const postImageToImage = async (data, storeData, files) => {
-  // /* eslint-disable-next-line no-debugger */
-  // debugger
   console.log(data);
   if (storeData.length === 0) {
     const file = new File([{}], '');
