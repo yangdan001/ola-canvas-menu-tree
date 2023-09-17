@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 // import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import shortid from 'shortid';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import {
   notification,
   Input,
@@ -27,7 +28,7 @@ import {
 import _ from 'lodash';
 import { EditOutlined, DownOutlined, UpOutlined, MenuOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  getAllDescription, postImage, getRecord,postImageToImage,
+  getAllDescription, postImage, getRecord, postImageToImage,
 } from '../../../src/services/api';
 import textToImageStore from '../../../src/store/textToImageStore';
 import { toJS } from "mobx";
@@ -72,13 +73,13 @@ const ProgressBarButton = styled(Button)`
 
 const ProgressButton = ({ percent, children, ...rest }) => {
   return (
-    <div  style={{ width: '274px', position: 'relative',marginTop: 10 }}>
+    <div style={{ width: '274px', position: 'relative', marginTop: 10 }}>
       <ProgressBarButton percent={percent} {...rest}>
         {/* {children} */}
       </ProgressBarButton>
-      <div  style={{ position: 'absolute', zIndex: 1, top:'50%', left:'50%', transform:'translate(-50%,-50%)',color: '#FFFFFF',width: 100}}>{children}</div>
+      <div style={{ position: 'absolute', zIndex: 1, top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#FFFFFF', width: 100 }}>{children}</div>
     </div>
-    
+
   );
 };
 
@@ -102,16 +103,23 @@ const Generate = () => {
   const [textToImageDataRes, setTextToImageDataRes] = useState({});
   const [soketData, setSoketData] = useState({});
   const [formData, setFormData] = useState({});
+  const intl = useIntl();
+  const MIXED = intl.formatMessage({ id: 'mixed' });
   useEffect(() => {
-    getFormData()
-  }, [editor]);
+    const handler = () => {
+        getFormData()
+    };
+    editor.sceneGraph.on('render', handler);
+    return () => {
+      editor.sceneGraph.off('render', handler);
+    };
+  }, [editor, MIXED]);
   useEffect(() => {
     const setVhToState = () => {
       setVh(window.innerHeight * 0.01);
     };
     window.addEventListener('resize', setVhToState);
     async function login() {
-
       let config;
       const result = await getAllDescription();
       function processJson(result) {
@@ -143,58 +151,9 @@ const Generate = () => {
           setconfigOptions(config);
           localStorage.setItem('config', JSON.stringify(config));
         }
-
-        // if (editor) {
-        //   const handler = () => {
-        //     const items = editor.selectedElements.getItems();
-        //     if (items.length > 0) {
-        //       let newFormData = items[0].formData;
-        //       setFormData(newFormData);
-        //     }
-        //   };
-        //   editor.sceneGraph.on('render', handler);
-        //   return () => {
-        //     editor.sceneGraph.off('render', handler);
-        //   };
-        // }
         getFormData()
-        if(formData && formData.length>0){
-          //表单默认值
-          form.setFieldsValue({
-            base_model_name: formData.base_model_name,
-            vae_model_name: formData.vae_model_name,
-            positive_prompt: formData.positive_prompt,
-            negative_prompt: formData.negative_prompt,
-            number: formData.number,
-            num_inference_steps: formData.num_inference_steps,
-            cfg: formData.cfg,
-            scheduler_name: formData.scheduler_name,
-            width: formData.width,
-            height: formData.height,
-            seed: formData.seed,
-            denoise: formData.denoise, //去噪强度 Denoising Strength
-            widthHeight: formData.widthHeight
-          });
-        }else{
-          //表单默认值
-          form.setFieldsValue({
-            base_model_name: 'Base-V1-5.ckpt',
-            vae_model_name: 'disabled.pt',
-            positive_prompt: "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
-            negative_prompt: "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face",
-            number: 1,
-            num_inference_steps: "60",
-            cfg: "9.0",
-            scheduler_name: 'Euler_a',
-            width: "512",
-            height: "768",
-            seed: "1234",
-            denoise: "0.75", //去噪强度 Denoising Strength
-            widthHeight: '1'
-          });
-        }
-        let allValue = await form.getFieldsValue(true);
-        let value = await form.validateFields();
+        // let allValue = await form.getFieldsValue(true);
+        // let value = await form.validateFields();
         //基础模型,Vae模型中的提示 
         if (config.base_model && config.base_model.length !== 0) {
           const index = config.base_model.findIndex(item => item.title === 'Base-V1-5.ckpt');
@@ -212,26 +171,63 @@ const Generate = () => {
     }
   }, []);
 
-//取formdata数据
-const getFormData = () => {
-  if (editor) {
-    const handler = () => {
-      const items = editor.selectedElements.getItems();
-      if (items.length > 0) {
-        let newFormData = items[0].formData;
-        setFormData(newFormData);
+  //取formdata数据
+  const getFormData = () => {
+    const items = editor.selectedElements.getItems();
+    if (items.length > 0) {
+      let newFormData = items[0].formData;
+      for (let i = 0, len = items.length; i < len; i++) {
+        const element = items[i];
+        if (newFormData !== element.formData) {
+          newFormData = MIXED;
+        }
       }
-    };
-    editor.sceneGraph.on('render', handler);
-    return () => {
-      editor.sceneGraph.off('render', handler);
-    };
+      setFormData(newFormData);
+      setForm(newFormData)
+    }
   }
-}
 
-// 图片上传后逻辑处理
+  const setForm = (val) => {
+    if (val) {
+      //表单默认值
+      form.setFieldsValue({
+        base_model_name: val.base_model_name,
+        vae_model_name: val.vae_model_name,
+        positive_prompt: val.positive_prompt,
+        negative_prompt: val.negative_prompt,
+        number: val.number,
+        num_inference_steps: val.num_inference_steps,
+        cfg: val.cfg,
+        scheduler_name: val.scheduler_name,
+        width: val.width,
+        height: val.height,
+        seed: val.seed,
+        denoise: val.denoise, //去噪强度 Denoising Strength
+        widthHeight: val.widthHeight
+      });
+    } else {
+      //表单默认值
+      form.setFieldsValue({
+        base_model_name: 'Base-V1-5.ckpt',
+        vae_model_name: 'disabled.pt',
+        positive_prompt: "poster of warrior goddess| standing alone on hill| centered| detailed gorgeous face| anime style| key visual| intricate detail| highly detailed| breathtaking| vibrant| panoramic| cinematic| Carne Griffiths| Conrad Roset| Makoto Shinkai",
+        negative_prompt: "no words| watermark| bad anatomy| blurry| fuzzy| extra legs| extra arms| extra fingers| poorly drawn hands| poorly drawn feet| disfigured| out of frame| tiling| bad art| deformed| mutated| double face",
+        number: 1,
+        num_inference_steps: "60",
+        cfg: "9.0",
+        scheduler_name: 'Euler_a',
+        width: "512",
+        height: "768",
+        seed: "1234",
+        denoise: "0.75", //去噪强度 Denoising Strength
+        widthHeight: '1'
+      });
+    }
+  }
+
+  // 图片上传后逻辑处理
   useEffect(() => {
-    if( imgUrl == '' ){
+    if (imgUrl == '') {
       return
     }
     /**
@@ -241,39 +237,39 @@ const getFormData = () => {
     * */
     //监听uploadIMG  
 
-      /**
-       * 第一步：获取到选中的元素信息 如id、坐标、大小、是否为原形等；
-       * */
-      const sceneGraph = editor.sceneGraph;
-      const selectedElements = editor.selectedElements;
-      const prevStates = selectedElements.items[0].fill[0].attrs
-      /**
-       * 第2步：将图片填充在原来元素上，形状大小要同原来的元素；
-       * */
-      var image = new Image(); // 创建一个新的Image对象
-      image.src = imgUrl // 图片的路径
-      // // 在图片加载完成后执行绘制操作
-      image.onload = function() {
-        // editor.sceneGraph.children.forEach((item)=>{
-        //   if(item.objectName == selectedElements.items[0].objectName){
-        //     item.fill[0].type = 'Image'
-        //     item.fill[0].attrs = {src:imgUrl,opacity:0.7}
-        //   }
-        // })
-        selectedElements.items[0].fill[0].type = 'Image'
-        selectedElements.items[0].fill[0].attrs = {src:imgUrl,opacity:0.7}
-        const newStates = selectedElements.items[0].fill[0].attrs
-        editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update Type of Elements',
-              selectedElements.items[0],
-              newStates,
-              prevStates,
-          ),
+    /**
+     * 第一步：获取到选中的元素信息 如id、坐标、大小、是否为原形等；
+     * */
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
+    const prevStates = selectedElements.items[0].fill[0].attrs
+    /**
+     * 第2步：将图片填充在原来元素上，形状大小要同原来的元素；
+     * */
+    var image = new Image(); // 创建一个新的Image对象
+    image.src = imgUrl // 图片的路径
+    // // 在图片加载完成后执行绘制操作
+    image.onload = function () {
+      // editor.sceneGraph.children.forEach((item)=>{
+      //   if(item.objectName == selectedElements.items[0].objectName){
+      //     item.fill[0].type = 'Image'
+      //     item.fill[0].attrs = {src:imgUrl,opacity:0.7}
+      //   }
+      // })
+      selectedElements.items[0].fill[0].type = 'Image'
+      selectedElements.items[0].fill[0].attrs = { src: imgUrl, opacity: 0.7 }
+      const newStates = selectedElements.items[0].fill[0].attrs
+      editor.commandManager.pushCommand(
+        new SetElementsAttrs(
+          'Update Type of Elements',
+          selectedElements.items[0],
+          newStates,
+          prevStates,
+        ),
       );
-          // 重新渲染右侧画布
-          editor.sceneGraph.render();
-      };
+      // 重新渲染右侧画布
+      editor.sceneGraph.render();
+    };
 
   }, [imgUrl]);
 
@@ -388,34 +384,34 @@ const getFormData = () => {
   //   }
   // }
   //获取嵌套图
-const onInpaintingChange = (value) => {
-    if(value==true) {
-    const sceneGraph = editor.sceneGraph;
-    const selectedElements = editor.selectedElements;
-    const selectedWidth = selectedElements.items[0].width
-    const selectedHeight = selectedElements.items[0].height
-    const selectedX = selectedElements.items[0].x
-    const selectedY = selectedElements.items[0].y
-    const originalCtx = editor.sceneGraph.editor.ctx;
-    // 获取选中矩形区域的像素数据
-    const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
-    for (let i = 0; i < selectedImageData.data.length; i += 4) {
-      selectedImageData.data[i + 3] = 0;
-    }
+  const onInpaintingChange = (value) => {
+    if (value == true) {
+      const sceneGraph = editor.sceneGraph;
+      const selectedElements = editor.selectedElements;
+      const selectedWidth = selectedElements.items[0].width
+      const selectedHeight = selectedElements.items[0].height
+      const selectedX = selectedElements.items[0].x
+      const selectedY = selectedElements.items[0].y
+      const originalCtx = editor.sceneGraph.editor.ctx;
+      // 获取选中矩形区域的像素数据
+      const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
+      for (let i = 0; i < selectedImageData.data.length; i += 4) {
+        selectedImageData.data[i + 3] = 0;
+      }
 
-    // 创建新Canvas元素来显示选中区域
-    const resultCanvas = document.createElement('canvas');
-    resultCanvas.width = selectedWidth;
-    resultCanvas.height = selectedHeight;
-    const resultCtx = resultCanvas.getContext('2d');
-    // 清空Canvas，使背景透明
-    resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
-    // 将选中区域的像素数据放置在新Canvas上
-    resultCtx.putImageData(selectedImageData, 0, 0);
-    // 遍历每个矩形元素并绘制到新 Canvas 上
-    // 将选中元素的子元素绘制到Canvas上
-    const children = selectedElements.items[0].children;
-    for (let i = 0; i < children.length; i++) {
+      // 创建新Canvas元素来显示选中区域
+      const resultCanvas = document.createElement('canvas');
+      resultCanvas.width = selectedWidth;
+      resultCanvas.height = selectedHeight;
+      const resultCtx = resultCanvas.getContext('2d');
+      // 清空Canvas，使背景透明
+      resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+      // 将选中区域的像素数据放置在新Canvas上
+      resultCtx.putImageData(selectedImageData, 0, 0);
+      // 遍历每个矩形元素并绘制到新 Canvas 上
+      // 将选中元素的子元素绘制到Canvas上
+      const children = selectedElements.items[0].children;
+      for (let i = 0; i < children.length; i++) {
         const child = children[i];
         const rectX = child.x;
         const rectY = child.y;
@@ -424,22 +420,22 @@ const onInpaintingChange = (value) => {
         // 根据两个坐标位置计算出两个矩形在像素数据中的位置
         const rectXInImageData = rectX - selectedX;
         const rectYInImageData = rectY - selectedY;
-         // 绘制矩形
+        // 绘制矩形
         resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
         resultCtx.fillStyle = `rgba(${child.fill[0].attrs.r},${child.fill[0].attrs.g},${child.fill[0].attrs.b},${child.fill[0].attrs.a})`;
         resultCtx.fillRect(rectXInImageData, rectYInImageData, rectWidth, rectHeight);
-    }
+      }
 
-    // 将新Canvas转化为数据URL
-    const dataURL = resultCanvas.toDataURL('image/png');
+      // 将新Canvas转化为数据URL
+      const dataURL = resultCanvas.toDataURL('image/png');
 
-    // 创建一个新的图像元素，并设置其src属性为数据URL
-    const resultImage = new Image();
-    resultImage.src = dataURL;
+      // 创建一个新的图像元素，并设置其src属性为数据URL
+      const resultImage = new Image();
+      resultImage.src = dataURL;
 
-    // 将图像元素添加到页面上
-    document.body.appendChild(resultImage);
-    setinpaintingchecked(value)
+      // 将图像元素添加到页面上
+      document.body.appendChild(resultImage);
+      setinpaintingchecked(value)
     }
   }
   const onMultidiffusionChange = (value) => {
@@ -481,122 +477,122 @@ const onInpaintingChange = (value) => {
       form.setFieldsValue(values);
     }
   }
- //文生图 
- const textToImageSocket = async (backendData, controlnetFiles) => {
-  await postImage(backendData, controlnetFiles).then((RES) => {
-    try {
-      if (!RES || RES.code !== 0) {
-        notification.error({
-          message: '请求错误',
-          description: `${RES && RES.message ? RES.message : ''}`,
-        });
-        return false;
-      } else {
-        if (RES.params.task_id && RES.params.status!='FAILED') {
-          const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
-          const socket = new WebSocket(socketUrl);
-          socket.onopen = () => {
-            console.log('WebSocket连接已打开');
-          };
-          socket.onmessage = (event) => {
-            console.log('触发', JSON.parse(event.data));
-            if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
-              event && setTextToImageDataRes(JSON.parse(event.data))
-              globalData = JSON.parse(event.data) 
-              setSoketData(globalData)
-            }
-          };
-          socket.onclose = async (event) => {
-            console.log('close');
-            if (globalData && globalData.status === 'COMPLETED') {
-              const res = await getRecord(RES.params.task_id);
-              if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
-                let fileUrl = res.params.images[0]
-                setImgUrl(fileUrl)
-                localStorage.setItem('fileUrl', fileUrl)
+  //文生图 
+  const textToImageSocket = async (backendData, controlnetFiles) => {
+    await postImage(backendData, controlnetFiles).then((RES) => {
+      try {
+        if (!RES || RES.code !== 0) {
+          notification.error({
+            message: '请求错误',
+            description: `${RES && RES.message ? RES.message : ''}`,
+          });
+          return false;
+        } else {
+          if (RES.params.task_id && RES.params.status != 'FAILED') {
+            const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
+            const socket = new WebSocket(socketUrl);
+            socket.onopen = () => {
+              console.log('WebSocket连接已打开');
+            };
+            socket.onmessage = (event) => {
+              console.log('触发', JSON.parse(event.data));
+              if (event && JSON.parse(event.data) && JSON.parse(event.data) != {}) {
+                event && setTextToImageDataRes(JSON.parse(event.data))
+                globalData = JSON.parse(event.data)
+                setSoketData(globalData)
+              }
+            };
+            socket.onclose = async (event) => {
+              console.log('close');
+              if (globalData && globalData.status === 'COMPLETED') {
+                const res = await getRecord(RES.params.task_id);
+                if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status != 'FAILED') {
+                  let fileUrl = res.params.images[0]
+                  setImgUrl(fileUrl)
+                  localStorage.setItem('fileUrl', fileUrl)
+                } else {
+                  notification.error({
+                    message: '操作失败',
+                    description: `${res && res.message ? res.message : '请求异常'}`,
+                  });
+                }
               } else {
                 notification.error({
                   message: '操作失败',
-                  description: `${res && res.message ? res.message : '请求异常'}`,
+                  description: `请求失败`,
                 });
               }
-            } else {
-              notification.error({
-                message: '操作失败',
-                description: `请求失败`,
-              });
-            }
-          };
-        } else {
-          notification.error({
-            message: '接口错误',
-            description: `task_id不存在或发生异常`,
-          });
+            };
+          } else {
+            notification.error({
+              message: '接口错误',
+              description: `task_id不存在或发生异常`,
+            });
+          }
         }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  })
-}
+    })
+  }
 
-//图生图
-const imageToImageSocket = async (backendData, controlnetFiles, files) => {
-  await postImageToImage(backendData, controlnetFiles, files).then((RES) => {
-    try {
-      if (!RES || RES.code !== 0) {
-        notification.error({
-          message: '请求错误',
-          description: `${RES && RES.message ? RES.message : ''}`,
-        });
-        return false;
-      } else {
-        if (RES.params.task_id) {
-          const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
-          const socket = new WebSocket(socketUrl);
-          socket.onopen = () => {
-            console.log('WebSocket连接已打开');
-          };
-          socket.onmessage = (event) => {
-            console.log('触发', JSON.parse(event.data));
-              if (event && JSON.parse(event.data)&&JSON.parse(event.data)!={}) {
+  //图生图
+  const imageToImageSocket = async (backendData, controlnetFiles, files) => {
+    await postImageToImage(backendData, controlnetFiles, files).then((RES) => {
+      try {
+        if (!RES || RES.code !== 0) {
+          notification.error({
+            message: '请求错误',
+            description: `${RES && RES.message ? RES.message : ''}`,
+          });
+          return false;
+        } else {
+          if (RES.params.task_id) {
+            const socketUrl = `${socketBaseURL}/task/progress/${RES.params.task_id}`;
+            const socket = new WebSocket(socketUrl);
+            socket.onopen = () => {
+              console.log('WebSocket连接已打开');
+            };
+            socket.onmessage = (event) => {
+              console.log('触发', JSON.parse(event.data));
+              if (event && JSON.parse(event.data) && JSON.parse(event.data) != {}) {
                 event && setImageToImageDataRes(JSON.parse(event.data))
                 globalData = JSON.parse(event.data)
                 setSoketData(globalData)
               }
-          };
-          socket.onclose = async (event) => {
-            if (globalData && globalData.status === 'COMPLETED') {
-              const res = await getRecord(RES.params.task_id);
-              if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status!='FAILED') {
-                let fileUrl = res.params.images[0]
-                setImgUrl(fileUrl)
-                localStorage.setItem('fileUrl', fileUrl)
+            };
+            socket.onclose = async (event) => {
+              if (globalData && globalData.status === 'COMPLETED') {
+                const res = await getRecord(RES.params.task_id);
+                if (res && res.code === 0 && res.params && res.params.images && Array.isArray(res.params.images) && res.params.images.length > 0 && res.params.images.every(item => item !== '') && res.params.status != 'FAILED') {
+                  let fileUrl = res.params.images[0]
+                  setImgUrl(fileUrl)
+                  localStorage.setItem('fileUrl', fileUrl)
+                } else {
+                  notification.error({
+                    message: '操作失败',
+                    description: `${res && res.message ? res.message : '请求异常'}`,
+                  });
+                }
               } else {
                 notification.error({
                   message: '操作失败',
-                  description: `${res && res.message ? res.message : '请求异常'}`,
+                  description: `请求失败`,
                 });
               }
-            } else {
-              notification.error({
-                message: '操作失败',
-                description: `请求失败`,
-              });
-            }
-          };
-        } else {
-          notification.error({
-            message: '接口错误',
-            description: `task_id不存在或发生异常`,
-          });
+            };
+          } else {
+            notification.error({
+              message: '接口错误',
+              description: `task_id不存在或发生异常`,
+            });
+          }
         }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  })
-}
+    })
+  }
 
   //表单提交逻辑
   const onFinish = _.debounce(async (values) => {
@@ -670,7 +666,7 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
         }
       }
       let controlnetFiles = []
-      if(Object.keys(imgData).length !== 0) {
+      if (Object.keys(imgData).length !== 0) {
         controlnetFiles.push(imgData)
       }
       if (selectType === '1') {
@@ -863,11 +859,11 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
             checked={inpaintingchecked}
             defaultChecked={false}
             onChange={onInpaintingChange}
-            // onChange={
-            //   (newChecked) => {
-            //     textToImageStore.updateInpainting(newChecked);
-            //   }} 
-            />
+          // onChange={
+          //   (newChecked) => {
+          //     textToImageStore.updateInpainting(newChecked);
+          //   }} 
+          />
         </Form.Item>
         <Form.Item name="Multidiffusion" label="Multidiffusion" valuePropName="multidiffusionChecked">
           <Switch checked={multidiffusionChecked} defaultChecked={false} onChange={onMultidiffusionChange} />
@@ -878,14 +874,14 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
           // label="Upload"
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          // extra=""
+        // extra=""
         >
-          <Upload 
-          action={""}
-          showUploadList={false}
-          maxCount={1} 
-          multiple={false} 
-          onChange={onChangeHandler}>
+          <Upload
+            action={""}
+            showUploadList={false}
+            maxCount={1}
+            multiple={false}
+            onChange={onChangeHandler}>
             <div className='upload-box'>
               <PlusOutlined style={{ fontSize: '24px', color: '#985EFF' }} />
             </div>
@@ -897,14 +893,14 @@ const imageToImageSocket = async (backendData, controlnetFiles, files) => {
             offset: 6,
           }}
         >
-        {(soketData && 
-            soketData.status === 'RUNNING') ?(
+          {(soketData &&
+            soketData.status === 'RUNNING') ? (
             <div>
-          <ProgressButton percent={soketData&& soketData.progress && soketData.progress.progress}>Progress {soketData&& soketData.progress && Math.round(Number(soketData.progress.progress))}%</ProgressButton>
-        </div>
-       ):<Button type="primary" htmlType="submit" className='generate-btn'>
+              <ProgressButton percent={soketData && soketData.progress && soketData.progress.progress}>Progress {soketData && soketData.progress && Math.round(Number(soketData.progress.progress))}%</ProgressButton>
+            </div>
+          ) : <Button type="primary" htmlType="submit" className='generate-btn'>
             Submit
-          </Button>} 
+          </Button>}
         </Form.Item>
       </Form>
     </div>
