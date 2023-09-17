@@ -348,6 +348,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     smooth: boolean,
   ) {
     const src = texture.attrs.src;
+    const opacity = texture.attrs.opacity;
     const width = this.width;
     const height = this.height;
     let img: CanvasImageSource | undefined = undefined;
@@ -371,7 +372,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
 
     const sx = img.width / 2 - width / scale / 2;
     const sy = img.height / 2 - height / scale / 2;
-
+    if(opacity){
+      ctx.globalAlpha = opacity;
+    }
     ctx.drawImage(
       img,
       sx,
@@ -383,6 +386,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
       width,
       height,
     );
+    ctx.globalAlpha = 1.0;
   }
 
   protected fillbrush(
