@@ -10,7 +10,7 @@ import { StrokeCard } from '../Cards/StrokeCard';
 import Generate from '../Generate/index';
 import { Tabs, Divider, Select, Slider } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import ActionType from '../ActionType';
+import ActionType from '../Cards/ActionType';
 import OpcitySet from '../OpcitySet';
 import BackToMeta from '../BackToMeta';
 import PenSize from '../PenSize';

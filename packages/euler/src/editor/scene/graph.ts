@@ -34,7 +34,7 @@ export interface GraphAttrs {
   parent?: Graph | null;
   zIndex?: number;
   brushPath?: Path2D | null;
-  iframeType?: SelectType;
+  iframeType?: string;
 }
 
 export class Graph {
@@ -57,7 +57,7 @@ export class Graph {
   rotation?: number = 0;
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
-  iframeType = SelectType.Meta;
+  iframeType = "Meta";
   constructor(options: GraphAttrs) {
     this.type = options.type ?? this.type;
     this.id = options.id ?? genId();
@@ -299,7 +299,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
   }: {
     width?: number;
     height?: number;
-    iframeType?: SelectType;
+    iframeType?: string;
   }) {
     // 获取原来x y 坐标
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
@@ -633,8 +633,8 @@ export const MutateElementsAndRecord = {
           ),
       );
   },
-  
-  setIframeType(editor: Editor, elements: Graph[], iframeType: SelectType) {
+  // 设置元素类型 mate / image / 
+  setIframeType(editor: Editor, elements: Graph[], iframeType: string) {
     if (elements.length === 0) {
         return;
     }
