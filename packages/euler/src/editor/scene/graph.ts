@@ -72,7 +72,11 @@ export class Graph {
     height: "768",
     seed: "1234",
     denoise: "0.75", //去噪强度 Denoising Strength
-    widthHeight: '1'
+    widthHeight: '1',
+    isInpainting: false,
+    controlnet: '',
+    lora: '',
+    Multidiffusion: false,
   }
 
   constructor(options: GraphAttrs) {

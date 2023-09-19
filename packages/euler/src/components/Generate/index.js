@@ -94,13 +94,16 @@ const Generate = () => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [inpaintingchecked, setinpaintingchecked] = useState(false);
   const [multidiffusionChecked, setMultidiffusionChecked] = useState(false);
-  const [stepsVal, setStepsVal] = useState(0);
-  const [scaleVal, setScaleVal] = useState(0);
+  const [stepsVal, setStepsVal] = useState(0.75);
+  const [scaleVal, setScaleVal] = useState(0.75);
+  const [baseModelVal, setBaseModelVal] = useState('');
+  const [loraVal, setLoraVal] = useState('');
+  const [controlnetVal, setControlnetVal] = useState(0.75);
   const [fileObj, setFileObj] = useState({});
   const [imgUrl, setImgUrl] = useState("");
   const [imgData, setImgData] = useState({});
-  const [imageToImageDataRes, setImageToImageDataRes] = useState({});
-  const [textToImageDataRes, setTextToImageDataRes] = useState({});
+  // const [imageToImageDataRes, setImageToImageDataRes] = useState({});
+  // const [textToImageDataRes, setTextToImageDataRes] = useState({});
   const [soketData, setSoketData] = useState({});
   const [formData, setFormData] = useState({});
   const intl = useIntl();
@@ -203,8 +206,19 @@ const Generate = () => {
         height: val.height,
         seed: val.seed,
         denoise: val.denoise, //去噪强度 Denoising Strength
-        widthHeight: val.widthHeight
+        widthHeight: val.widthHeight,
+        isInpainting: val.isInpainting,
+        controlnet: val.controlnet,
+        lora: val.lora,
+        Multidiffusion: val.Multidiffusion,
       });
+      setBaseModelVal(val.base_model_name)
+      setLoraVal(val.lora)
+      setControlnetVal(val.controlnet)
+      setStepsVal(val.num_inference_steps)
+      setScaleVal(val.cfg)
+      setMultidiffusionChecked(val.Multidiffusion)
+      setinpaintingchecked(val.isInpainting)
     } else {
       //表单默认值
       form.setFieldsValue({
@@ -220,7 +234,11 @@ const Generate = () => {
         height: "768",
         seed: "1234",
         denoise: "0.75", //去噪强度 Denoising Strength
-        widthHeight: '1'
+        widthHeight: '1',
+        isInpainting: false,
+        controlnet: '',
+        lora: '',
+        Multidiffusion:false,
       });
     }
   }
@@ -305,22 +323,14 @@ const Generate = () => {
   }
 
   //
-  const onChangeSteps = (value) => {
+  const onChangeSteps = (value, type) => {
     setStepsVal(value)
+    updateFormData(type,value)
   }
   //
-  const onAfterChangeSteps = (value) => {
-    setStepsVal(value)
-  }
-
-  //
-  const onChangeScale = (value) => {
+  const onChangeScale = (value, type) => {
     setScaleVal(value)
-  }
-  //
-  const onAfterChangeScale = (value) => {
-    setScaleVal(value)
-
+    updateFormData(type,value)
   }
   //获取mask图
   // const onInpaintingChange = (value) => {
@@ -384,7 +394,8 @@ const Generate = () => {
   //   }
   // }
   //获取嵌套图
-  const onInpaintingChange = (value) => {
+  const onInpaintingChange = (value,type) => {
+    
     if (value == true) {
       const sceneGraph = editor.sceneGraph;
       const selectedElements = editor.selectedElements;
@@ -435,16 +446,40 @@ const Generate = () => {
 
       // 将图像元素添加到页面上
       document.body.appendChild(resultImage);
-      setinpaintingchecked(value)
+    }
+    setinpaintingchecked(value)
+    updateFormData(type,value)
+  }
+  const onMultidiffusionChange = (value,type) => {
+    setMultidiffusionChecked(value)
+    console.log(value,'onMultidiffusionChange')
+    updateFormData(type,value)
+  }
+
+  const updateFormData = (key,value) => {
+    const sceneGraph = editor.sceneGraph;
+    const selectedElements = editor.selectedElements;
+    if (editor) {
+      const elements = editor.selectedElements.getItems();
+      const prevData = elements[0].formData
+      const newData = {...prevData,[key]:value}
+      MutateElementsAndRecord.setFormdata(editor, elements, newData);
+      editor.sceneGraph.render();
     }
   }
-  const onMultidiffusionChange = (value) => {
-    setMultidiffusionChecked(value)
+
+  const handleBlur= (event, type) => {
+    let changeVal = event.target.value
+    updateFormData(type,changeVal)
   }
 
+  const TextAreaChange= (event, type) => {
+    let changeVal = event.target.value
+    updateFormData(type,changeVal)
+  }
 
   const SelectComponentOnChange = (value, option, type, index) => {
-    if (type === 'basemodel') {
+    if (type === 'base_model_name') {
       setBaseModelTips(option.item);
       let targetVaeModalArray = JSON.parse(localStorage.getItem('config')).vae_model.filter(item => option.item.link === item.link);
       form.setFieldsValue({
@@ -466,16 +501,18 @@ const Generate = () => {
       });
     }
     if (type === 'controlnet') {
-      textToImageStore.setControlNetitems(value)
-      let values = { controlnet: toJS(textToImageStore.status.controlnet), }
-      form.setFieldsValue(values);
+      // textToImageStore.setControlNetitems(value)
+      // let values = { controlnet: toJS(textToImageStore.status.controlnet), }
+      // form.setFieldsValue(values);
     }
     if (type === 'lora') {
       //lora的回填
-      textToImageStore.setLoaritems(value);
-      let values = { lora: toJS(textToImageStore.status.lora), }
-      form.setFieldsValue(values);
+      // textToImageStore.setLoaritems(value);
+      // let values = { lora: toJS(textToImageStore.status.lora), }
+      // form.setFieldsValue(values);
     }
+    updateFormData(type,value)
+    
   }
   //文生图 
   const textToImageSocket = async (backendData, controlnetFiles) => {
@@ -497,7 +534,7 @@ const Generate = () => {
             socket.onmessage = (event) => {
               console.log('触发', JSON.parse(event.data));
               if (event && JSON.parse(event.data) && JSON.parse(event.data) != {}) {
-                event && setTextToImageDataRes(JSON.parse(event.data))
+                // event && setTextToImageDataRes(JSON.parse(event.data))
                 globalData = JSON.parse(event.data)
                 setSoketData(globalData)
               }
@@ -556,7 +593,7 @@ const Generate = () => {
             socket.onmessage = (event) => {
               console.log('触发', JSON.parse(event.data));
               if (event && JSON.parse(event.data) && JSON.parse(event.data) != {}) {
-                event && setImageToImageDataRes(JSON.parse(event.data))
+                // event && setImageToImageDataRes(JSON.parse(event.data))
                 globalData = JSON.parse(event.data)
                 setSoketData(globalData)
               }
@@ -663,7 +700,9 @@ const Generate = () => {
           height: allValue.height,
           seed: allValue.seed ? allValue.seed : 'disable',
           denoise: allValue.denoise, //去噪强度 Denoising Strength
-        }
+        },
+        isInpainting: allValue.isInpainting?'1':'0',
+
       }
       let controlnetFiles = []
       if (Object.keys(imgData).length !== 0) {
@@ -742,8 +781,9 @@ const Generate = () => {
             <div className='model-title'>Model</div>
             {baseModelTips.title && <Select
               placeholder="请选择模型"
-              defaultValue={baseModelTips.title}
-              onChange={(value, option) => SelectComponentOnChange(value, option, 'basemodel')}
+              // defaultValue={baseModelTips.title}
+              value={baseModelVal}
+              onChange={(value, option) => SelectComponentOnChange(value, option, 'base_model_name')}
             >
               {checkOptionsType(configOptions.base_model || [])}
             </Select>}
@@ -767,13 +807,13 @@ const Generate = () => {
                 <div className='prompts-content-title'>Prompt</div>
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name="positive_prompt" >
-                    <TextArea rows={6} className="no-resize" />
+                    <TextArea rows={6} className="no-resize" onChange={(value) => TextAreaChange(value, 'positive_prompt')} onBlur={(value) => handleBlur(value, 'positive_prompt')}/>
                   </Form.Item>
                 </ConfigProvider>
                 <div className='negative-content-title'>Negative prompt</div>
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name="negative_prompt" >
-                    <TextArea rows={6} />
+                    <TextArea rows={6} onChange={(value) => TextAreaChange(value, 'negative_prompt')} onBlur={(value) => handleBlur(value, 'negative_prompt')}/>
                   </Form.Item>
                 </ConfigProvider>
                 <div className='negative-content-dec' >Concepts specified in the negative prompt won't guide the generation.</div>
@@ -799,14 +839,14 @@ const Generate = () => {
                 <div className='slider-title'>Steps {stepsVal}</div>
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name={'num_inference_steps'} style={{ marginBottom: 0 }}>
-                    <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChangeSteps} onAfterChange={onAfterChangeSteps} />
+                    <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={stepsVal} onChange={(value) => onChangeSteps(value, 'num_inference_steps')}  />
                   </Form.Item>
                 </ConfigProvider>
                 <div className='slider-dec'>Results are better the more steps you use. If you want faster results you can use a smaller number.</div>
                 <div className='slider-title'>Guidance {scaleVal}</div>
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name={'cfg'} style={{ marginBottom: 0 }}>
-                    <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={0.75} onChange={onChangeScale} onAfterChange={onAfterChangeScale} />
+                    <Slider min={0} max={1} step={0.01} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} value={scaleVal}  onChange={(value) => onChangeScale(value, 'cfg')}  />
                   </Form.Item>
                 </ConfigProvider>
                 <div className='slider-dec'>Increasing guidance scale forces the generation to better match the prompt.</div>
@@ -833,6 +873,8 @@ const Generate = () => {
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name="controlnet" >
                     <Select
+                    value={controlnetVal}
+                    onChange={(value, option) => SelectComponentOnChange(value, option, 'controlnet')}
                     // placeholder="请选择controlnet模型"
                     >
                       {checkOptionsType(configOptions.controlnet_model || [])}
@@ -843,6 +885,7 @@ const Generate = () => {
                 <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
                   <Form.Item name="lora" >
                     <Select
+                      value={loraVal}
                       onChange={(value, option) => SelectComponentOnChange(value, option, 'lora')}
                     // placeholder="请选择Lora模型"
                     >
@@ -857,16 +900,11 @@ const Generate = () => {
         <Form.Item name="isInpainting" label="Inpainting" valuePropName="checked">
           <Switch
             checked={inpaintingchecked}
-            defaultChecked={false}
-            onChange={onInpaintingChange}
-          // onChange={
-          //   (newChecked) => {
-          //     textToImageStore.updateInpainting(newChecked);
-          //   }} 
+            onChange={(value) => onInpaintingChange(value, 'isInpainting')}
           />
         </Form.Item>
         <Form.Item name="Multidiffusion" label="Multidiffusion" valuePropName="multidiffusionChecked">
-          <Switch checked={multidiffusionChecked} defaultChecked={false} onChange={onMultidiffusionChange} />
+          <Switch checked={multidiffusionChecked}  onChange={(value) => onMultidiffusionChange(value, 'Multidiffusion')} />
         </Form.Item>
         <div className='generate-title  marB-3'>Image Content</div>
         <Form.Item
@@ -874,7 +912,6 @@ const Generate = () => {
           // label="Upload"
           valuePropName="fileList"
           getValueFromEvent={normFile}
-        // extra=""
         >
           <Upload
             action={""}

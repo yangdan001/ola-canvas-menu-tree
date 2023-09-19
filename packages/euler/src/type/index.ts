@@ -101,5 +101,9 @@ export interface IFormData {
   height: string,
   seed: string,
   denoise: string, //去噪强度 Denoising Strength
-  widthHeight: string
+  widthHeight: string,
+  isInpainting: boolean,
+  Multidiffusion: boolean,
+  controlnet: string,
+  lora: string,
 }
