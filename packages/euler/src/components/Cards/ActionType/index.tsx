@@ -9,12 +9,17 @@ import {
   Select,
   ConfigProvider,
   Form,
-  Divider
+  Divider,
+  notification
 } from 'antd';
 import { BaseCard } from '../BaseCard';
 import './style.scss';
 import { useIntl } from 'react-intl';
-const ElementsInfoCards: FC = () => {
+interface ChildProps {
+  onData: (data: string) => void;
+}
+
+const ElementsInfoCards: FC<ChildProps> = (props) => {
   const editor = useContext(EditorContext);
   const intl = useIntl();
   const MIXED = intl.formatMessage({ id: 'mixed' });
@@ -53,9 +58,19 @@ const ElementsInfoCards: FC = () => {
           onChange={(newIframeType) => {
             if (editor) {
               const elements = editor.selectedElements.getItems();
+              const elementsType =  elements[0].fill[0].type //'Image' 
+              if(elementsType == 'Image' && newIframeType == 'Mask') {
+                notification.warning({
+                  message: '提示',
+                  description: `image类型不能修改成mask类型`,
+                });
+                return
+              }
               MutateElementsAndRecord.setIframeType(editor, elements, newIframeType);
               editor.sceneGraph.render();
             }
+            //子组件给父组件传参数
+            props.onData(newIframeType);
           }}
         />
       </div>
@@ -73,6 +88,7 @@ const AttrSelect: FC<{
   return (
     <div>
       <label htmlFor={props.label}>{props.label}</label>
+      <ConfigProvider theme={{ token: { colorPrimary: '#BB93F8', }, }}   >
       <Select
         id={props.label}
         value={props.value}
@@ -86,6 +102,7 @@ const AttrSelect: FC<{
           </option>
         ))}
       </Select>
+      </ConfigProvider>
     </div>
   );
 };

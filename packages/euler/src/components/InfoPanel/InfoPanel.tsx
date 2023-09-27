@@ -28,6 +28,11 @@ export const InfoPanel: FC = () => {
   const [type, setType] = useState(PanelType.Global);
   const [key, setKey] = useState('1');
   const [frameType, setIframeType] = useState('image');
+  // const [receivedData, setReceivedData] = useState<string>('');
+//父组件接收子组件的参数
+  const handleChildData = (dataFromChild: string) => {
+     setIframeType(dataFromChild);
+  }
   // 根据是否选中元素，来决定面板类型
   useEffect(() => {
     if (editor) {
@@ -62,7 +67,7 @@ export const InfoPanel: FC = () => {
                 <>
                   <div className='property-title'>Property</div>
                   <Divider style={{marginTop: 10,marginBottom: 0,background:'#444'}}/>
-                  <ActionType/>
+                  <ActionType onData={handleChildData}/>
                   {/* <AlignCard /> */}
                   <ElementsInfoCards />
                   {/* <Divider style={{marginTop: 10,marginBottom: 0}}/> */}
