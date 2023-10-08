@@ -205,7 +205,7 @@ export class SelectTool implements ITool {
   afterEnd() {
     /* eslint-disable-next-line no-debugger */
     // debugger
-    console.log(this.editor,'this.editor')
+    // console.log(this.editor,'this.editor')
     if (!this.editor.hostEventManager.isDraggingCanvasBySpace) {
       this.editor.setCursor('');
     }

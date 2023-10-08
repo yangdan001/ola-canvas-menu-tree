@@ -53,7 +53,7 @@ export class KeyBindingManager {
   private handleAction = (e: KeyboardEvent) => {
     if (
       e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLTextAreaElement
+      e.target instanceof HTMLTextAreaElement 
     ) {
       return;
     }

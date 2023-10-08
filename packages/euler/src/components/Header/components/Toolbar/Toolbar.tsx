@@ -68,6 +68,12 @@ export const ToolBar = () => {
             icon: <TextFilled />,
           },
           {
+            name: 'drawPen',
+            hotkey: 'P',
+            intlId: 'tool.pen',
+            icon: <HighlightFilled />,
+          },
+          {
             name: 'dragCanvas',
             hotkey: 'H',
             intlId: 'tool.hand',

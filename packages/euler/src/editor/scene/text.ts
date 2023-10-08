@@ -21,6 +21,8 @@ export class TextGraph extends Graph {
   fontSize: number;
   autoFit?: boolean;
   constructor(options: Optional<TextAttrs, 'width' | 'height'>) {
+    /* eslint-disable-next-line no-debugger */
+    debugger
     super({
       ...options,
       type: GraphType.Text,

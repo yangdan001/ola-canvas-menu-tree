@@ -48,9 +48,9 @@ export class Rect extends Graph {
           this.fillImage(ctx, texture, imgManager, smooth);
           break;
         }
-        case TextureType.Canvas: {
-          this.fillbrush(ctx, texture, imgManager, smooth, canvas);
-        }
+        // case TextureType.Canvas: {
+        //   this.fillbrush(ctx, texture, imgManager, smooth, canvas);
+        // }
       }
     }
     if (this.strokeWidth) {
@@ -67,10 +67,10 @@ export class Rect extends Graph {
             this.fillImage(ctx, texture, imgManager, smooth);
             break;
           }
-          case TextureType.Canvas: {
-            // TODO: stroke image
-            this.fillbrush(ctx, texture, imgManager, smooth, canvas);
-          }
+          // case TextureType.Canvas: {
+          //   // TODO: stroke image
+          //   this.fillbrush(ctx, texture, imgManager, smooth, canvas);
+          // }
         }
       }
     }

@@ -13,6 +13,7 @@ export const en = {
   'tool.ellipse': 'Ellipse',
   'tool.line': 'Line',
   'tool.text': 'Text',
+  'tool.pen': 'Pen',
   'tool.hand': 'Hand',
   'command.copy': 'Copy',
   'command.pasteHere': 'Paste here',

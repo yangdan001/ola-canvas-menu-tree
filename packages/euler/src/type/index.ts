@@ -5,6 +5,11 @@ export interface IRect {
   height: number;
 }
 
+export interface IPen {
+  x: number;
+  y: number;
+  points: { x: number; y: number }[];
+}
 export interface IBrush {
   startX: number;
   startY: number;
@@ -54,6 +59,7 @@ export enum GraphType {
   Text = 'Text',
   Line = 'Line',
   Brush = 'Brush',
+  Pen = 'Pen',
 }
 
 export enum SelectType {

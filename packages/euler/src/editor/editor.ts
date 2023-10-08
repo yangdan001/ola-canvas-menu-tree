@@ -15,6 +15,7 @@ import { ZoomManager } from './zoom_manager';
 import { AutoSaveGraphs } from './store/auto-save-graphs';
 import { GraphAttrs } from './scene/graph';
 import { TextEditor } from './text/text_editor';
+import { PenEditor } from './pen/pen_editor';
 import { RefLine } from './ref_line';
 import { ClipboardManager } from './clipboard';
 import { KeyBindingManager } from './key_binding_manager';
@@ -55,6 +56,7 @@ export class Editor {
   ruler: Ruler;
   refLine: RefLine;
   textEditor: TextEditor;
+  penEditor: PenEditor;
 
   autoSaveGraphs: AutoSaveGraphs;
 
@@ -87,8 +89,9 @@ export class Editor {
     this.selectedElements = new SelectedElements(this);
     this.ruler = new Ruler(this);
     this.refLine = new RefLine(this);
+  
     this.textEditor = new TextEditor(this);
-
+    this.penEditor = new PenEditor(this);
     this.hostEventManager = new HostEventManager(this);
     this.hostEventManager.bindHotkeys();
 

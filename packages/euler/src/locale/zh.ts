@@ -15,6 +15,7 @@ export const zh: typeof en = {
   'tool.ellipse': '圆',
   'tool.line': '直线',
   'tool.text': '文字',
+  'tool.pen': '涂鸦',
   'tool.hand': '拖拽画布',
   'command.copy': '复制',
   'command.pasteHere': '粘贴到此处',

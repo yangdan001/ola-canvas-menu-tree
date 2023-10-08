@@ -6,7 +6,8 @@ export class DrawTextTool implements ITool {
   readonly type = 'drawText';
   readonly hotkey = 't';
 
-  constructor(private editor: Editor) {}
+  constructor(private editor: Editor) {
+  }
   active() {
     this.editor.setCursor('crosshair');
   }

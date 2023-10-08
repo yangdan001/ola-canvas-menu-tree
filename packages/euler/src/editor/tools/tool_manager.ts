@@ -8,6 +8,7 @@ import { DrawBrushTool } from './tool_draw_brush';
 import { SelectTool } from './tool_select';
 import { ITool } from './type';
 import { DrawTextTool } from './tool_draw_text';
+import { DrawPenTool } from './tool_draw_pen';
 import { DrawLineTool } from './tool_draw_line';
 
 interface Events {
@@ -36,6 +37,7 @@ export class ToolManager {
     this.registerToolAndHotKey(new DrawEllipseTool(editor));
     this.registerToolAndHotKey(new DrawLineTool(editor));
     this.registerToolAndHotKey(new DrawTextTool(editor));
+    this.registerToolAndHotKey(new DrawPenTool(editor));
     this.registerToolAndHotKey(new DragCanvasTool(editor));
 
     this.setActiveTool(SelectTool.type);
@@ -76,6 +78,10 @@ export class ToolManager {
         return;
       }
 
+      // if (this.editor.penEditor.isEditing()) {
+      //   return;
+      // }
+
       startWithLeftMouse = true;
       if (!this.currentTool) {
         throw new Error('there is no active tool');
@@ -105,7 +111,7 @@ export class ToolManager {
         if (this.isDragging) {
           this.enableSwitchTool = false;
           this.editor.hostEventManager.disableDragBySpace();
-          console.log(this.currentTool,'this.currentTool')
+          // console.log(this.currentTool,'this.currentTool')
           /* eslint-disable-next-line no-debugger */
     //  debugger
           this.currentTool.drag(e);
@@ -168,7 +174,7 @@ export class ToolManager {
       return;
     }
     /* eslint-disable-next-line no-debugger */
-    // debugger
+    debugger
     const prevTool = this.currentTool;
     const currentTool = (this.currentTool = this.toolMap.get(toolName) || null);
     if (!currentTool) {

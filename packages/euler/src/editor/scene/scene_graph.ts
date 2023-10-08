@@ -26,6 +26,7 @@ import { forEach } from '../../utils/array_util';
 import Grid from '../grid';
 import { getDevicePixelRatio } from '../../utils/common';
 import { TextGraph } from './text';
+import { PenGraph } from './pen';
 import { HALF_PI } from '../../constant';
 import { Line } from './line';
 import { Brush } from './brush';
@@ -627,6 +628,7 @@ getPointElements(point: IPoint): Graph[] {
       [GraphType.Line]: Line,
       [GraphType.Brush]: Brush,
       [GraphType.Text]: TextGraph,
+      [GraphType.Pen]: PenGraph,
     };
   
     const parseGraph = (attrs: any) => {
