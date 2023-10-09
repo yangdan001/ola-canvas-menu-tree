@@ -41,7 +41,7 @@ export class DrawPenTool implements ITool {
   
   end(e: PointerEvent) {
     // this.isDrawing = false;
-    // this.editor.ctx.lineWidth=1
+    this.editor.ctx.lineWidth=1
     // const penEditorInstance = new PenEditor(this.editor);
     // penEditorInstance.visible(); // This will call the constructor and then the visible method
 
