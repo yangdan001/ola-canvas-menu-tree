@@ -15,7 +15,6 @@ import { ZoomManager } from './zoom_manager';
 import { AutoSaveGraphs } from './store/auto-save-graphs';
 import { GraphAttrs } from './scene/graph';
 import { TextEditor } from './text/text_editor';
-import { PenEditor } from './pen/pen_editor';
 import { RefLine } from './ref_line';
 import { ClipboardManager } from './clipboard';
 import { KeyBindingManager } from './key_binding_manager';
@@ -56,7 +55,6 @@ export class Editor {
   ruler: Ruler;
   refLine: RefLine;
   textEditor: TextEditor;
-  penEditor: PenEditor;
 
   autoSaveGraphs: AutoSaveGraphs;
 
@@ -91,7 +89,7 @@ export class Editor {
     this.refLine = new RefLine(this);
   
     this.textEditor = new TextEditor(this);
-    this.penEditor = new PenEditor(this);
+    // this.penEditor = new PenEditor(this);
     this.hostEventManager = new HostEventManager(this);
     this.hostEventManager.bindHotkeys();
 
@@ -133,11 +131,10 @@ export class Editor {
       this.sceneGraph.render();
     });
   }
+  //销毁事件
   destroy() {
     this.containerElement.removeChild(this.canvasElement);
     this.textEditor.destroy();
-    // this.penEditor.unbindEvent();
-    // this.penEditor.destroy();
     this.keybindingManager.destroy();
     this.hostEventManager.destroy();
     this.clipboard.destroy();

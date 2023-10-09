@@ -43,12 +43,12 @@ export const ToolBar = () => {
             intlId: 'tool.rectangle',
             icon: <RectOutlined />,
           },
-          {
-            name: 'drawBrush',
-            hotkey: 'B',
-            intlId: 'tool.brush',
-            icon: <HighlightFilled />,
-          },
+          // {
+          //   name: 'drawBrush',
+          //   hotkey: 'B',
+          //   intlId: 'tool.brush',
+          //   icon: <HighlightFilled />,
+          // },
           // {
           //   name: 'drawEllipse',
           //   hotkey: 'O',

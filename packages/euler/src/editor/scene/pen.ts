@@ -54,9 +54,6 @@ export class PenGraph extends Graph {
     const textY = Number(this.y)-2
     ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
-    ctx.beginPath();
-    /* eslint-disable-next-line no-debugger */
-    debugger
     for (const texture of this.fill) {
       switch (texture.type) {
         case TextureType.Solid: {
