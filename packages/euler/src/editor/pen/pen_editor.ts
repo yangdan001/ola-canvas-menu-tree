@@ -18,6 +18,7 @@ export class PenEditor {
   private prevPoint: IPoint = { x: -1, y: -1 };
   private mouseStoppedTimer: NodeJS.Timeout | null;
   _unbindEvent: () => void;
+  _bindEvent: () => void;
   constructor(private editor: Editor) {
     /* eslint-disable-next-line no-debugger */
     // debugger
@@ -29,8 +30,11 @@ export class PenEditor {
     this.penColor = '#fff'; // Default pen color  black
     this.penWidth = 5; // Default pen width
     // this.bindEvents();
-    //画笔添加监听
+    //画笔卸载监听
     this._unbindEvent = this.bindEvent();
+    //画笔添加监听
+    this._bindEvent = this.bindEvent;
+
     this.mouseStoppedTimer = null;
   }
   /**

@@ -49,7 +49,7 @@ export class DrawPenTool implements ITool {
 
     this.editor.penEditor.visible();
     //画笔添加监听
-    // this.editor.penEditor._unbindEvent();
+    this.editor.penEditor._bindEvent();
     this.editor.penEditor.setPenWidth(this.brushSize);
     //拖动结束后工具栏图标还是选中的画笔图标
     this.editor.toolManager.setActiveTool('drawPen');
