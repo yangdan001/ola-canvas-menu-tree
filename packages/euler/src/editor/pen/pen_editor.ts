@@ -76,16 +76,6 @@ export class PenEditor {
       this.createPenGraph();
     }
   }
-  /**
-   * 监听mouseleave
-  */
-  private endDrawing() {
-    console.log('监听mouseleave - endDrawing',this.penPoints)
-    this.drawing = false;
-    if (this.penPoints.length > 0) {
-      this.createPenGraph();
-    }
-  }
   
   private createPenGraph() {
     if (this.penPoints.length === 0) return;
@@ -98,6 +88,7 @@ export class PenEditor {
     const ctx = this.editor.ctx;
     if (!canvas) return;
     const pen = new PenGraph({
+      penWidth: this.penWidth,
       points: this.penPoints,
       x: firstPoint.x,
       y: firstPoint.y,
@@ -144,7 +135,19 @@ export class PenEditor {
   setPenWidth(width: number) {
     this.penWidth = width;
   }
+  // isEditing() {
+  //   const canvas = this.editor.canvasElement;
+  //   return canvas.style.display !== 'none';
+  // }
 
+  destroy() {
+    console.log('7777')
+    const canvas = this.editor.canvasElement;
+    const ctx = this.editor.ctx;
+    canvas.removeEventListener('mousedown', this.startDrawing.bind(this));
+    canvas.removeEventListener('mousemove', this.moveDraw.bind(this));
+    canvas.removeEventListener('mouseup', this.stopDrawing.bind(this));
+  }
  
 }
 

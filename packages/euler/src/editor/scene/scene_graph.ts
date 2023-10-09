@@ -298,7 +298,7 @@ drawLine(
   ctx.beginPath();
   ctx.moveTo(startPoint.x, startPoint.y);
   ctx.lineTo(endPoint.x, endPoint.y);
-  ctx.lineWidth = brushSize * 2; // Brush size affects line thickness
+  ctx.lineWidth = brushSize ; // Brush size affects line thickness
   ctx.lineCap = 'round'; // Rounded line ends for a brush effect
   ctx.strokeStyle = 'black'; // Set brush color (you can customize this)
   ctx.stroke();

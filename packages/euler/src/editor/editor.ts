@@ -136,6 +136,7 @@ export class Editor {
   destroy() {
     this.containerElement.removeChild(this.canvasElement);
     this.textEditor.destroy();
+    this.penEditor.destroy();
     this.keybindingManager.destroy();
     this.hostEventManager.destroy();
     this.clipboard.destroy();

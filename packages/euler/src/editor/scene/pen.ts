@@ -8,12 +8,13 @@ import { parseRGBAStr } from '../../utils/color';
 export interface PenAttrs extends GraphAttrs {
   points: { x: number; y: number }[];  // Points for the pen path
   strokeWidth: number;
+  penWidth: number;
 }
 
 export class PenGraph extends Graph {
   points: { x: number; y: number }[];
   strokeWidth: number;
-
+  penWidth: number;
   constructor(options: Optional<PenAttrs, 'width' | 'height'>) {
     /* eslint-disable-next-line no-debugger */
     // debugger
@@ -26,6 +27,7 @@ export class PenGraph extends Graph {
   
     this.points = options.points || [];
     this.strokeWidth = options.strokeWidth || 2;
+    this.penWidth = options.penWidth || 1;
   }
   
   getAttrs() {
@@ -72,7 +74,7 @@ export class PenGraph extends Graph {
       for (let i = 1; i < this.points.length; i++) {
         ctx.lineTo(this.points[i].x, this.points[i].y);
       }
-
+      ctx.lineWidth = this.penWidth;
       ctx.stroke();
     }
 

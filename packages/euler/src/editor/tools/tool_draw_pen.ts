@@ -27,16 +27,16 @@ export class DrawPenTool implements ITool {
 
   start(e: PointerEvent) {
     // this.isDrawing = true;
-    // this.startPoint = this.editor.getCursorXY(e);
-    // this.prevPoint = this.startPoint;
+    this.startPoint = this.editor.getCursorXY(e);
+    this.prevPoint = this.startPoint;
     // this.editor.canvasElement.style.cursor = 'crosshair';
   }
   drag(e: PointerEvent) {
     // if (!this.isDrawing) return;
 
-    // const currentPoint = this.editor.getCursorXY(e);
-    // this.editor.sceneGraph.drawLine(this.editor.ctx,this.prevPoint, currentPoint, this.brushSize);
-    // this.prevPoint = currentPoint;
+    const currentPoint = this.editor.getCursorXY(e);
+    this.editor.sceneGraph.drawLine(this.editor.ctx,this.prevPoint, currentPoint, this.brushSize);
+    this.prevPoint = currentPoint;
   }
   
   end(e: PointerEvent) {
@@ -46,7 +46,7 @@ export class DrawPenTool implements ITool {
     // penEditorInstance.visible(); // This will call the constructor and then the visible method
 
     this.editor.penEditor.visible();
-    // this.editor.penEditor.setPenWidth(1);
+    this.editor.penEditor.setPenWidth(this.brushSize);
     this.editor.toolManager.setActiveTool('select');
     // do nothing
   }
