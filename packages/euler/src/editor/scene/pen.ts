@@ -4,7 +4,9 @@ import { rotateInCanvas } from '../../utils/canvas';
 import { GraphType } from '../../type';
 import { TextureType } from '../texture';
 import { parseRGBAStr } from '../../utils/color';
-
+//画笔默认宽高
+const DEFAULT_TEXT_WIDTH = 80;
+const DEFAULT_TEXT_WEIGHT = 30;
 export interface PenAttrs extends GraphAttrs {
   points: { x: number; y: number }[];  // Points for the pen path
   strokeWidth: number;
@@ -21,8 +23,8 @@ export class PenGraph extends Graph {
     super({
       ...options,
       type: GraphType.Pen,
-      width: options.width || 0, // Provide a default width if not provided
-      height: options.height || 0, // Provide a default height if not provided
+      width: options.width || DEFAULT_TEXT_WIDTH, // 画笔有宽高可以移动
+      height: options.height || DEFAULT_TEXT_WEIGHT, // 画笔有宽高可以移动
     });
   
     this.points = options.points || [];

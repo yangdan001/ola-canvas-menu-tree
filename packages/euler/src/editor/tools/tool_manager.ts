@@ -78,10 +78,6 @@ export class ToolManager {
         return;
       }
 
-      // if (this.editor.penEditor.isEditing()) {
-      //   return;
-      // }
-
       startWithLeftMouse = true;
       if (!this.currentTool) {
         throw new Error('there is no active tool');

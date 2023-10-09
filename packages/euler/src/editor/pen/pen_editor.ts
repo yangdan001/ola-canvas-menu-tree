@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
+import { noop } from '../../utils/common';
 import { Editor } from '../editor';
 import { PenGraph } from '../scene/pen';
 import { AddShapeCommand } from '../commands/add_shape';
@@ -6,6 +7,7 @@ import { IBox, IPoint } from '../../type';
 
 
 export class PenEditor {
+  penCanvas:HTMLCanvasElement
   drawing: boolean;
   lastX: number;
   lastY: number;
@@ -15,78 +17,131 @@ export class PenEditor {
   private startPoint: IPoint = { x: -1, y: -1 };
   private prevPoint: IPoint = { x: -1, y: -1 };
   private mouseStoppedTimer: NodeJS.Timeout | null;
+  _unbindEvent: () => void;
   constructor(private editor: Editor) {
     /* eslint-disable-next-line no-debugger */
     // debugger
-    
+    this.penCanvas = this.editor.canvasElement;
     this.drawing = false;
     this.lastX = 0;
     this.lastY = 0;
     this.penPoints = [];
     this.penColor = '#fff'; // Default pen color  black
     this.penWidth = 5; // Default pen width
-    this.bindEvents();
+    // this.bindEvents();
+    //画笔添加监听
+    this._unbindEvent = this.bindEvent();
     this.mouseStoppedTimer = null;
   }
   /**
    * 
    * 绑定监听方法---初始化时执行
   */
-  private bindEvents() {
-    console.log('绑定监听方法---初始化时执行');
+  // private bindEvents() {
+  //   console.log('绑定监听方法---初始化时执行');
+  //   console.log(this.editor,'this.editor')
+  //   // const canvas = this.editor.canvasElement;
+  //   // const ctx = this.editor.ctx;
+  //   this.penCanvas.addEventListener('mousedown', this.startDrawing.bind(this));
+  //   this.penCanvas.addEventListener('mousemove', this.moveDraw.bind(this));
+  //   this.penCanvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+  //   // this.canvas.addEventListener('mouseleave', this.endDrawing.bind(this));
+  // }
+
+  //监听画笔功能事件 封装类实现监听卸载同一个方法
+  private bindEvent() {
+
+    const startDrawing = (e: MouseEvent) => {
+      console.log(this.editor,'this.editor')
+      console.log('监听mousedown-startDrawing')
+      this.drawing = true;
+      //获取起点坐标（视口 转 场景坐标）
+      this.startPoint = this.editor.getSceneCursorXY(e);
+      this.penPoints.push({ x: this.startPoint.x, y: this.startPoint.y });
+    };
+
+    const moveDraw = (e: MouseEvent) => {
+      if (!this.drawing) return;
+      console.log('监听mousemove - moveDraw')
+      //获取起点坐标（视口 转 场景坐标）
+      const currentPoint = this.editor.getSceneCursorXY(e);
+      this.penPoints.push({ x: currentPoint.x, y: currentPoint.y });
+    };
+    const stopDrawing = (e: MouseEvent) => {
+      console.log('监听mouseup - stopDrawing')
+      if (this.penPoints.length > 0) {
+        // Create a pen graph using the stored points
+        this.createPenGraph();
+      }
+      this.drawing = false;
+    };
+
+
+    // 获取画布监听move事件
     const canvas = this.editor.canvasElement;
-    const ctx = this.editor.ctx;
-    canvas.addEventListener('mousedown', this.startDrawing.bind(this));
-    canvas.addEventListener('mousemove', this.moveDraw.bind(this));
-    canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
-    // this.canvas.addEventListener('mouseleave', this.endDrawing.bind(this));
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    //卸载监听
+    return function unbindEvent() {
+      canvas.removeEventListener('mousedown', startDrawing);
+      canvas.removeEventListener('mousemove', moveDraw);
+      canvas.removeEventListener('mouseup', stopDrawing);
+    };
+  }
+  unbindEvent() {
+    //添加监听
+    this._unbindEvent();
+    //卸载监听
+    this._unbindEvent = noop;
   }
   
   /**
    * 监听mousedown
   */
-  private startDrawing(e: MouseEvent) {
-    console.log('监听mousedown-startDrawing')
-    this.drawing = true;
-    //获取起点坐标（视口 转 场景坐标）
-    this.startPoint = this.editor.getSceneCursorXY(e);
-    this.penPoints.push({ x: this.startPoint.x, y: this.startPoint.y });
+  // private startDrawing(e: MouseEvent) {
+  //   console.log('监听mousedown-startDrawing')
+  //   this.drawing = true;
+  //   //获取起点坐标（视口 转 场景坐标）
+  //   this.startPoint = this.editor.getSceneCursorXY(e);
+  //   this.penPoints.push({ x: this.startPoint.x, y: this.startPoint.y });
 
-  }
+  // }
   /**
    * 监听mousemove
   */
-  private moveDraw(e: MouseEvent) {
-    if (!this.drawing) return;
-    console.log('监听mousemove - moveDraw')
-    //获取起点坐标（视口 转 场景坐标）
-    const currentPoint = this.editor.getSceneCursorXY(e);
-    this.penPoints.push({ x: currentPoint.x, y: currentPoint.y });
+  // private moveDraw(e: MouseEvent) {
+  //   if (!this.drawing) return;
+  //   console.log('监听mousemove - moveDraw')
+  //   //获取起点坐标（视口 转 场景坐标）
+  //   const currentPoint = this.editor.getSceneCursorXY(e);
+  //   this.penPoints.push({ x: currentPoint.x, y: currentPoint.y });
     
-  }
+  // }
 
   /**
    * 监听mouseup
   */
-  private stopDrawing(e: MouseEvent) {
-    console.log('监听mouseup - stopDrawing')
-    this.drawing = false;
-    if (this.penPoints.length > 0) {
-      // Create a pen graph using the stored points
-      this.createPenGraph();
-    }
-  }
+  // private stopDrawing(e: MouseEvent) {
+  //   console.log('监听mouseup - stopDrawing')
+  //   if (this.penPoints.length > 0) {
+  //     // Create a pen graph using the stored points
+  //     this.createPenGraph();
+  //   }
+  //   this.drawing = false;
+  // }
   
   private createPenGraph() {
     if (this.penPoints.length === 0) return;
     // Use the first point as the x and y coordinate
     const firstPoint = this.penPoints[0];
     /* eslint-disable-next-line no-debugger */
-    // debugger
+    debugger
 
-    const canvas = this.editor.canvasElement;
-    const ctx = this.editor.ctx;
-    if (!canvas) return;
+    // const canvas = this.editor.canvasElement;
+    // const ctx = this.editor.ctx;
+    console.log(this.penCanvas,'this.penCanvas')
+    if (!this.penCanvas) return;
     const pen = new PenGraph({
       penWidth: this.penWidth,
       points: this.penPoints,
@@ -103,12 +158,13 @@ export class PenEditor {
     this.editor.commandManager.pushCommand(
       new AddShapeCommand('draw pen', this.editor, [pen]),
     );
-    this.penPoints = [];
+    //画笔存数据后卸载监听
+    this.unbindEvent();
   }
   visible() {
     const zoom = this.editor.zoomManager.getZoom();
-    const canvas = this.editor.canvasElement;
-    const ctx = this.editor.ctx;
+    // const canvas = this.editor.canvasElement;
+    // const ctx = this.editor.ctx;
 
     const fontSize = this.editor.setting.get('defaultFontSize') * zoom + 'px';
     const styles = {
@@ -118,15 +174,9 @@ export class PenEditor {
       // fontSize,
       display: 'block',
     } as const;
-    Object.assign(canvas.style, styles);
-    canvas.style.display = 'block';
+    Object.assign(this.penCanvas.style, styles);
+    this.penCanvas.style.display = 'block';
   }
-
- 
-
- 
-
-  
 
   setPenColor(color: string) {
     this.penColor = color;
@@ -135,18 +185,13 @@ export class PenEditor {
   setPenWidth(width: number) {
     this.penWidth = width;
   }
-  // isEditing() {
-  //   const canvas = this.editor.canvasElement;
-  //   return canvas.style.display !== 'none';
-  // }
 
   destroy() {
     console.log('7777')
-    const canvas = this.editor.canvasElement;
-    const ctx = this.editor.ctx;
-    canvas.removeEventListener('mousedown', this.startDrawing.bind(this));
-    canvas.removeEventListener('mousemove', this.moveDraw.bind(this));
-    canvas.removeEventListener('mouseup', this.stopDrawing.bind(this));
+    // const canvas = this.editor.canvasElement;
+    // const ctx = this.editor.ctx;
+    // this.penCanvas.remove();
+    this.unbindEvent();
   }
  
 }

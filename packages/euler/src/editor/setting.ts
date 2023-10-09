@@ -16,6 +16,7 @@ export class Setting {
       attrs: { r: 0, g: 0, b: 0, a: 1 },
     } as ITexture,
     strokeWidth: 1,
+    brushSize: 1,//画笔的粗细
     firstFill: {
       type: TextureType.Solid,
       // attrs: { r: 217, g: 217, b: 217, a: 1 },//灰色图形背景
