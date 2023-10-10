@@ -9,7 +9,7 @@ export class DrawTextTool implements ITool {
   constructor(private editor: Editor) {
   }
   active() {
-    this.editor.setCursor('crosshair');
+    this.editor.setCursor('crosshair'); //crosshair：十字准线
   }
   inactive() {
     this.editor.setCursor('');

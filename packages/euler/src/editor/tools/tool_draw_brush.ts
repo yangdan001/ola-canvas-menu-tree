@@ -51,7 +51,7 @@ export class DrawBrushTool implements ITool  {
     this.commandDesc = 'draw Path';
   }
   active() {
-    this.editor.setCursor('crosshair');
+    this.editor.setCursor('crosshair'); //crosshair：十字准线
   }
   inactive() {
     this.editor.setCursor('');
@@ -66,7 +66,7 @@ export class DrawBrushTool implements ITool  {
     this.isDrawing = true;
     this.startPoint = this.editor.getCursorXY(e);
     this.prevPoint = this.startPoint;
-    this.editor.canvasElement.style.cursor = 'crosshair';
+    this.editor.canvasElement.style.cursor = 'crosshair';//crosshair：十字准线
   }
   drag(e: PointerEvent) {
     if (!this.isDrawing) return;
@@ -90,7 +90,7 @@ console.log(this.editor.sceneGraph,'999')
     // do nothing
   }
   afterEnd() {
-    this.editor.canvasElement.style.cursor = 'crosshair';
+    this.editor.canvasElement.style.cursor = 'crosshair';//crosshair：十字准线
   }
 }
 

@@ -22,18 +22,28 @@ export abstract class DrawGraphTool implements ITool {
   private unbindEvent: () => void = noop;
 
   constructor(protected editor: Editor) {}
+  //清空canvas上的鼠标手势样式
+  inactive() {
+    this.editor.setCursor('');
+
+    this.unbindEvent();
+  }
+  //设置canvas上的鼠标手势样式
   active() {
     const editor = this.editor;
-    editor.setCursor('crosshair');
-
+    editor.setCursor('crosshair');//crosshair：十字准线
+   /**
+   * 按键、鼠标等事件管理
+   */
     const hotkeysManager = editor.hostEventManager;
     const updateRectWhenShiftToggle = () => {
       if (this.isDragging) {
         this.updateRect();
       }
     };
+    //按下shift
     hotkeysManager.on('shiftToggle', updateRectWhenShiftToggle);
-
+    //当视口发生变化时更新rect
     const updateRectWhenViewportTranslate = () => {
       if (editor.hostEventManager.isDraggingCanvasBySpace) {
         return;
@@ -54,11 +64,7 @@ export abstract class DrawGraphTool implements ITool {
       editor.viewportManager.off('xOrYChange', updateRectWhenViewportTranslate);
     };
   }
-  inactive() {
-    this.editor.setCursor('');
 
-    this.unbindEvent();
-  }
   moveExcludeDrag() {
     // do nothing;
   }

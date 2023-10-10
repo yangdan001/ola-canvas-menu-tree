@@ -155,17 +155,26 @@ export class Editor {
     const { x: scrollX, y: scrollY } = this.viewportManager.getViewport();
     return viewportCoordsToSceneUtil(x, y, zoom, scrollX, scrollY, round);
   }
+    /**
+   * 场景坐标 转 视口坐标
+   */
   sceneCoordsToViewport(x: number, y: number) {
     const zoom = this.zoomManager.getZoom();
     const { x: scrollX, y: scrollY } = this.viewportManager.getViewport();
     return sceneCoordsToViewportUtil(x, y, zoom, scrollX, scrollY);
   }
+  /**
+   * 获取手势光标坐标
+   */
   getCursorXY(event: { clientX: number; clientY: number }) {
     return {
       x: event.clientX - this.setting.get('offsetX'),
       y: event.clientY - this.setting.get('offsetY'),
     };
   }
+  /**
+   * 获取场景中 手势光标坐标
+   */
   getSceneCursorXY(event: { clientX: number; clientY: number }, round = false) {
     const { x, y } = this.getCursorXY(event);
     return this.viewportCoordsToScene(x, y, round);
