@@ -206,15 +206,14 @@ removeItems(elements: Graph[]) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
   
-    // 场景坐标转换为视口坐标
-    const dpr = getDevicePixelRatio();
-  
+    // 场景坐标转换为视口坐标dpr=1.600000023841858
+    const dpr = getDevicePixelRatio(); 
     const dx = -viewport.x;
     const dy = -viewport.y;
     ctx.scale(dpr * zoom, dpr * zoom);
     ctx.translate(dx, dy);
 
-    
+    //遍历可见元素
     for (const element of visibleElements) {
         this.renderElement(element, ctx, zoom, canvas);
     }
@@ -223,10 +222,10 @@ removeItems(elements: Graph[]) {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
-  
+    //选中矩形组成的包围盒
     const selectedElementsBBox = this.editor.selectedElements.getBBox();
   
-    // 1. draw pixel grid
+    // 1. draw pixel grid 绘制像素网格
     if (
       setting.get('enablePixelGrid') &&
       zoom >= this.editor.setting.get('minPixelGridZoom')
@@ -234,12 +233,12 @@ removeItems(elements: Graph[]) {
       this.grid.draw();
     }
   
-    // 2. draw selected elements bbox
+    // 2. draw selected elements bbox 绘制选定元素对话框
     if (this.showOutline) {
       this.highLightSelectedBox(selectedElementsBBox);
     }
   
-    // 3. draw selectionBox
+    // 3. draw selectionBox 绘制选择框
     if (this.selection) {
       ctx.save();
       ctx.strokeStyle = setting.get('selectionStroke');
@@ -262,14 +261,14 @@ removeItems(elements: Graph[]) {
       ctx.restore();
     }
   
-    // 4. draw transform handle
+    // 4. draw transform handle 绘制变换控制
     if (this.showOutline) {
       this.transformHandle.draw(selectedElementsBBox);
     }
   
     this.editor.refLine.drawRefLine(ctx);
   
-    // 5. drawing rulers
+    // 5. drawing rulers 绘图标尺
     if (setting.get('enableRuler')) {
       this.editor.ruler.draw();
     }
@@ -279,7 +278,7 @@ removeItems(elements: Graph[]) {
     this.eventEmitter.emit('render');
   });
   
-
+//查找可见元素   
 findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements: Graph[]) {
   for (const element of elements) {
     if(!(element !== null && element !== undefined && "getBBox" in element)){ continue}
@@ -309,6 +308,7 @@ drawLine(
   ctx.closePath();
 }
 
+//渲染可见元素
 renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number,canvas: HTMLCanvasElement) {
   ctx.save();
   
