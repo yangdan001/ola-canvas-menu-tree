@@ -42,7 +42,8 @@ export class DrawPenTool implements ITool {
     //开始时 清空数组
     this.penPoints = []
     //画笔实现画的起点
-    this.startPoint = this.editor.getCursorXY(e);
+    // this.startPoint = this.editor.sceneCoordsToViewport(e.clientX, e.clientY);         
+    this.startPoint = this.editor.getSceneCursorXY(e);         
     this.prevPoint = this.startPoint;
     this.penPoints.push({ x: this.startPoint.x, y: this.startPoint.y });
 
@@ -50,7 +51,8 @@ export class DrawPenTool implements ITool {
   // tool_manager.ts中 调用此drag方法
   drag(e: PointerEvent) {
     //画笔实时画的move过程的所有点
-    const currentPoint = this.editor.getCursorXY(e);
+    // const currentPoint = this.editor.sceneCoordsToViewport(e.clientX, e.clientY);
+    const currentPoint = this.editor.getSceneCursorXY(e);
     // 实时画 功能实现
     this.editor.sceneGraph.drawLine(this.editor.ctx,this.prevPoint, currentPoint, this.brushSize);
     this.prevPoint = currentPoint;
@@ -75,7 +77,7 @@ export class DrawPenTool implements ITool {
   }
   //点的存储与动作结束后的线条绘制
   createPenGraph() {
-    if (this.penPoints.length === 0) return;
+    if (this.penPoints.length === 0 || this.penPoints.length === 1 ) return;
     const firstPoint = this.penPoints[0];
     if (!this.editor.canvasElement) return;
     const pen = new PenGraph({
@@ -84,7 +86,7 @@ export class DrawPenTool implements ITool {
       x: firstPoint.x,
       y: firstPoint.y,
       fill: cloneDeep(this.editor.setting.get('textFill')),
-      strokeWidth: 2,
+      strokeWidth: cloneDeep(this.editor.setting.get('strokeWidth')),
     });
     this.editor.sceneGraph.addItems([pen]);
 

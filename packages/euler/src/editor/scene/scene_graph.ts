@@ -182,15 +182,19 @@ removeItems(elements: Graph[]) {
       ctx,
       setting,
     } = this.editor;
+    //视口管理器的坐标及宽高
     const viewport = viewportManager.getViewport();
+    //获取zoom缩放的值
     const zoom = this.editor.zoomManager.getZoom();
+    //获取缩放后视口饿坐标位置
     const viewportBoxInScene = this.editor.viewportManager.getBbox();
     /* eslint-disable-next-line no-debugger */
   // debugger
+    //可见元素
     const visibleElements: Graph[] = [];
     // 1. 找出视口下所有元素
     this.findVisibleElements(this.children, viewportBoxInScene, visibleElements);
-  
+  //转换后的位置
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   
     // 2. 清空画布，然后绘制所有可见元素
