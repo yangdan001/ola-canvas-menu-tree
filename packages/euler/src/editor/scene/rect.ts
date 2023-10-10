@@ -10,7 +10,10 @@ export type RectAttrs = GraphAttrs;
 export class Rect extends Graph {
   constructor(options: RectAttrs) {
     super({ ...options, type: GraphType.Rect });
+    console.log('...Rectoptions', options);
   }
+  
+  // 获取没有旋转时候的坐标及宽高
   getBBoxWithoutRotation() {
     return {
       x: this.x,
@@ -26,16 +29,20 @@ export class Rect extends Graph {
     smooth: boolean,
     canvas: HTMLCanvasElement
   ) {
+    // 如果有旋转
     if (this.rotation) {
+      // 中心点
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;
 
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
+
     ctx.beginPath();
-    const textY = Number(this.y)-2
+    const textY = Number(this.y) - 2
     ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
+    //绘制矩形
     ctx.rect(this.x, this.y, this.width, this.height);
     for (const texture of this.fill) {
       switch (texture.type) {

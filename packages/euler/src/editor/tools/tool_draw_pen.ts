@@ -30,7 +30,7 @@ export class DrawPenTool implements ITool {
   }
   //设置canvas上的鼠标手势样式
   active() {
-    this.editor.setCursor('crosshair');
+    this.editor.setCursor('crosshair');//crosshair：十字准线
   }
 
   moveExcludeDrag() {
@@ -69,7 +69,7 @@ export class DrawPenTool implements ITool {
     // //画笔添加监听
     //拖动结束后工具栏图标还是选中的画笔图标
     this.editor.toolManager.setActiveTool('drawPen');
-    // this.editor.canvasElement.style.cursor = 'crosshair';
+    // this.editor.canvasElement.style.cursor = 'crosshair';//crosshair：十字准线
   }
   afterEnd() {
     console.log('');
