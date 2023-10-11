@@ -39,6 +39,7 @@ export class SelectMoveTool implements IBaseTool {
   start(e: PointerEvent) {
     this.startPoint = this.editor.getSceneCursorXY(e);
     const selectedElements = this.editor.selectedElements.getItems();
+    //元素移动的起始点
     this.startPoints = selectedElements.map((element) => ({
       x: element.x,
       y: element.y,
@@ -90,6 +91,7 @@ export class SelectMoveTool implements IBaseTool {
 
     const selectedElements = this.editor.selectedElements.getItems();
     const startPoints = this.startPoints;
+    //选中元素的所有的起始点move事件
     for (let i = 0, len = selectedElements.length; i < len; i++) {
       // selectedElements[i].x = startPoints[i].x + dx;
       // selectedElements[i].y = startPoints[i].y + dy;

@@ -52,12 +52,13 @@ export class PenGraph extends Graph {
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
 
-    const textY = Number(this.y) - 2
+    const textY = Number(this.y) - 2;
+    ctx.beginPath();
+
     ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
     
     if (this.points.length > 0) {
-      ctx.beginPath();
       ctx.moveTo(this.points[0].x, this.points[0].y);
 
       for (let i = 1; i < this.points.length; i++) {

@@ -3,6 +3,7 @@ import { ITool } from './type';
 import { IBox, IPoint } from '../../type';
 import { PenGraph } from '../scene/pen';
 import cloneDeep from 'lodash.clonedeep';
+// import { Graph } from '../scene/graph';
 
 
 import { AddShapeCommand } from '../commands/add_shape';
@@ -107,7 +108,9 @@ export class DrawPenTool implements ITool {
     this.editor.commandManager.pushCommand(
       new AddShapeCommand('draw pen', this.editor, [pen]),
     );
-   
+    //todo 需要将画笔的pen对象放到选中元素的children中
+    // console.log([pen],pen,'[pen]')
+    // this.editor.sceneGraph.children[0].children.push(pen);
   }
   visible() {
     const zoom = this.editor.zoomManager.getZoom();
