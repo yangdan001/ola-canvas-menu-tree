@@ -13,7 +13,8 @@ export class DrawPenTool implements ITool {
   readonly hotkey = 'p';
   private isDrawing = false;
   private startPoint: IPoint = { x: -1, y: -1 }; //开始点位
-  private prevPoint: IPoint = { x: -1, y: -1 }; //记录上一个点位
+  private prevPoint!: IPoint; //记录上一个点位
+  private lastDragPoint!: IPoint;//记录上一个点位
   private brushSize = 5; // Set your desired brush size here
   private prevViewport!: IBox;
   private commandDesc: string;
@@ -44,33 +45,27 @@ export class DrawPenTool implements ITool {
     //画笔实现画的起点
     this.startPoint = this.editor.getCursorXY(e);
     this.prevPoint = this.startPoint;
-
-
     //将坐标转为场景坐标存起来；在场景中绘制线条时使用的点坐标
     const storePoint = this.editor.getSceneCursorXY(
       e,
       this.editor.setting.get('snapToPixelGrid'),
     );
     this.penPoints.push({ x: storePoint.x, y: storePoint.y });
-
   }
   // tool_manager.ts中 调用此drag方法
   drag(e: PointerEvent) {
     //画笔实时画的move过程的所有点  鼠标在视口内划过的坐标 用于实时绘制线条
     const currentPoint = this.editor.getCursorXY(e);
-    // 实时画 功能实现
+    // 实时画 功能实现 每一次都是从上个点画起
     this.editor.sceneGraph.drawLine(this.editor.ctx, this.prevPoint, currentPoint, this.brushSize);
     this.prevPoint = currentPoint;
-
     //将点存进数组
     //将坐标转为场景坐标存起来；在场景中绘制线条时使用的点坐标
     const storePoint = this.editor.getSceneCursorXY(
       e,
       this.editor.setting.get('snapToPixelGrid'),
     );
-
     this.penPoints.push({ x: storePoint.x, y: storePoint.y });
-
   }
   //鼠标抬起 ool_manager.ts中 调用此drag方法
   end(e: PointerEvent) {
@@ -93,16 +88,20 @@ export class DrawPenTool implements ITool {
     const firstPoint = this.penPoints[0];
     if (!this.editor.canvasElement) return;
     const pen = new PenGraph({
-      penWidth: 5,
+      penWidth: this.brushSize,
       points: this.penPoints,
       x: firstPoint.x,
       y: firstPoint.y,
       fill: cloneDeep(this.editor.setting.get('textFill')),
       strokeWidth: 2,
     });
+    console.log('pen',pen);
+    
     this.editor.sceneGraph.addItems([pen]);
 
+    //选中当前元素
     this.editor.selectedElements.setItems([pen]);
+
     this.editor.sceneGraph.render();
 
     this.editor.commandManager.pushCommand(

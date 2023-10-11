@@ -39,3 +39,7 @@ Some Chinese language articles on how to develop a graphic editor.
 ## Material
 
 - [icons](https://www.figma.com/community/file/1224385128783567603/euler-icons)
+
+
+   /* eslint-disable-next-line no-debugger */
+    debugger

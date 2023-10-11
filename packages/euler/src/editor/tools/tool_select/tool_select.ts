@@ -1,6 +1,7 @@
 import throttle from 'lodash.throttle';
 import { Graph } from '../../scene/graph';
 import { Rect } from '../../scene/rect';
+import { PenGraph } from '../../scene/pen';
 import { IPoint } from '../../../type';
 import { Editor } from '../../editor';
 import { IBaseTool, ITool } from '../type';
@@ -21,6 +22,7 @@ export class SelectTool implements ITool {
 
   startPoint: IPoint = { x: -1, y: -1 };
   drawingRect: Rect | null = null;
+  drawingPen: PenGraph | null = null;
   currStrategy: IBaseTool | null = null;
   // 策略
   strategyMove: SelectMoveTool;
@@ -92,6 +94,7 @@ export class SelectTool implements ITool {
     // 5. 按住 shift 键，可进行连选
 
     const sceneGraph = this.editor.sceneGraph;
+    //选中的元素 -- 可移动
     const selectedElements = this.editor.selectedElements;
     const isShiftPressing = this.editor.hostEventManager.isShiftPressing;
 

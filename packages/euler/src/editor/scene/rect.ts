@@ -44,6 +44,7 @@ export class Rect extends Graph {
     ctx.fillText(this.objectName, this.x, textY);
     //绘制矩形
     ctx.rect(this.x, this.y, this.width, this.height);
+      //绘制内部填充颜色
     for (const texture of this.fill) {
       switch (texture.type) {
         case TextureType.Solid: {

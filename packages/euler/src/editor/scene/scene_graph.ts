@@ -94,6 +94,8 @@ addItems(elements: Graph[], parent?: Graph, idx?: number) {
   } else {
     // 否则，将元素添加为顶层元素
     if (idx === undefined) {
+      console.log("elements",elements);
+      
       this.children.push(...elements);
     } else {
       this.children.splice(idx, 0, ...elements);
@@ -102,7 +104,7 @@ addItems(elements: Graph[], parent?: Graph, idx?: number) {
 }
 moveElement(element: Graph, parent?: Graph) {
   /* eslint-disable-next-line no-debugger */
-  debugger
+  // debugger
   // 1. 首先从当前位置移除元素
   this.removeElementFromItsParent(element);
 
@@ -322,6 +324,8 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number,canvas
   // 抗锯齿
   const smooth = zoom <= 1;
   const imgManager = this.editor.imgManager;
+    /* eslint-disable-next-line no-debugger */
+    
   element.renderFillAndStrokeTexture(ctx, imgManager, smooth, canvas);
   ctx.restore();
   

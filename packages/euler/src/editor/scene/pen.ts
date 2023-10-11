@@ -39,8 +39,9 @@ export class PenGraph extends Graph {
       strokeWidth: this.strokeWidth,
     };
   }
-
+  //绘制
   renderFillAndStrokeTexture(ctx: CanvasRenderingContext2D) {
+
     if (this.rotation) {
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;
@@ -51,21 +52,10 @@ export class PenGraph extends Graph {
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
 
-    const textY = Number(this.y)-2
+    const textY = Number(this.y) - 2
     ctx.fillStyle = '#7F39FB';
     ctx.fillText(this.objectName, this.x, textY);
-    for (const texture of this.fill) {
-      switch (texture.type) {
-        case TextureType.Solid: {
-          ctx.strokeStyle = parseRGBAStr(texture.attrs);
-          ctx.lineWidth = this.strokeWidth;
-          break;
-        }
-        case TextureType.Image: {
-          // TODO:
-        }
-      }
-    }
+    
     if (this.points.length > 0) {
       ctx.beginPath();
       ctx.moveTo(this.points[0].x, this.points[0].y);

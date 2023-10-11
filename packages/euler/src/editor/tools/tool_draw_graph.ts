@@ -5,6 +5,7 @@ import { normalizeRect } from '../../utils/graphics';
 import { AddShapeCommand } from '../commands/add_shape';
 import { Editor } from '../editor';
 import { ITool } from './type';
+import { log } from 'console';
 
 export abstract class DrawGraphTool implements ITool {
   static type = 'drawGraph';
@@ -14,11 +15,11 @@ export abstract class DrawGraphTool implements ITool {
 
   protected drawingGraph: Graph | null = null;
 
-  private startPoint: IPoint = { x: -1, y: -1 };
-  private lastDragPoint!: IPoint;
-  private lastDragPointInViewport!: IPoint;
+  private startPoint: IPoint = { x: -1, y: -1 }; //起点
+  private lastDragPoint!: IPoint; //场景中的终点
+  private lastDragPointInViewport!: IPoint; //视口中的终点
 
-  private isDragging = false;
+  private isDragging = false; //正在拖拽状态
   private unbindEvent: () => void = noop;
 
   constructor(protected editor: Editor) {}
@@ -68,11 +69,12 @@ export abstract class DrawGraphTool implements ITool {
   moveExcludeDrag() {
     // do nothing;
   }
-
+  //多边形绘制
   start(e: PointerEvent) {
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
       return;
     }
+    //起点 坐标点为 场景光标坐标
     this.startPoint = this.editor.getSceneCursorXY(
       e,
       this.editor.setting.get('snapToPixelGrid'),
@@ -80,10 +82,11 @@ export abstract class DrawGraphTool implements ITool {
     this.drawingGraph = null;
     this.isDragging = false;
   }
-
+  //左键按下  开始移动
   drag(e: PointerEvent) {
      /* eslint-disable-next-line no-debugger */
     //  debugger
+    //移动时 禁止一些事件 如删除事件、右键
     this.editor.hostEventManager.disableDelete();
     this.editor.hostEventManager.disableContextmenu();
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -91,12 +94,51 @@ export abstract class DrawGraphTool implements ITool {
     }
     this.isDragging = true;
     this.lastDragPointInViewport = this.editor.getCursorXY(e);
+    // 场景中的终点坐标
     this.lastDragPoint = this.editor.getSceneCursorXY(
       e,
       this.editor.setting.get('snapToPixelGrid'),
     );
+    // 更新矩形
     this.updateRect();
   }
+  // 更新矩形
+  private updateRect() {
+    /* eslint-disable-next-line no-debugger */
+   //  debugger
+   const { x, y } = this.lastDragPoint;
+   //场景对象 用于添加一个图形到场景中
+   const sceneGraph = this.editor.sceneGraph;
+   const { x: startX, y: startY } = this.startPoint;
+
+   const width = x - startX;
+   const height = y - startY;
+
+   const rect = {
+     x: startX,
+     y: startY,
+     width, // width may be negative
+     height, // height may be negative
+   };
+
+   // pressing Shift to draw a square
+   if (this.editor.hostEventManager.isShiftPressing) {
+     this.adjustSizeWhenShiftPressing(rect);
+   }
+   if (this.drawingGraph) {
+    //this.drawingGraph 有值后 执行更新
+     this.updateGraph(rect);
+   } else {
+    //首次执行这 新增
+     const element = this.createGraph(rect)!;
+     sceneGraph.addItems([element]);
+     this.drawingGraph = element;
+
+   }
+    //实时选中 实时render
+    this.editor.selectedElements.setItems([this.drawingGraph]);
+    sceneGraph.render();
+ }
   /**
    * create graph, and give the original rect (width may be negative)
    * noMove: if true, the graph will not move when drag
@@ -116,47 +158,14 @@ export abstract class DrawGraphTool implements ITool {
    */
   protected updateGraph(rect: IRect) {
     rect = normalizeRect(rect);
+    //实时更新宽高
     const drawingShape = this.drawingGraph!;
     drawingShape.x = rect.x;
     drawingShape.y = rect.y;
     drawingShape.width = rect.width;
     drawingShape.height = rect.height;
   }
-
-  private updateRect() {
-     /* eslint-disable-next-line no-debugger */
-    //  debugger
-    const { x, y } = this.lastDragPoint;
-    const sceneGraph = this.editor.sceneGraph;
-    const { x: startX, y: startY } = this.startPoint;
-
-    const width = x - startX;
-    const height = y - startY;
-
-    const rect = {
-      x: startX,
-      y: startY,
-      width, // width may be negative
-      height, // height may be negative
-    };
-
-    // pressing Shift to draw a square
-    if (this.editor.hostEventManager.isShiftPressing) {
-      this.adjustSizeWhenShiftPressing(rect);
-    }
-
-    if (this.drawingGraph) {
-      this.updateGraph(rect);
-    } else {
-      const element = this.createGraph(rect)!;
-      sceneGraph.addItems([element]);
-
-      this.drawingGraph = element;
-    }
-    this.editor.selectedElements.setItems([this.drawingGraph]);
-    sceneGraph.render();
-  }
-
+  
   end(e: PointerEvent) {
      /* eslint-disable-next-line no-debugger */
     //  debugger
