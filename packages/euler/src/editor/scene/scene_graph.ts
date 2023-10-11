@@ -305,7 +305,6 @@ drawLine(
   ctx.lineCap = 'round'; // Rounded line ends for a brush effect
   ctx.strokeStyle = 'black'; // Set brush color (you can customize this)
   ctx.stroke();
-  ctx.closePath();
 }
 
 //渲染可见元素
