@@ -34,6 +34,7 @@ export interface GraphAttrs {
   parent?: Graph | null;
   zIndex?: number;
   brushPath?: Path2D | null;
+  points?:{ x: number; y: number }[];
   iframeType?: string;
   formData?:IFormData
 }
@@ -58,6 +59,7 @@ export class Graph {
   rotation?: number = 0;
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
+  points:{ x: number; y: number }[];//画笔轨迹的点坐标
   iframeType = "Meta";
   formData = {
     base_model_name: 'Base-V1-5.ckpt',
@@ -96,7 +98,7 @@ export class Graph {
     this.height = options.height;
     this.iframeType = options.iframeType ?? this.iframeType;
     this.formData = options.formData ?? this.formData;
-
+    this.points = options.points?options.points:[]
     if (options.fill) {
       this.fill = options.fill;
     }
@@ -129,6 +131,7 @@ export class Graph {
       rotation: this.rotation,
       zIndex: this.zIndex,
       brushPath: this.brushPath,
+      points: this.points,
       iframeType: this.iframeType,
       formData: this.formData,
     };

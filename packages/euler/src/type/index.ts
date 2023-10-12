@@ -45,6 +45,12 @@ export type INoEmptyArray<T> = [T, ...T[]];
 export interface IPoint {
   x: number;
   y: number;
+  points?: { x: number; y: number }[];
+}
+
+export interface PPoint {
+  dx: number;
+  dy: number;
 }
 
 export interface IObject {
