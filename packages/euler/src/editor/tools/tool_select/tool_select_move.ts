@@ -1,4 +1,4 @@
-import { IPoint, PPoint } from '../../../type';
+import { IPoint} from '../../../type';
 import { noop } from '../../../utils/common';
 import { MoveElementsCommand } from '../../commands/move_elements';
 import { Editor } from '../../editor';
@@ -13,7 +13,6 @@ import { IBaseTool } from '../type';
 export class SelectMoveTool implements IBaseTool {
   private startPoint: IPoint = { x: -1, y: -1 };
   private startPoints: IPoint[] = [];
-  private pdPoints: PPoint[] = [];
   private dragPoint: IPoint | null = null;
   private dx = 0;
   private dy = 0;
@@ -21,9 +20,7 @@ export class SelectMoveTool implements IBaseTool {
 
   unbindEvents = noop;
 
-  constructor(private editor: Editor) {
-    this.pdPoints = []
-  }
+  constructor(private editor: Editor) {}
   active() {
     const hotkeysManager = this.editor.hostEventManager;
     const moveWhenToggleShift = () => {
@@ -46,12 +43,10 @@ export class SelectMoveTool implements IBaseTool {
     this.startPoint = this.editor.getSceneCursorXY(e);
     //获取选中的元素集合
     const selectedElements = this.editor.selectedElements.getItems();
-    console.log(this.startPoint, 'this.startPoint;;;;;')
     //获取选中的元素的x，y
     this.startPoints = selectedElements.map((element) => ({
       x: element.x,
       y: element.y,
-      points: element.points ? element.points : [],//画笔轨迹的坐标点数组对象
     }));
     //选中元素多个矩形组成的包围盒
     const bBox = this.editor.selectedElements.getBBox();
@@ -109,42 +104,6 @@ export class SelectMoveTool implements IBaseTool {
     }
 
     const selectedElements = this.editor.selectedElements.getItems();
-    //画笔points轨迹的所有点计算移动的x，y位置
-    // const pdPoint: any[] = []
-    // selectedElements.forEach((element) => {
-    //   if (element.points && element.points.length > 0) {
-    //     for (let p = 0, plen = element.points.length; p < plen; p++) {
-    //       //视口坐标 转 场景坐标-场景中 手势光标坐标
-    //       let pdx = (this.dx = x - element.points[p].x);
-    //       let pdy = (this.dy = y - element.points[p].y);
-    //       //判断主机事件管理器的shift是否按下
-    //       if (this.editor.hostEventManager.isShiftPressing) {
-    //         if (Math.abs(pdx) > Math.abs(pdy)) {
-    //           pdy = 0;
-    //         } else {
-    //           pdx = 0;
-    //         }
-    //       }
-    //       //在移动阶段，AABBox的x和y应该四舍五入为整数（对齐像素网格/是否吸附到像素网格）
-    //       // in the moving phase, AABBox's x and y should round to be integer (snap to pixel grid)
-    //       if (this.editor.setting.get('snapToPixelGrid')) {
-    //         // if dx == 0, we thing it is in vertical moving.垂直移动的
-    //         if (pdx !== 0)
-    //           pdx = Math.round(this.prevBBoxPos.x + pdx) - this.prevBBoxPos.x;
-    //         // similarly dy
-    //         if (dy !== 0)
-    //           pdy = Math.round(this.prevBBoxPos.y + pdy) - this.prevBBoxPos.y;
-    //       }
-    //       pdPoint.push({
-    //         dx: pdx,
-    //         dy: pdy,
-    //       })
-    //       // return pdPoint
-    //     }
-    //   }
-    // },
-    //   this.pdPoints = pdPoint
-    // );
     const startPoints = this.startPoints;
     //选中元素的所有的起始点move事件
     for (let i = 0, len = selectedElements.length; i < len; i++) {
@@ -154,26 +113,6 @@ export class SelectMoveTool implements IBaseTool {
       const ddx = startPoints[i].x + dx - element.x
       const ddy = startPoints[i].y + dy - element.y
       element.move(ddx, ddy); // 移动元素
-      // if (selectedElements[i].points && selectedElements[i].points.length > 0) {
-      //   for (let p = 0, pointslen = selectedElements[i].points.length; p < pointslen; p++) {
-      //     const startPointPen = startPoints[i];
-      //     if (startPointPen && startPointPen.points && startPointPen.points[p]) {
-      //       const ddxPen = startPointPen.points[p].x + this.pdPoints[p].dx - element.x;
-      //       const ddyPen = startPointPen.points[p].y + this.pdPoints[p].dy - element.y;
-      //       console.log(element, 'element2', p)
-      //       console.log(element.points, ' element.points2', p)
-      //       console.log(ddxPen, 'ddxPen2', p)
-      //       console.log(ddyPen, 'ddyPen2', p)
-      //       console.log(dx, 'dx2', p)
-      //       console.log(dy, 'dy2', p)
-      //       console.log(startPoints[i], 'startPoints[i]2', p)
-      //       console.log(startPoints, 'startPoints2', p)
-      //       console.log(startPointPen.points[p].x, 'startPointPen.points[p].x', p)
-      //       console.log(startPointPen.points[p].y, 'startPointPen.points[p].y', p)
-      //       element.move(ddxPen, ddyPen);
-      //     }
-      //   }
-      // }
     }
     // 参照线处理（目前不处理 “吸附到像素网格的情况” 的特殊情况） TODO:修复吸附和偏移
 

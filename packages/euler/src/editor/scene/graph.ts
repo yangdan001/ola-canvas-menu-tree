@@ -154,8 +154,17 @@ export class Graph {
     // }
 }
 move(dx: number, dy: number) {
+  //普通图形左上角的的点移动
   this.x += dx;
   this.y += dy;
+  //画笔的轨迹坐标点移动
+  if(this.points && this.points.length > 0) {
+    const penPoints = this.points
+    for (let p = 0, pointslen = penPoints.length; p < pointslen; p++) {
+      penPoints[p].x += dx;
+      penPoints[p].y += dy;
+    }
+  }
   for (const child of this.children) {
     if('move' in child){
       child.move(dx, dy);
