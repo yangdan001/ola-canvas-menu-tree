@@ -36,7 +36,8 @@ export interface GraphAttrs {
   brushPath?: Path2D | null;
   points?:{ x: number; y: number }[];
   iframeType?: string;
-  formData?:IFormData
+  formData?:IFormData;
+  brushSize?: number; //画笔粗细
 }
 
 export class Graph {
@@ -60,6 +61,7 @@ export class Graph {
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
   points:{ x: number; y: number }[];//画笔轨迹的点坐标
+  brushSize?: number = 1;
   iframeType = "Meta";
   formData = {
     base_model_name: 'Base-V1-5.ckpt',
@@ -113,6 +115,9 @@ export class Graph {
     if (options.brushPath) {
       this.brushPath = options.brushPath;
     }
+    if (options.brushSize) {
+      this.brushSize = options.brushSize;
+    }
   }
   getAttrs(): GraphAttrs {
     return {
@@ -132,6 +137,7 @@ export class Graph {
       zIndex: this.zIndex,
       brushPath: this.brushPath,
       points: this.points,
+      brushSize : this.brushSize,
       iframeType: this.iframeType,
       formData: this.formData,
     };
@@ -332,10 +338,12 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     height,
     iframeType,
     formData,
+    brushSize,
   }: {
     width?: number;
     height?: number;
     iframeType?: string;
+    brushSize?: number;
     formData?: IFormData;
   }) {
     // 获取原来x y 坐标
@@ -348,6 +356,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     }
     if (iframeType) {
       this.iframeType = iframeType;
+    }
+    if (brushSize) {
+      this.brushSize = brushSize;
     }
     if (formData) {
       this.formData = formData;
@@ -437,7 +448,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     canvas:HTMLCanvasElement,
   ) {
     /* eslint-disable-next-line no-debugger */
-    debugger
+    // debugger
     // ctx.beginPath();
     // ctx.moveTo(startPoint.x, startPoint.y);
     // ctx.lineTo(endPoint.x, endPoint.y);
@@ -700,8 +711,31 @@ export const MutateElementsAndRecord = {
             prevStates,
         ),
     );
-},
+  },
+  // 设置画笔粗细属性
+  setBrushSize(editor: Editor, elements: Graph[], brushSize: number) {
+    if (elements.length === 0) {
+        return;
+    }
 
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, brushSize: el.brushSize }));
+
+    for (const element of elements) {
+        element.resizeAndKeepRotatedXY({ brushSize });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, brushSize: el.brushSize }));
+
+    editor.commandManager.pushCommand(
+        new SetElementsAttrs(
+            'Update brushSize of Elements',
+            allAffectedElements,
+            newStates,
+            prevStates,
+        ),
+    );
+  },
 // 设置接口formData数据 
 setFormdata(editor: Editor, elements: Graph[], formData: IFormData) {
   if (elements.length === 0) {

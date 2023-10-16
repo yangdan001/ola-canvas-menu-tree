@@ -4,13 +4,30 @@ import { parseRGBAStr } from '../../utils/color';
 import { ImgManager } from '../Img_manager';
 import { TextureType } from '../texture';
 import { Graph, GraphAttrs } from './graph';
+//画笔默认宽高
+// const DEFAULT_TEXT_WIDTH = 80;
+// const DEFAULT_TEXT_WEIGHT = 30;
+// export interface PenAttrs extends GraphAttrs {
+//   points: { x: number; y: number }[];  // Points for the pen path
+//   strokeWidth: number;
+//   brushSize: number;
+// }
 
 export type RectAttrs = GraphAttrs;
 
 export class Rect extends Graph {
+  // points: { x: number; y: number }[];
+  // brushSize: number;
   constructor(options: RectAttrs) {
-    super({ ...options, type: GraphType.Rect });
+    super({
+      ...options,
+      type: GraphType.Rect,
+      // width: options.width || DEFAULT_TEXT_WIDTH, // 画笔有宽高可以移动
+      // height: options.height || DEFAULT_TEXT_WEIGHT, // 画笔有宽高可以移动
+    });
     console.log('...Rectoptions', options);
+    // this.points = options.points || [];
+    // this.brushSize = options.brushSize || 1;
   }
   
   // 获取没有旋转时候的坐标及宽高
@@ -56,10 +73,21 @@ export class Rect extends Graph {
           this.fillImage(ctx, texture, imgManager, smooth);
           break;
         }
-        // case TextureType.Canvas: {
-        //   this.fillbrush(ctx, texture, imgManager, smooth, canvas);
-        // }
-      }
+      //   case TextureType.Pen: {
+      //     if (this.points.length > 0) {
+      //       ctx.moveTo(this.points[0].x, this.points[0].y);
+      
+      //       for (let i = 1; i < this.points.length; i++) {
+      //         ctx.lineTo(this.points[i].x, this.points[i].y);
+      //       }
+      //       ctx.lineWidth = this.brushSize;
+      //       ctx.stroke();
+      //     }
+      
+      //     if (this.rotation) {
+      //       ctx.restore();
+      //     }
+      // }
     }
     if (this.strokeWidth) {
       ctx.lineWidth = this.strokeWidth;
@@ -75,13 +103,25 @@ export class Rect extends Graph {
             this.fillImage(ctx, texture, imgManager, smooth);
             break;
           }
-          // case TextureType.Canvas: {
-          //   // TODO: stroke image
-          //   this.fillbrush(ctx, texture, imgManager, smooth, canvas);
-          // }
-        }
+        //   case TextureType.Pen: {
+        //     if (this.points.length > 0) {
+        //       ctx.moveTo(this.points[0].x, this.points[0].y);
+        
+        //       for (let i = 1; i < this.points.length; i++) {
+        //         ctx.lineTo(this.points[i].x, this.points[i].y);
+        //       }
+        //       ctx.lineWidth = this.brushSize;
+        //       ctx.stroke();
+        //     }
+        
+        //     if (this.rotation) {
+        //       ctx.restore();
+        //     }
+        // }
       }
     }
+  }
     ctx.closePath();   
   }
 }
+  }

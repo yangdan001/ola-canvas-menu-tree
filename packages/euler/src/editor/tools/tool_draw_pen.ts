@@ -1,9 +1,11 @@
 import { Editor } from '../editor';
 import { ITool } from './type';
-import { IBox, IPoint } from '../../type';
+import { IBox, IPoint, IRect } from '../../type';
 import { PenGraph } from '../scene/pen';
+import { Rect } from '../scene/rect';
 import cloneDeep from 'lodash.clonedeep';
 // import { Graph } from '../scene/graph';
+import { normalizeRect } from '../../utils/graphics';
 
 
 import { AddShapeCommand } from '../commands/add_shape';
@@ -16,7 +18,7 @@ export class DrawPenTool implements ITool {
   private startPoint: IPoint = { x: -1, y: -1 }; //开始点位
   private prevPoint!: IPoint; //记录上一个点位
   private lastDragPoint!: IPoint;//记录上一个点位
-  private brushSize = 5; // Set your desired brush size here
+  private brushSize:number; // Set your desired brush size here
   private prevViewport!: IBox;
   private commandDesc: string;
   private penPoints: { x: number; y: number }[];
@@ -24,6 +26,8 @@ export class DrawPenTool implements ITool {
   constructor(private editor: Editor) {
     this.commandDesc = 'draw Path';
     this.penPoints = [];
+    //画笔粗细设置 选中元素的brushSize属性 或者setting文件的brushSize属性
+    this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
 
   }
   //清空canvas上的鼠标手势样式
@@ -57,6 +61,8 @@ export class DrawPenTool implements ITool {
   drag(e: PointerEvent) {
     //画笔实时画的move过程的所有点  鼠标在视口内划过的坐标 用于实时绘制线条
     const currentPoint = this.editor.getCursorXY(e);
+    //画笔粗细设置 选中元素的brushSize属性 或者setting文件的brushSize属性
+    this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
     // 实时画 功能实现 每一次都是从上个点画起
     this.editor.sceneGraph.drawLine(this.editor.ctx, this.prevPoint, currentPoint, this.brushSize);
     this.prevPoint = currentPoint;
@@ -72,7 +78,7 @@ export class DrawPenTool implements ITool {
   end(e: PointerEvent) {
     this.editor.ctx.lineWidth=1
     this.visible();
-    //
+
     this.createPenGraph()
     // //画笔添加监听
     //拖动结束后工具栏图标还是选中的画笔图标
@@ -88,6 +94,8 @@ export class DrawPenTool implements ITool {
     if (this.penPoints.length === 0) return;
     const firstPoint = this.penPoints[0];
     if (!this.editor.canvasElement) return;
+    //画笔粗细设置 选中元素的brushSize属性 或者setting文件的brushSize属性
+    this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
     const pen = new PenGraph({
       penWidth: this.brushSize,
       points: this.penPoints,
@@ -96,6 +104,16 @@ export class DrawPenTool implements ITool {
       fill: cloneDeep(this.editor.setting.get('textFill')),
       strokeWidth: 2,
     });
+    // const pen = new Rect({
+    // //  ...rect,
+    //   width:100,
+    //   height:100,
+    //   points: this.penPoints,
+    //   x: firstPoint.x,
+    //   y: firstPoint.y,
+    //   fill: cloneDeep(this.editor.setting.get('textFill')),
+    //   strokeWidth: 2,
+    // });
     console.log('pen',pen);
     
     this.editor.sceneGraph.addItems([pen]);
