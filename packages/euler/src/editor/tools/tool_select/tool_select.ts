@@ -78,9 +78,9 @@ export class SelectTool implements ITool {
   start(e: PointerEvent) {
     console.log('init current time')
     const currentTime = Date.now();
-    const DOUBLE_CLICK_THRESHOLD = 300; 
+    const DOUBLE_CLICK_THRESHOLD = 300;  //双击临界时间间隔
     this.currStrategy = null;
-    this.topHitElementWhenStart = null;
+    this.topHitElementWhenStart = null; //开始时的顶部命中元素
     this.isDragHappened = false;
    
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -129,7 +129,11 @@ export class SelectTool implements ITool {
       !isShiftPressing &&
       sceneGraph.isPointInSelectedBox(this.startPoint)
     ) {
+      //战略移动
       this.currStrategy = this.strategyMove;
+
+
+
     } else {
       const topHitElement = sceneGraph.getTopHitElement(
         this.startPoint.x,
@@ -147,6 +151,8 @@ export class SelectTool implements ITool {
           }
         } else {
           selectedElements.setItems([topHitElement]);
+
+
         }
 
         sceneGraph.render();
@@ -192,11 +198,13 @@ export class SelectTool implements ITool {
     }
 
     if (this.topHitElementWhenStart && !this.isDragHappened) {
+      //切换选中元素
       this.editor.selectedElements.toggleItems([this.topHitElementWhenStart]);
       this.editor.sceneGraph.render();
     }
 
     if (currStrategy) {
+      //是否启用拖动
       currStrategy.end(e, isEnableDrag);
       currStrategy.inactive();
     } else {
@@ -209,12 +217,13 @@ export class SelectTool implements ITool {
     /* eslint-disable-next-line no-debugger */
     // debugger
     // console.log(this.editor,'this.editor')
+    //是否正在拖拽画布的空间
     if (!this.editor.hostEventManager.isDraggingCanvasBySpace) {
       this.editor.setCursor('');
     }
-    this.topHitElementWhenStart = null;
-    this.isDragHappened = false;
+    this.topHitElementWhenStart = null; //开始时的顶部命中元素
+    this.isDragHappened = false; //拖拽是否发生
     this.currStrategy?.afterEnd();
-    this.currStrategy = null;
+    this.currStrategy = null; //当前策略
   }
 }

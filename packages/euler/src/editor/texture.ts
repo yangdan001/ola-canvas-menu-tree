@@ -1,7 +1,7 @@
 export enum TextureType {
   Solid = 'Solid',
   Image = 'Image',
-  Canvas = 'Canvas',
+  Pen = 'Pen',
 }
 
 export interface IRGBA {
@@ -17,7 +17,7 @@ export interface TextureSolid {
 }
 
 export interface TextureCanvas {
-  type: TextureType.Canvas;
+  type: TextureType.Pen;
   attrs: {
     src?: string;
     opacity?: number;
@@ -49,14 +49,14 @@ export const DEFAULT_IMAGE_TEXTURE: TextureImage = {
 };
 
 export const DEFAULT_CANVAS_TEXTURE: TextureCanvas = {
-  type: TextureType.Canvas,
+  type: TextureType.Pen,
   attrs: {},
 };
 
 export const DEFAULT_TEXTURES = {
   [TextureType.Solid]: DEFAULT_SOLID_TEXTURE,
   [TextureType.Image]: DEFAULT_IMAGE_TEXTURE,
-  [TextureType.Canvas]: DEFAULT_CANVAS_TEXTURE,
+  [TextureType.Pen]: DEFAULT_CANVAS_TEXTURE,
 
 };
 

@@ -5,21 +5,52 @@ import {
 } from 'antd';
 import './index.scss';
 import { HighlightOutlined } from '@ant-design/icons';
+import { EditorContext } from '../../context';
+import { MutateElementsAndRecord } from '../../editor/scene/graph';
+import { useIntl } from 'react-intl';
 
 const PenSize = () => {
-  const [penVal, setPenVal] = useState(0);
-  // useEffect(() => {
-    
-  // }, []); 
+  const intl = useIntl();
+  const MIXED = intl.formatMessage({ id: 'mixed' });
+  const editor = useContext(EditorContext);
+  const [brushSize, setBrushSize] = useState(0);
+  useEffect(() => {
+    if (editor) {
+      const handler = () => {
+        const items = editor.selectedElements.getItems();
+        if (items.length > 0) {
+          let newBrushSize= items[0].brushSize;
+          for (let i = 0, len = items.length; i < len; i++) {
+            const element = items[i];
+            if (newBrushSize !==  element.brushSize ) {
+              newBrushSize = MIXED;
+            }
+          }
+          setBrushSize(newBrushSize);
+        }
+      };
+      editor.sceneGraph.on('render', handler);
+      return () => {
+        editor.sceneGraph.off('render', handler);
+      };
+    }
+  }, [editor, MIXED]);
 
   const onSize = (value) => {
     console.log('onChange: ', value);
-    setPenVal(value)
+    setBrushSize(value)
   }
 
   const onAfterSize = (value) => {
     console.log('onAfterChange: ', value);
-    setPenVal(value)
+    setBrushSize(value)
+    // const brushSize = editor.setting.get('brushSize');
+    if (editor) {
+      const elements = editor.selectedElements.getItems();
+      // editor.setting.set('brushSize', value);
+      MutateElementsAndRecord.setBrushSize(editor, elements, value);
+      editor.sceneGraph.render();
+    }
   }
 
 
@@ -31,7 +62,7 @@ return(
         </div>
         {/* <Divider style={{marginTop: 10,marginBottom: 0}}/> */}
         <div>Size</div>
-        <Slider min={1} max={100} step={1} trackStyle={{ backgroundColor: '#7F39FB' }} railStyle={{ backgroundColor: '#FFFFFF' }} defaultValue={10} onChange={onSize} onAfterChange={onAfterSize} />
+        <Slider min={1} max={100} step={1} trackStyle={{ backgroundColor: '#7F39FB' }} defaultValue={1} railStyle={{ backgroundColor: '#FFFFFF' }} value={brushSize} onChange={onSize} onAfterChange={onAfterSize} />
         <Divider style={{marginTop: 5,marginBottom: 0,background:'#EEE'}}/>
    </div>
       )

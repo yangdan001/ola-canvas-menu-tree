@@ -23,7 +23,7 @@ export class Setting {
       attrs: { r: 0, g: 0, b: 0, a: 1 }, //黑色图形背景
     } as ITexture,
     drawPathFill: {
-      type: TextureType.Canvas,
+      type: TextureType.Pen,
       // attrs: { r: 217, g: 217, b: 217, a: 1 },//灰色图形背景
       attrs: { 
         strokeStyle : 'white', // 画笔颜色

@@ -50,7 +50,7 @@ export class Brush extends Graph {
           this.fillImage(ctx, texture, imgManager, smooth);
           break;
         }
-        case TextureType.Canvas: {
+        case TextureType.Pen: {
           this.fillbrush(ctx, texture, imgManager, smooth, canvas);
         }
       }
@@ -71,7 +71,7 @@ export class Brush extends Graph {
             this.fillImage(ctx, texture, imgManager, smooth);
             break;
           }
-          case TextureType.Canvas: {
+          case TextureType.Pen: {
             // TODO: stroke image
             this.fillbrush(ctx, texture, imgManager, smooth, canvas);
           }
