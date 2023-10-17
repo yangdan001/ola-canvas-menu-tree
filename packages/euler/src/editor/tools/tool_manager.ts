@@ -196,8 +196,10 @@ export class ToolManager {
     if (!currentTool) {
       throw new Error(`没有 ${toolName} 对应的工具对象`);
     }
-    //  清空上一个工具项的 canvas上的cursor手标
+    //  清空上一个工具项的 canvas上的选中样式
+    if(toolName!='drawPen'){
     prevTool && prevTool.inactive();
+    }
     //设置新cursor手标
     currentTool.active();
     //设置被点击图标的高亮
