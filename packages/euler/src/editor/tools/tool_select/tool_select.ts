@@ -76,6 +76,8 @@ export class SelectTool implements ITool {
     }
 }
   start(e: PointerEvent) {
+    /* eslint-disable-next-line no-debugger */
+    // debugger
     console.log('init current time')
     const currentTime = Date.now();
     const DOUBLE_CLICK_THRESHOLD = 300;  //双击临界时间间隔
@@ -190,7 +192,7 @@ export class SelectTool implements ITool {
   }
   end(e: PointerEvent, isEnableDrag: boolean) {
      /* eslint-disable-next-line no-debugger */
-// debugger
+    // debugger
     const currStrategy = this.currStrategy;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {

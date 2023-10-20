@@ -106,6 +106,8 @@ class SelectedElements {
     }
     /* eslint-disable-next-line no-debugger */
     //  debugger
+    console.log(this.items,'this.items9999')
+    //带旋转的bBox
     const bBoxesWithRotation = this.items.map((element) => element.getBBox());
   //   const bBoxesWithRotation = this.items
   // .filter((element) => element !== null && element !== undefined)
@@ -119,6 +121,12 @@ class SelectedElements {
   //     return { x: 0, y: 0, width: 0, height: 0 };
   //   }
   // });
+  /**
+ * 求多个矩形组成的包围盒
+ */
+  console.log(bBoxesWithRotation,'bBoxesWithRotation')
+  console.log(getRectsBBox(...bBoxesWithRotation),'getRectsBBox(...bBoxesWithRotation)')
+
     return getRectsBBox(...bBoxesWithRotation);
   }
   getRotation() {

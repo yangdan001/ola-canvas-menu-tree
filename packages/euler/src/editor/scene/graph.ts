@@ -13,7 +13,7 @@ import { DEFAULT_IMAGE, ITexture, TextureCanvas, TextureImage } from '../texture
 import { ImgManager } from '../Img_manager';
 /**
  * 画布元素节点属性接口
- * */ 
+ * */
 export interface GraphAttrs {
   type?: GraphType;
   id?: string;
@@ -34,9 +34,9 @@ export interface GraphAttrs {
   parent?: Graph | null;
   zIndex?: number;
   brushPath?: Path2D | null;
-  points?:{ x: number; y: number }[];
+  points?: { x: number; y: number }[];
   iframeType?: string;
-  formData?:IFormData;
+  formData?: IFormData;
   brushSize?: number; //画笔粗细
 }
 
@@ -54,13 +54,13 @@ export class Graph {
   fill: ITexture[] = [];
   stroke: ITexture[] = [];
   strokeWidth?: number;
-  visible?: boolean = true; 
-  disabled?: boolean = false; 
+  visible?: boolean = true;
+  disabled?: boolean = false;
   // transform
   rotation?: number = 0;
   zIndex?: number;
   brushPath: Path2D | null = null; // 添加这一行来存储画笔路径
-  points:{ x: number; y: number }[];//画笔轨迹的点坐标
+  points: { x: number; y: number }[];//画笔轨迹的点坐标
   brushSize?: number = 1;
   iframeType = "Meta";
   formData = {
@@ -100,7 +100,7 @@ export class Graph {
     this.height = options.height;
     this.iframeType = options.iframeType ?? this.iframeType;
     this.formData = options.formData ?? this.formData;
-    this.points = options.points?options.points:[]
+    this.points = options.points ? options.points : []
     if (options.fill) {
       this.fill = options.fill;
     }
@@ -137,7 +137,7 @@ export class Graph {
       zIndex: this.zIndex,
       brushPath: this.brushPath,
       points: this.points,
-      brushSize : this.brushSize,
+      brushSize: this.brushSize,
       iframeType: this.iframeType,
       formData: this.formData,
     };
@@ -148,80 +148,87 @@ export class Graph {
     const dRotation = attrs.rotation !== undefined ? attrs.rotation - (this.rotation || 0) : 0;
 
     for (const key in attrs) {
-        if (Object.prototype.hasOwnProperty.call(attrs, key)) {
-            const attrKey = key as keyof GraphAttrs;
-            (this as any)[attrKey] = attrs[attrKey];
-        }
+      if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+        const attrKey = key as keyof GraphAttrs;
+        (this as any)[attrKey] = attrs[attrKey];
+      }
     }
 
     // 如果位置或旋转发生了变化，应用这些变化到所有子元素上
     // if (dx !== 0 || dy !== 0 || dRotation !== 0) {
     //     this.applyTransformToChildren(dx, dy, dRotation);
     // }
-}
-move(dx: number, dy: number) {
-  //普通图形左上角的的点移动
-  this.x += dx;
-  this.y += dy;
-  //画笔的轨迹坐标点移动
-  if(this.points && this.points.length > 0) {
-    const penPoints = this.points
-    for (let p = 0, pointslen = penPoints.length; p < pointslen; p++) {
-      penPoints[p].x += dx;
-      penPoints[p].y += dy;
+  }
+  move(dx: number, dy: number) {
+    //普通图形左上角的的点移动
+    this.x += dx;
+    this.y += dy;
+    //画笔的轨迹坐标点移动
+    if (this.points && this.points.length > 0) {
+      const penPoints = this.points
+      for (let p = 0, pointslen = penPoints.length; p < pointslen; p++) {
+        penPoints[p].x += dx;
+        penPoints[p].y += dy;
+      }
+    }
+    for (const child of this.children) {
+      if ('move' in child) {
+        child.move(dx, dy);
+      }
     }
   }
-  for (const child of this.children) {
-    if('move' in child){
-      child.move(dx, dy);
-    }
-  }
-}
-rotate(dRotation: number) {
-  this.rotation = (this.rotation || 0) + dRotation;
-  for (const child of this.children) {
+  rotate(dRotation: number) {
+    this.rotation = (this.rotation || 0) + dRotation;
+    for (const child of this.children) {
       child.rotate(dRotation);
+    }
   }
-}
 
-getAllDescendants(): Graph[] {
-  let descendants: Graph[] = [];
-  for (const child of this.children) {
+  getAllDescendants(): Graph[] {
+    let descendants: Graph[] = [];
+    for (const child of this.children) {
       descendants.push(child);
-      if('getAllDescendants' in child ){
+      if ('getAllDescendants' in child) {
         descendants = descendants.concat(child.getAllDescendants());
       }
-  }
-  return descendants;
-}
-
-private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
-    for (const child of this.children) {
-        child.x += dx;
-        child.y += dy;
-        if (child.rotation) {
-            child.rotation += dRotation;
-        } else {
-            child.rotation = dRotation;
-        }
-        child.applyTransformToChildren(dx, dy, dRotation);  // 递归地应用到子元素的子元素
     }
-}
+    return descendants;
+  }
+
+  private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
+    for (const child of this.children) {
+      child.x += dx;
+      child.y += dy;
+      if (child.rotation) {
+        child.rotation += dRotation;
+      } else {
+        child.rotation = dRotation;
+      }
+      child.applyTransformToChildren(dx, dy, dRotation);  // 递归地应用到子元素的子元素
+    }
+  }
 
   /**
    * 计算包围盒（不考虑 strokeWidth）
    * 考虑旋转
    */
   getBBox(): IBox {
+    /**
+     * 计算绝对坐标
+     */
     const [x, y, x2, y2, cx, cy] = getAbsoluteCoords(this);
     const rotation = this.rotation;
     if (!rotation) {
+      /**
+     * 获取不旋转的BBox
+     */
       return this.getBBoxWithoutRotation();
     }
 
+    //变换旋转
     const { x: nwX, y: nwY } = transformRotate(x, y, rotation, cx, cy); // 左上
     const { x: neX, y: neY } = transformRotate(x2, y, rotation, cx, cy); // 右上
-    const { x: seX, y: seY } = transformRotate(x2, y2, rotation, cx, cy); // 右下
+    const { x: seX, y: seY } = transformRotate(x2, y2, rotation, cx, cy); // 右上
     const { x: swX, y: swY } = transformRotate(x, y2, rotation, cx, cy); // 右下
 
     const minX = Math.min(nwX, neX, seX, swX);
@@ -287,6 +294,9 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
 
     return [nw, ne, se, sw];
   }
+  /**
+   * 获取不旋转的BBox
+  */
   getBBoxWithoutRotation() {
     return {
       x: this.x,
@@ -332,7 +342,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
   }
   /**
    * 调整大小并保持旋转XY
-   * */ 
+   * */
   resizeAndKeepRotatedXY({
     width,
     height,
@@ -423,7 +433,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
 
     const sx = img.width / 2 - width / scale / 2;
     const sy = img.height / 2 - height / scale / 2;
-    if(opacity){
+    if (opacity) {
       ctx.globalAlpha = opacity;
     }
     ctx.drawImage(
@@ -445,7 +455,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     texture: TextureCanvas,
     imgManager: ImgManager,
     smooth: boolean,
-    canvas:HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
   ) {
     /* eslint-disable-next-line no-debugger */
     // debugger
@@ -531,7 +541,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
     this.children.push(child);
     child.parent = this;
   }
-  
+
   removeChild(child: Graph) {
     const index = this.children.indexOf(child);
     if (index !== -1) {
@@ -539,7 +549,7 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
       child.parent = null;
     }
   }
-  
+
 
   static dMove(graphs: Graph[], dx: number, dy: number) {
     for (const graph of graphs) {
@@ -551,11 +561,11 @@ private applyTransformToChildren(dx: number, dy: number, dRotation: number) {
 
 /**
  * 获取所有受影响的元素
- * */ 
+ * */
 function getAllElementsWithChildren(element: Graph): Graph[] {
   let elements = [element];
   for (const child of element.children) {
-      elements = elements.concat(getAllElementsWithChildren(child));
+    elements = elements.concat(getAllElementsWithChildren(child));
   }
   return elements;
 }
@@ -567,255 +577,254 @@ export const MutateElementsAndRecord = {
 
   // 设置旋转X
   setRotateX(editor: Editor, elements: Graph[], rotatedX: number) {
-      if (elements.length === 0) {
-          return;
-      }
+    if (elements.length === 0) {
+      return;
+    }
 
-      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-      const prevStates = allAffectedElements.map(el => ({ x: el.x }));
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x }));
 
-      for (const element of elements) {
-          element.setRotatedX(rotatedX);
-      }
+    for (const element of elements) {
+      element.setRotatedX(rotatedX);
+    }
 
-      const newStates = allAffectedElements.map(el => ({ x: el.x }));
+    const newStates = allAffectedElements.map(el => ({ x: el.x }));
 
-      editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update X of Elements',
-              allAffectedElements,
-              newStates,
-              prevStates,
-          ),
-      );
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update X of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
   },
-// 设置旋转Y
+  // 设置旋转Y
   setRotateY(editor: Editor, elements: Graph[], rotatedY: number) {
-      if (elements.length === 0) {
-          return;
-      }
+    if (elements.length === 0) {
+      return;
+    }
 
-      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-      const prevStates = allAffectedElements.map(el => ({ y: el.y }));
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ y: el.y }));
 
-      for (const element of elements) {
-          element.setRotatedY(rotatedY);
-      }
+    for (const element of elements) {
+      element.setRotatedY(rotatedY);
+    }
 
-      const newStates = allAffectedElements.map(el => ({ y: el.y }));
+    const newStates = allAffectedElements.map(el => ({ y: el.y }));
 
-      editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update Y of Elements',
-              allAffectedElements,
-              newStates,
-              prevStates,
-          ),
-      );
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update Y of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
   },
-// 设置宽度
+  // 设置宽度
   setWidth(editor: Editor, elements: Graph[], width: number) {
-    console.log('width',width);
-    
+
     /* eslint-disable-next-line no-debugger */
-      if (elements.length === 0) {
-          return;
-      }
+    if (elements.length === 0) {
+      return;
+    }
 
-      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-      const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
-      
-      for (const element of elements) {
-          element.resizeAndKeepRotatedXY({ width });
-      }
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
 
-      const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ width });
+    }
 
-      editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update Width of Elements',
-              allAffectedElements,
-              newStates,
-              prevStates,
-          ),
-      );
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
+
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update Width of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
   },
-// 设置高度
+  // 设置高度
   setHeight(editor: Editor, elements: Graph[], height: number) {
-      if (elements.length === 0) {
-          return;
-      }
+    if (elements.length === 0) {
+      return;
+    }
 
-      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-      const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
 
-      for (const element of elements) {
-          element.resizeAndKeepRotatedXY({ height });
-      }
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ height });
+    }
 
-      const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, height: el.height }));
 
-      editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update Height of Elements',
-              allAffectedElements,
-              newStates,
-              prevStates,
-          ),
-      );
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update Height of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
   },
-// 设置旋转
+  // 设置旋转
   setRotation(editor: Editor, elements: Graph[], rotation: number) {
-      if (elements.length === 0) {
-          return;
-      }
+    if (elements.length === 0) {
+      return;
+    }
 
-      const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-      const prevStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
 
-      for (const element of elements) {
-          element.rotation = rotation;
-      }
+    for (const element of elements) {
+      element.rotation = rotation;
+    }
 
-      const newStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
+    const newStates = allAffectedElements.map(el => ({ rotation: el.rotation || 0 }));
 
-      editor.commandManager.pushCommand(
-          new SetElementsAttrs(
-              'Update Rotation of Elements',
-              allAffectedElements,
-              newStates,
-              prevStates,
-          ),
-      );
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update Rotation of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
   },
   // 设置元素类型 Meta / image / 
   setIframeType(editor: Editor, elements: Graph[], iframeType: string) {
     if (elements.length === 0) {
-        return;
+      return;
     }
 
     const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
     const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, iframeType: el.iframeType }));
 
     for (const element of elements) {
-        element.resizeAndKeepRotatedXY({ iframeType });
+      element.resizeAndKeepRotatedXY({ iframeType });
     }
 
     const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, iframeType: el.iframeType }));
 
     editor.commandManager.pushCommand(
-        new SetElementsAttrs(
-            'Update iframeType of Elements',
-            allAffectedElements,
-            newStates,
-            prevStates,
-        ),
+      new SetElementsAttrs(
+        'Update iframeType of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
     );
   },
   // 设置画笔粗细属性
   setBrushSize(editor: Editor, elements: Graph[], brushSize: number) {
     if (elements.length === 0) {
-        return;
+      return;
     }
 
     const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
     const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, brushSize: el.brushSize }));
 
     for (const element of elements) {
-        element.resizeAndKeepRotatedXY({ brushSize });
+      element.resizeAndKeepRotatedXY({ brushSize });
     }
 
     const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, brushSize: el.brushSize }));
 
     editor.commandManager.pushCommand(
-        new SetElementsAttrs(
-            'Update brushSize of Elements',
-            allAffectedElements,
-            newStates,
-            prevStates,
-        ),
+      new SetElementsAttrs(
+        'Update brushSize of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
     );
   },
-// 设置接口formData数据 
-setFormdata(editor: Editor, elements: Graph[], formData: IFormData) {
-  if (elements.length === 0) {
+  // 设置接口formData数据 
+  setFormdata(editor: Editor, elements: Graph[], formData: IFormData) {
+    if (elements.length === 0) {
       return;
-  }
+    }
 
-  const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
-  const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
 
-  for (const element of elements) {
+    for (const element of elements) {
       element.resizeAndKeepRotatedXY({ formData });
-  }
+    }
 
-  const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, formData: el.formData }));
 
-  editor.commandManager.pushCommand(
+    editor.commandManager.pushCommand(
       new SetElementsAttrs(
-          'Update formData of Elements',
-          allAffectedElements,
-          newStates,
-          prevStates,
+        'Update formData of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
       ),
-  );
-},
-//   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
-//     // 创建新的 Path2D 对象来存储画笔路径
-//     this.brushPath = new Path2D();
-//     this.brushPath.moveTo(x, y);
-  
-//     // 设置画笔属性，例如颜色和宽度
-//     ctx.strokeStyle = this.brushColor;  // 设置画笔颜色
-//     ctx.lineWidth = this.brushWidth;    // 设置画笔宽度
-//     ctx.lineJoin = 'round';             // 设置线条连接方式为圆角
-  
-//     // 开始绘制画笔路径
-//     ctx.beginPath();
-//     // 添加鼠标移动事件监听器，用于实时更新路径
-//   document.addEventListener('mousemove', this.handleMouseMove);
-//   },
-  
-//   stopDrawingBrush() {
-//     // 停止绘制画笔路径
-//     this.brushPath = null;
-//   },
+    );
+  },
+  //   startDrawingBrush(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  //     // 创建新的 Path2D 对象来存储画笔路径
+  //     this.brushPath = new Path2D();
+  //     this.brushPath.moveTo(x, y);
 
-//   // 处理鼠标按下事件，开始绘制画笔路径
-// handleMouseDown(event: MouseEvent) {
-//   if (this.brushPath) {
-//     return;
-//   }
+  //     // 设置画笔属性，例如颜色和宽度
+  //     ctx.strokeStyle = this.brushColor;  // 设置画笔颜色
+  //     ctx.lineWidth = this.brushWidth;    // 设置画笔宽度
+  //     ctx.lineJoin = 'round';             // 设置线条连接方式为圆角
 
-//   const x = event.clientX - this.canvas.getBoundingClientRect().left;
-//   const y = event.clientY - this.canvas.getBoundingClientRect().top;
+  //     // 开始绘制画笔路径
+  //     ctx.beginPath();
+  //     // 添加鼠标移动事件监听器，用于实时更新路径
+  //   document.addEventListener('mousemove', this.handleMouseMove);
+  //   },
 
-//   this.startDrawingBrush(this.ctx, x, y);
-// },
+  //   stopDrawingBrush() {
+  //     // 停止绘制画笔路径
+  //     this.brushPath = null;
+  //   },
 
-// // 处理鼠标移动事件，绘制画笔路径
-// handleMouseMove(event: MouseEvent) {
-//   if (!this.brushPath) {
-//     return;
-//   }
+  //   // 处理鼠标按下事件，开始绘制画笔路径
+  // handleMouseDown(event: MouseEvent) {
+  //   if (this.brushPath) {
+  //     return;
+  //   }
 
-//   const x = event.clientX - this.canvas.getBoundingClientRect().left;
-//   const y = event.clientY - this.canvas.getBoundingClientRect().top;
+  //   const x = event.clientX - this.canvas.getBoundingClientRect().left;
+  //   const y = event.clientY - this.canvas.getBoundingClientRect().top;
 
-//   // 绘制画笔路径
-//   this.ctx.lineTo(x, y);
-//   this.ctx.stroke();
-// },
+  //   this.startDrawingBrush(this.ctx, x, y);
+  // },
 
-// // 处理鼠标释放事件，停止绘制画笔路径
-// handleMouseUp(event: MouseEvent) {
-//   if (!this.brushPath) {
-//     return;
-//   }
+  // // 处理鼠标移动事件，绘制画笔路径
+  // handleMouseMove(event: MouseEvent) {
+  //   if (!this.brushPath) {
+  //     return;
+  //   }
 
-//   this.stopDrawingBrush();
-// }
+  //   const x = event.clientX - this.canvas.getBoundingClientRect().left;
+  //   const y = event.clientY - this.canvas.getBoundingClientRect().top;
 
-  
+  //   // 绘制画笔路径
+  //   this.ctx.lineTo(x, y);
+  //   this.ctx.stroke();
+  // },
+
+  // // 处理鼠标释放事件，停止绘制画笔路径
+  // handleMouseUp(event: MouseEvent) {
+  //   if (!this.brushPath) {
+  //     return;
+  //   }
+
+  //   this.stopDrawingBrush();
+  // }
+
+
 };
 
