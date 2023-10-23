@@ -21,8 +21,6 @@ export class TextGraph extends Graph {
   fontSize: number;
   autoFit?: boolean;
   constructor(options: Optional<TextAttrs, 'width' | 'height'>) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     super({
       ...options,
       type: GraphType.Text,
@@ -51,8 +49,6 @@ export class TextGraph extends Graph {
   }
 
   renderFillAndStrokeTexture(ctx: CanvasRenderingContext2D) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     if (this.rotation) {
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;

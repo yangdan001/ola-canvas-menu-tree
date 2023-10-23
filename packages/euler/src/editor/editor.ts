@@ -103,8 +103,6 @@ export class Editor {
     });
 
     const data = this.autoSaveGraphs.load();
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     //todo的入口
     if (data) {
       this.sceneGraph.load(data.data);

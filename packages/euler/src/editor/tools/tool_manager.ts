@@ -121,8 +121,6 @@ export class ToolManager {
         if (this.isDragging) {
           this.enableSwitchTool = false; //此时禁止切换工具
           this.editor.hostEventManager.disableDragBySpace(); //此时禁止拖拽画布
-          /* eslint-disable-next-line no-debugger */
-          // debugger
           // 调用当前工具文件的drag方法 如tool_draw_pen.ts中的drag方法
           this.currentTool.drag(e);
         }
@@ -187,8 +185,6 @@ export class ToolManager {
     if (!this.enableSwitchTool || this.getActiveToolName() === toolName) {
       return;
     }
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     const prevTool = this.currentTool;
 
     // 将点击工具项数据赋给this.currentTool

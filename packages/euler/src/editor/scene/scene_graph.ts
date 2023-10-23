@@ -79,8 +79,6 @@ export class SceneGraph {
     return result;
 }
 addItems(elements: Graph[], parent?: Graph, idx?: number) {
-  /* eslint-disable-next-line no-debugger */
-  // debugger
   if (parent) {
     // 如果有指定父元素，将元素添加为父元素的子元素
     if (idx === undefined) {
@@ -103,8 +101,6 @@ addItems(elements: Graph[], parent?: Graph, idx?: number) {
   }
 }
 moveElement(element: Graph, parent?: Graph) {
-  /* eslint-disable-next-line no-debugger */
-  // debugger
   // 1. 首先从当前位置移除元素
   this.removeElementFromItsParent(element);
 
@@ -190,8 +186,6 @@ removeItems(elements: Graph[]) {
     const zoom = this.editor.zoomManager.getZoom();
     //获取缩放后视口饿坐标位置
     const viewportBoxInScene = this.editor.viewportManager.getBbox();
-    /* eslint-disable-next-line no-debugger */
-  // debugger
     //可见元素
     const visibleElements: Graph[] = [];
     // 1. 找出视口下所有元素
@@ -284,8 +278,6 @@ removeItems(elements: Graph[]) {
 findVisibleElements(elements: Graph[], viewportBoxInScene: IBox, visibleElements: Graph[]) {
   for (const element of elements) {
     if(!(element !== null && element !== undefined && "getBBox" in element)){ continue}
-    /* eslint-disable-next-line no-debugger */
-    //  debugger
       if ( isRectIntersect(element.getBBox(), viewportBoxInScene)) {
           visibleElements.push(element);
           if (element.children && element.children.length > 0) {
@@ -324,8 +316,6 @@ renderElement(element: Graph, ctx: CanvasRenderingContext2D, zoom: number,canvas
   // 抗锯齿
   const smooth = zoom <= 1;
   const imgManager = this.editor.imgManager;
-    /* eslint-disable-next-line no-debugger */
-    
   element.renderFillAndStrokeTexture(ctx, imgManager, smooth, canvas);
   ctx.restore();
   
@@ -639,8 +629,6 @@ getPointElements(point: IPoint): Graph[] {
     };
   
     const parseGraph = (attrs: any) => {
-      /* eslint-disable-next-line no-debugger */
-      // debugger
       const type = attrs.type as GraphType; // 使用类型断言
       const Ctor = ctorMap[type];
       if (!Ctor) {

@@ -335,8 +335,6 @@ const Generate = () => {
   //获取mask图
   // const onInpaintingChange = (value) => {
   //   console.log(value, 'value888')
-  //   /* eslint-disable-next-line no-debugger */
-  //    debugger
   //   if(value==true) {
   //   const sceneGraph = editor.sceneGraph;
   //   const selectedElements = editor.selectedElements;
@@ -1131,3 +1129,327 @@ const Generate = () => {
   )
 }
 export default Generate;
+
+
+
+
+//抠图1支持获取抠图部分的像素数据getImageData方法，且图片路径解决了请求头跨域问题
+  // const init =()=>{
+  //   // 创建原始图片
+  //   const originalImage = new Image();
+  //   originalImage.crossOrigin = 'anonymous';
+  //   // originalImage.src = 'https://sagemaker-us-west-2-227263203486.s3.us-west-2.amazonaws.com/sd_engine_staging/cloud_data/output_imgs/8c04c0d8d880ee7042b92003ac0ae55a.jpg';
+  //   // originalImage.src = 'http://web.cdn.olfk.top/user_icon.png';
+  //   originalImage.src = 'http://web.cdn.olfk.top/1e317b55ae86edafbc06ee135f558a42%20%281%29.jpeg';
+  //   originalImage.onload = function() {
+  //       // 创建Canvas元素
+  //       const canvas = document.createElement('canvas');
+  //       const ctx = canvas.getContext('2d');
+
+  //       // 设置Canvas大小
+  //       canvas.width = 200; // 设置Canvas的宽度
+  //       canvas.height = 200; // 设置Canvas的高度
+
+  //       // 绘制原始图片
+  //       ctx.drawImage(originalImage, 0, 0);
+
+  //       // 定义抠图的坐标和大小
+  //       const x = 50; // 左上角X坐标
+  //       const y = 50; // 左上角Y坐标
+  //       const width = 100; // 宽度
+  //       const height = 100; // 高度
+
+  //       // 获取抠图部分的像素数据
+  //       const imageData = ctx.getImageData(x, y, width, height);
+
+  //       // 创建一个新Canvas元素
+  //       const resultCanvas = document.createElement('canvas');
+  //       const resultCtx = resultCanvas.getContext('2d');
+
+  //       // 设置新Canvas的大小
+  //       resultCanvas.width = width;
+  //       resultCanvas.height = height;
+
+  //       // 将抠图的像素数据绘制到新Canvas上
+  //       resultCtx.putImageData(imageData, 0, 0);
+
+  //       // 将新Canvas转换为图片
+  //       const resultImage = new Image();
+  //       resultImage.src = resultCanvas.toDataURL('image/png');
+  //       console.log(resultImage,'resultImage9999')
+  //       console.log(resultImage.src ,'resultImage.src9999')
+  //       // 添加到页面中或进行其他操作
+  //       document.body.appendChild(resultImage);
+  //   };
+
+  // }
+
+  //抠子元素mask，只抠mask
+  // const init = ()=>{
+  //   // 获取原始Canvas和上下文
+  //   const originalCanvas = document.getElementById('myCanvas');
+  //   const originalCtx = originalCanvas.getContext('2d');
+
+  //   //   // 绘制一个矩形
+  //   originalCtx.fillStyle = 'red';
+  //   // 设置填充颜色为透明
+  //   // originalCtx.fillStyle = 'rgba(255,0,0,0.3)';
+  //   originalCtx.fillRect(50, 50, 200, 150);
+  //   // 定义选中矩形的位置和尺寸
+  //   const selectedX = 50; // 选中矩形的起始点 x 坐标
+  //   const selectedY = 50; // 选中矩形的起始点 y 坐标
+  //   const selectedWidth = 200; // 选中矩形的宽度
+  //   const selectedHeight = 150; // 选中矩形的高度
+
+  //   // 定义两个矩形的位置和尺寸
+  //   const x1 = 60; // 第一个矩形的起始点 x 坐标
+  //   const y1 = 60; // 第一个矩形的起始点 y 坐标
+  //   const width1 = 80; // 第一个矩形的宽度
+  //   const height1 = 60; // 第一个矩形的高度
+
+  //   const x2 = 120; // 第二个矩形的起始点 x 坐标
+  //   const y2 = 80; // 第二个矩形的起始点 y 坐标
+  //   const width2 = 60; // 第二个矩形的宽度
+  //   const height2 = 40; // 第二个矩形的高度
+
+  //   // 获取选中矩形区域的像素数据
+  //   const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
+  //   for (let i = 0; i < selectedImageData.data.length; i += 4) {
+  //     // Set the alpha (transparency) value to 0
+  //     selectedImageData.data[i + 3] = 0;
+  //   }
+  //   // 创建新Canvas元素来显示选中区域
+  //   const resultCanvas = document.createElement('canvas');
+  //   resultCanvas.width = selectedWidth;
+  //   resultCanvas.height = selectedHeight;
+  //   const resultCtx = resultCanvas.getContext('2d');
+  //   // 清空Canvas，使背景透明
+  //   resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+  //   // // 设置生成图片的背景色
+  //   // resultCtx.fillStyle = 'rgba(0, 0, 0, 0)'; // 使用透明色作为背景色
+  //   // originalCtx.fillStyle = 'rgba(0, 0, 0, 0)';
+  //   // resultCtx.fillRect(0, 0, selectedWidth, selectedHeight);
+  //   // 将选中区域的像素数据放置在新Canvas上
+  //   resultCtx.putImageData(selectedImageData, 0, 0);
+
+
+
+  //   // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+  //   const x1InImageData = x1 - selectedX;
+  //   const y1InImageData = y1 - selectedY;
+  //   const x2InImageData = x2 - selectedX;
+  //   const y2InImageData = y2 - selectedY;
+
+
+  //   // 绘制两个矩形
+  //   resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+  //   resultCtx.fillStyle = 'blue'; // 第一个矩形的颜色
+  //   resultCtx.fillRect(x1InImageData, y1InImageData, width1, height1);
+
+  //   resultCtx.fillStyle = 'green'; // 第二个矩形的颜色
+  //   resultCtx.fillRect(x2InImageData, y2InImageData, width2, height2);
+
+  //   // 将新Canvas转化为数据URL
+  //   const dataURL = resultCanvas.toDataURL('image/png');
+
+  //   // 创建一个新的图像元素，并设置其src属性为数据URL
+  //   const resultImage = new Image();
+  //   resultImage.src = dataURL;
+
+  //   // 将图像元素添加到页面上
+  //   document.body.appendChild(resultImage);
+
+  // }
+
+  //抠图2不完善
+  // const init =()=>{
+  //   // 创建原始图片
+  //   const originalImage = new Image();
+  //   originalImage.crossOrigin = 'anonymous';
+  //   originalImage.src = 'https://sagemaker-us-west-2-227263203486.s3.us-west-2.amazonaws.com/sd_engine_staging/cloud_data/output_imgs/8c04c0d8d880ee7042b92003ac0ae55a.jpg';
+  //   // originalImage.src = 'http://web.cdn.olfk.top/user_icon.png';
+  //   // originalImage.src = 'http://web.cdn.olfk.top/1e317b55ae86edafbc06ee135f558a42%20%281%29.jpeg';
+  //   originalImage.onload = function() {
+  //       // 创建Canvas元素
+  //       const canvas = document.createElement('canvas');
+  //       const ctx = canvas.getContext('2d');
+
+  //       // 设置Canvas大小
+  //       canvas.width = 200; // 设置Canvas的宽度
+  //       canvas.height = 200; // 设置Canvas的高度
+
+  //       // 绘制原始图片
+  //       ctx.drawImage(originalImage, 50, 50,100,100);
+
+  //       // 将新Canvas转换为图片
+  //       const resultImage = new Image();
+  //       // 设置Canvas大小
+  //       canvas.width = 100; // 设置Canvas的宽度
+  //       canvas.height = 100; // 设置Canvas的高度
+  //       resultImage.src = canvas.toDataURL('image/png');
+
+  //       // 添加到页面中或进行其他操作
+  //       document.body.appendChild(resultImage);
+  //   };
+
+  // }
+  //抠图3不支持获取抠图部分的像素数据getImageData方法，且图片路径未解决请求头跨域问题
+  // const init =()=>{
+  //   // 为原始图像创建图像对象
+  //   const originalImage = new Image();
+  //   originalImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
+  //   originalImage.src = 'https://sagemaker-us-west-2-227263203486.s3.us-west-2.amazonaws.com/sd_engine_staging/cloud_data/output_imgs/8c04c0d8d880ee7042b92003ac0ae55a.jpg';
+
+  //   originalImage.onload = function() {
+  //     // 创建画布元素及其2D渲染上下文
+  //     const canvas = document.createElement('canvas');
+  //     const ctx = canvas.getContext('2d');
+
+  //     // 定义要提取的部分的坐标和大小
+  //     const sourceX = 100; // 源区域左上角的X坐标
+  //     const sourceY = 100; // 源区域左上角的Y坐标
+  //     const sourceWidth = 100; // 源区域的宽度
+  //     const sourceHeight = 100; // 源区域的高度
+
+  //     // 定义目标画布的大小
+  //     const destinationWidth = 200; // 目标画布的宽度
+  //     const destinationHeight = 200; // 目标画布的高度
+
+  //     // 设置画布大小以匹配目标大小
+  //     canvas.width = destinationWidth;
+  //     canvas.height = destinationHeight;
+
+  //     // 将提取的部分按指定大小绘制到画布上
+  //     ctx.drawImage(
+  //       originalImage,
+  //       sourceX, sourceY, sourceWidth, sourceHeight, // 源坐标和大小
+  //       0, 0, destinationWidth, destinationHeight    // 目的地坐标和大小
+  //     );
+
+  //     // 创建新的Image对象
+  //     const resultImage = new Image();
+  //     resultImage.src = canvas.toDataURL('image/png');
+
+  //     // 将结果图像添加到DOM或执行其他操作
+  //     document.body.appendChild(resultImage);
+  //   };
+  // }
+
+  //抠子元素mask不完善
+  // const init =()=>{
+  //   // 获取Canvas元素和上下文
+  //   const canvas = document.getElementById('myCanvas');
+  //   const ctx = canvas.getContext('2d');
+
+  //   // 绘制一个矩形
+  //   ctx.fillStyle = 'blue';
+  //   ctx.fillRect(50, 50, 200, 150);
+
+  //   // 选中矩形
+  //   ctx.beginPath();
+  //   ctx.rect(50, 50, 200, 150);
+
+  //   // 获取整个Canvas的像素数据
+  //   const imageData = ctx.getImageData(50, 50, 200, 150)
+  //   // const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  //   // const data = imageData.data;
+
+  //   // // 遍历像素数据，抠出矩形内的像素区域（示例中以透明颜色表示抠出）
+  //   // for (let y = 50; y < 200; y++) {
+  //   //   for (let x = 50; x < 250; x++) {
+  //   //     const index = (y * imageData.width + x) * 4;
+  //   //     data[index + 3] = 0; // 设置像素的 alpha 通道为0，表示透明
+  //   //   }
+  //   // }
+
+  //   // 将修改后的像素数据放回Canvas
+  //   ctx.putImageData(imageData, 0, 0);
+
+  //   // 将Canvas内容导出为数据URL
+  //   const dataURL = canvas.toDataURL('image/png');
+
+  //   // 创建一个新的Image元素，将数据URL设置为src
+  //   const resultImage = new Image();
+  //   resultImage.src = dataURL;
+
+  //   // 将图片添加到页面上
+  //   document.body.appendChild(resultImage);
+
+  // }
+
+  //抠子元素image，只抠image
+  // const init = ()=>{
+  //   // 获取原始Canvas和上下文
+  //   const originalCanvas = document.getElementById('myCanvas');
+  //   const originalCtx = originalCanvas.getContext('2d');
+
+  //   //   // 绘制一个矩形
+  //   originalCtx.fillStyle = 'red';
+  //   // 设置填充颜色为透明
+  //   // originalCtx.fillStyle = 'rgba(255,0,0,0.3)';
+  //   originalCtx.fillRect(50, 50, 200, 150);
+  //   // 定义选中矩形的位置和尺寸
+  //   const selectedX = 50; // 选中矩形的起始点 x 坐标
+  //   const selectedY = 50; // 选中矩形的起始点 y 坐标
+  //   const selectedWidth = 200; // 选中矩形的宽度
+  //   const selectedHeight = 150; // 选中矩形的高度
+
+  //   // 定义两个矩形的位置和尺寸
+  //   const x1 = 60; // 第一个矩形的起始点 x 坐标
+  //   const y1 = 60; // 第一个矩形的起始点 y 坐标
+  //   const width1 = 80; // 第一个矩形的宽度
+  //   const height1 = 60; // 第一个矩形的高度
+
+  //   const x2 = 120; // 第二个矩形的起始点 x 坐标
+  //   const y2 = 80; // 第二个矩形的起始点 y 坐标
+  //   const width2 = 60; // 第二个矩形的宽度
+  //   const height2 = 40; // 第二个矩形的高度
+
+  //   // 获取选中矩形区域的像素数据
+  //   const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
+  //   for (let i = 0; i < selectedImageData.data.length; i += 4) {
+  //     // Set the alpha (transparency) value to 0
+  //     selectedImageData.data[i + 3] = 0;
+  //   }
+  //   // 创建新Canvas元素来显示选中区域
+  //   const resultCanvas = document.createElement('canvas');
+  //   resultCanvas.width = selectedWidth;
+  //   resultCanvas.height = selectedHeight;
+  //   const resultCtx = resultCanvas.getContext('2d');
+  //   // 清空Canvas，使背景透明
+  //   resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+  //   // // 设置生成图片的背景色
+  //   // resultCtx.fillStyle = 'rgba(0, 0, 0, 0)'; // 使用透明色作为背景色
+  //   // originalCtx.fillStyle = 'rgba(0, 0, 0, 0)';
+  //   // resultCtx.fillRect(0, 0, selectedWidth, selectedHeight);
+  //   // 将选中区域的像素数据放置在新Canvas上
+  //   resultCtx.putImageData(selectedImageData, 0, 0);
+
+
+
+  //   // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+  //   const x1InImageData = x1 - selectedX;
+  //   const y1InImageData = y1 - selectedY;
+  //   const x2InImageData = x2 - selectedX;
+  //   const y2InImageData = y2 - selectedY;
+
+
+  //   // 绘制两个矩形
+  //   resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+  //   resultCtx.fillStyle = 'blue'; // 第一个矩形的颜色
+  //   resultCtx.fillRect(x1InImageData, y1InImageData, width1, height1);
+
+  //   resultCtx.fillStyle = 'green'; // 第二个矩形的颜色
+  //   resultCtx.fillRect(x2InImageData, y2InImageData, width2, height2);
+
+  //   // 将新Canvas转化为数据URL
+  //   const dataURL = resultCanvas.toDataURL('image/png');
+
+  //   // 创建一个新的图像元素，并设置其src属性为数据URL
+  //   const resultImage = new Image();
+  //   resultImage.src = dataURL;
+
+  //   // 将图像元素添加到页面上
+  //   document.body.appendChild(resultImage);
+
+  // }

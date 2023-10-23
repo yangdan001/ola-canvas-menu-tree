@@ -84,8 +84,6 @@ export abstract class DrawGraphTool implements ITool {
   }
   //左键按下  开始移动
   drag(e: PointerEvent) {
-     /* eslint-disable-next-line no-debugger */
-    //  debugger
     //移动时 禁止一些事件 如删除事件、右键
     this.editor.hostEventManager.disableDelete();
     this.editor.hostEventManager.disableContextmenu();
@@ -104,8 +102,6 @@ export abstract class DrawGraphTool implements ITool {
   }
   // 更新矩形
   private updateRect() {
-    /* eslint-disable-next-line no-debugger */
-   //  debugger
    const { x, y } = this.lastDragPoint;
    //场景对象 用于添加一个图形到场景中
    const sceneGraph = this.editor.sceneGraph;
@@ -167,8 +163,6 @@ export abstract class DrawGraphTool implements ITool {
   }
   
   end(e: PointerEvent) {
-     /* eslint-disable-next-line no-debugger */
-    //  debugger
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
       return;
     }
@@ -201,8 +195,6 @@ export abstract class DrawGraphTool implements ITool {
     }
 
     if (this.drawingGraph) {
-      /* eslint-disable-next-line no-debugger */
-      // debugger
       this.editor.commandManager.pushCommand(
         new AddShapeCommand(this.commandDesc, this.editor, [this.drawingGraph]),
       );
@@ -210,8 +202,6 @@ export abstract class DrawGraphTool implements ITool {
   }
 
   afterEnd() {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.isDragging = false;
     this.editor.hostEventManager.enableDelete();
     this.editor.hostEventManager.enableContextmenu();

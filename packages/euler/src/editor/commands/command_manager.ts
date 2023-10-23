@@ -68,8 +68,6 @@ export class CommandManager {
     this.isEnableRedoUndo = false;
   }
   pushCommand(command: ICommand) {
-    /* eslint-disable-next-line no-debugger */
-  // debugger
     this.emitter.emit('beforeExecCmd');
     this._command = command
     // console.log(

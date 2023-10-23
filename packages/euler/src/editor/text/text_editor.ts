@@ -9,8 +9,6 @@ export class TextEditor {
   y = -1;
 
   constructor(private editor: Editor) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.textarea = document.createElement('input');
     this.setStyle();
     this.hide();

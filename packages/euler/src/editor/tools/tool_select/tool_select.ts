@@ -76,8 +76,6 @@ export class SelectTool implements ITool {
     }
 }
   start(e: PointerEvent) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     console.log('init current time')
     const currentTime = Date.now();
     const DOUBLE_CLICK_THRESHOLD = 300;  //双击临界时间间隔
@@ -176,8 +174,6 @@ export class SelectTool implements ITool {
     this.lastClickedElement = topHitElement;
   }
   drag(e: PointerEvent) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.isDragHappened = true;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -191,8 +187,6 @@ export class SelectTool implements ITool {
     }
   }
   end(e: PointerEvent, isEnableDrag: boolean) {
-     /* eslint-disable-next-line no-debugger */
-    // debugger
     const currStrategy = this.currStrategy;
 
     if (this.editor.hostEventManager.isDraggingCanvasBySpace) {
@@ -216,8 +210,6 @@ export class SelectTool implements ITool {
 
   }
   afterEnd() {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     // console.log(this.editor,'this.editor')
     //是否正在拖拽画布的空间
     if (!this.editor.hostEventManager.isDraggingCanvasBySpace) {

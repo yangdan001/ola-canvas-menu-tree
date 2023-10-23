@@ -18,8 +18,6 @@ export class DrawSelectionBox implements IBaseTool {
     // do nothing
   }
   start(e: PointerEvent) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.isShiftPressingWhenStart = false;
     //判断画布事件管理器是否按下了 Shift 键
     if (this.editor.hostEventManager.isShiftPressing) {
@@ -38,8 +36,6 @@ export class DrawSelectionBox implements IBaseTool {
     this.editor.sceneGraph.setSelection(this.lastPoint);
   }
   drag(e: PointerEvent) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     //获取场景中 手势光标坐标
     const point = this.editor.getSceneCursorXY(e);
     //根据两个坐标点确定一个矩形
@@ -50,8 +46,6 @@ export class DrawSelectionBox implements IBaseTool {
     this.editor.sceneGraph.render();
   }
   end() {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     //获取画布的选中元素
     const elements = this.editor.sceneGraph.getElementsInSelection();
 
@@ -67,8 +61,6 @@ export class DrawSelectionBox implements IBaseTool {
     }
   }
   afterEnd() {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.isShiftPressingWhenStart = false;
     this.editor.sceneGraph.selection = null;
     this.editor.sceneGraph.render();

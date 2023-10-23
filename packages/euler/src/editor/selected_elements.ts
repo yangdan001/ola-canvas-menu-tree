@@ -104,8 +104,6 @@ class SelectedElements {
     if (this.isEmpty()) {
       return null;
     }
-    /* eslint-disable-next-line no-debugger */
-    //  debugger
     console.log(this.items,'this.items9999')
     //带旋转的bBox
     const bBoxesWithRotation = this.items.map((element) => element.getBBox());

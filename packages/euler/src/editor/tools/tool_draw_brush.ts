@@ -18,8 +18,6 @@ import { DrawGraphTool } from './tool_draw_graph';
 
 //   protected createGraph(rect: IRect) {
 //     rect = normalizeRect(rect);
-//     /* eslint-disable-next-line no-debugger */
-//     debugger
 //     return new Brush({
 //       ...rect,
 //       fill: [cloneDeep(this.editor.setting.get('drawPathFill'))],
@@ -83,8 +81,6 @@ console.log(this.editor.sceneGraph,'999')
   end() {
     this.isDrawing = false;
     this.editor.ctx.lineWidth=1
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.editor.toolManager.setActiveTool('select');
     console.log(222)
     // do nothing

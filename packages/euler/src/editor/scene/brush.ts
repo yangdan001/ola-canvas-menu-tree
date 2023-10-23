@@ -32,8 +32,6 @@ export class Brush extends Graph {
 
       rotateInCanvas(ctx, this.rotation, cx, cy);
     }
-    /* eslint-disable-next-line no-debugger */
-    debugger
     ctx.beginPath();
     // const textY = Number(this.y)-2
     ctx.fillStyle = '#7F39FB';
@@ -57,8 +55,6 @@ export class Brush extends Graph {
     }
     if (this.strokeWidth) {
       ctx.lineWidth = this.strokeWidth;
-      /* eslint-disable-next-line no-debugger */
-    debugger
       for (const texture of this.stroke) {
         switch (texture.type) {
           case TextureType.Solid: {

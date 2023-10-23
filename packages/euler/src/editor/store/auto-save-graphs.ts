@@ -8,8 +8,6 @@ export class AutoSaveGraphs {
   listener: () => void;
   constructor(private editor: Editor) {
     this.listener = debounce(() => {
-      /* eslint-disable-next-line no-debugger */
-  // debugger
       this.save();
     }, 300);
   }

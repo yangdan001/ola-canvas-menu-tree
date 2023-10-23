@@ -349,12 +349,14 @@ export class Graph {
     iframeType,
     formData,
     brushSize,
+    points,
   }: {
     width?: number;
     height?: number;
     iframeType?: string;
     brushSize?: number;
     formData?: IFormData;
+    points?:{ x: number; y: number }[]
   }) {
     // 获取原来x y 坐标
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
@@ -369,6 +371,9 @@ export class Graph {
     }
     if (brushSize) {
       this.brushSize = brushSize;
+    }
+    if (points) {
+      this.points = points;
     }
     if (formData) {
       this.formData = formData;
@@ -457,8 +462,6 @@ export class Graph {
     smooth: boolean,
     canvas: HTMLCanvasElement,
   ) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     // ctx.beginPath();
     // ctx.moveTo(startPoint.x, startPoint.y);
     // ctx.lineTo(endPoint.x, endPoint.y);
@@ -625,12 +628,9 @@ export const MutateElementsAndRecord = {
   },
   // 设置宽度
   setWidth(editor: Editor, elements: Graph[], width: number) {
-
-    /* eslint-disable-next-line no-debugger */
     if (elements.length === 0) {
       return;
     }
-
     const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
     const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, width: el.width }));
 
@@ -739,6 +739,30 @@ export const MutateElementsAndRecord = {
     editor.commandManager.pushCommand(
       new SetElementsAttrs(
         'Update brushSize of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
+  },
+  // 修改画笔points轨迹属性
+  setBrushPoints(editor: Editor, elements: Graph[], points: { x: number; y: number }[]) {
+    if (elements.length === 0) {
+      return;
+    }
+
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, points: el.points }));
+
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ points });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, points: el.points }));
+
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update points of Elements',
         allAffectedElements,
         newStates,
         prevStates,

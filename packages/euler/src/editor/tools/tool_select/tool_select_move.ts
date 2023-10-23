@@ -127,8 +127,6 @@ export class SelectMoveTool implements IBaseTool {
   }
 
   end(e: PointerEvent, isEnableDrag: boolean) {
-    /* eslint-disable-next-line no-debugger */
-    // debugger    
     const selectedElements = this.editor.selectedElements.getItems();
     if (selectedElements.length === 0 || !isEnableDrag) {
       // 移动的时候元素被删除了，或者撤销导致为空
@@ -170,8 +168,6 @@ export class SelectMoveTool implements IBaseTool {
   }
 
   afterEnd() {
-    /* eslint-disable-next-line no-debugger */
-    // debugger
     this.dragPoint = null;
     this.editor.sceneGraph.showOutline = true;
     this.editor.refLine.clear();
