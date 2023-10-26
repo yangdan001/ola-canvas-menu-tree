@@ -83,6 +83,12 @@ const ProgressButton = ({ percent, children, ...rest }) => {
   );
 };
 
+
+//1.接口获取初始化的值，暂时存储到localstrage 1
+//2.文生图逻辑梳理，数据调整 1
+//3.图生图逻辑梳理，数据调整 1
+//4.数据要求备份到本地，保留历史记录 1
+//5.文生图生成的图片不可以执行图生图逻辑 1
 const Generate = () => {
   const editor = useContext(EditorContext);
   const [form] = Form.useForm();//表单的form实例
@@ -816,8 +822,23 @@ const Generate = () => {
     })
   }
 
-  //表单提交逻辑
-  const onFinish = _.debounce(async (values) => {
+  const onChangeHandler = (info) => {
+    let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
+    setImgData(info.file.originFileObj)
+    setImgUrl(fileUrl)
+    //读取base64图
+    const reader = new FileReader();
+    reader.readAsDataURL(info.file.originFileObj);
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList, 'uploading');
+    }
+    if (info.file.status === 'done') {
+      console.log(info.file, info.fileList, 'done');
+    }
+  }
+
+   //表单提交逻辑
+   const onFinish = _.debounce(async (values) => {
     const sceneGraph = editor.sceneGraph;
     const selectedElements = editor.selectedElements;
     const selectedWidth = selectedElements.items[0].width
@@ -869,7 +890,7 @@ const Generate = () => {
         lora: allValue.lora ? loraFormValue : [],
         controlnet: allValue.controlnet ? controlnetFormValue : [],
         image_names: {
-          control_image_name: selectType == 3 && fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
+          control_image_name: (selectType == 3 || selectType == 1 )&& fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
           custom_image_name: selectType == 2 && fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
         },
         prompts: {
@@ -896,7 +917,7 @@ const Generate = () => {
       if (selectType === '1') {
         if (allValue.controlnet) {
           if (fileObj && fileObj.name) {
-            textToImageSocket(datas, controlnetFiles)
+          textToImageSocket(datas, controlnetFiles)
           } else {
             message.error('请上传图片！');
             return false;
@@ -921,21 +942,6 @@ const Generate = () => {
       console.error(errorInfo)
     }
   }, 300)
-
-  const onChangeHandler = (info) => {
-    let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
-    setImgData(info.file.originFileObj)
-    setImgUrl(fileUrl)
-    //读取base64图
-    const reader = new FileReader();
-    reader.readAsDataURL(info.file.originFileObj);
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList, 'uploading');
-    }
-    if (info.file.status === 'done') {
-      console.log(info.file, info.fileList, 'done');
-    }
-  }
 
   return (
     <div className="generate">
@@ -1099,7 +1105,7 @@ const Generate = () => {
           getValueFromEvent={normFile}
         >
           <Upload
-            action={""}
+            action={"http://localhost:8000/module"}
             showUploadList={false}
             maxCount={1}
             multiple={false}

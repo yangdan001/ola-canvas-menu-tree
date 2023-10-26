@@ -260,7 +260,7 @@ const fetchWrapper = {
       if (response.status === 401) {
         console.log(response);
         // message.error('身份验证已过期，请重新登陆');
-        localStorage.clear();
+        // localStorage.clear();
         localStorage.removeItem('selectType');
         localStorage.removeItem('token');
         // window.location.href = '/login';

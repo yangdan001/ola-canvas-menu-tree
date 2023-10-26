@@ -167,8 +167,10 @@ export class Graph {
     if (this.points && this.points.length > 0) {
       const penPoints = this.points
       for (let p = 0, pointslen = penPoints.length; p < pointslen; p++) {
-        penPoints[p].x += dx;
-        penPoints[p].y += dy;
+        if(penPoints[p]!=null) {
+          penPoints[p].x += dx;
+          penPoints[p].y += dy;
+        }
       }
     }
     for (const child of this.children) {

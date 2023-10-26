@@ -113,7 +113,14 @@ export class DrawPenTool implements ITool {
     const firstPoint = this.penPoints[0];
     if (!this.editor.canvasElement) return;
     //画笔粗细设置 选中元素的brushSize属性 或者setting文件的brushSize属性
-    this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
+    const selectedElements = this.editor.selectedElements?.getItems();
+    if (selectedElements && selectedElements.length > 0 && typeof selectedElements[0]?.brushSize === 'number') {
+      this.brushSize = selectedElements[0].brushSize;
+    } else {
+      // 如果值为 undefined 或不是 number，设置一个默认值
+      this.brushSize = 1; // 或者你可以设置为其他默认值
+    }
+    // this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
     console.log(this.brushSize,'this.brushSize')
     const pen = new PenGraph({
       brushSize: this.brushSize,

@@ -47,8 +47,19 @@ const PenSize = () => {
     // const brushSize = editor.setting.get('brushSize');
     if (editor) {
       const elements = editor.selectedElements.getItems();
-      // editor.setting.set('brushSize', value);
       MutateElementsAndRecord.setBrushSize(editor, elements, value);
+      // editor.setting.set('brushSize', value);
+      editor.selectedElements?.getItems()[0].children.forEach(obj => {
+        if (String(obj.type) === 'Pen') {
+          obj.brushSize = value;
+          // 在箭头函数中直接使用外部的 this 上下文
+          if (editor) {
+            const elements = editor.selectedElements.getItems();
+            MutateElementsAndRecord.setBrushPoints(editor, elements, value);
+            editor.sceneGraph.render();
+          }
+        }
+      });
       editor.sceneGraph.render();
     }
   }

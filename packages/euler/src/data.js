@@ -212,7 +212,7 @@ export const setDatas = (value, store, selectType) => {
       custom_image_name: tempCheck(value, store, selectType),
     },
     prompts: {
-      positive_prompt: value.positive_prompt,
+      positive_prompt: value.positive_prompt ? value.positive_prompt : null,
       negative_prompt: value.negative_prompt ? value.negative_prompt : null,
     },
     sampler_params: {
@@ -269,7 +269,7 @@ export const setStoreDatas = (value, store, selectType) => {
     },
     sampler_params: {
       prompts: {
-        positive_prompt: value.positive_prompt,
+        positive_prompt: value.positive_prompt ? value.positive_prompt : null,
         negative_prompt: value.negative_prompt ? value.negative_prompt : null,
       },
       number: value.number,
