@@ -37,6 +37,17 @@ import { SetElementsAttrs } from '../../editor/commands/set_elements_attrs';
 import './index.scss';
 import { MutateElementsAndRecord } from '../../editor/scene/graph';
 import fetchApi from '../../../src/services/fetch';
+
+
+//isInpainting
+//1.isInpainting只是图生图的参数逻辑
+//2.isInpainting开与不开，上传mask图片，isInpainting就传2，custom_image_name数组第一张是图片、数组第二张是mask图片 
+//3.isInpainting开了，没有上传mask图片，isInpainting就传1，custom_image_name数组之传一张是图片
+//4.isInpainting没开，没有上传mask图片，isInpainting就传0，custom_image_name数组之传一张是图片
+//5.controlnet第一考虑条件，isInpainting的值不影响controlnet的逻辑
+//6.判断图片是否包含子集图片 包含的话上传的图片需要重新生成包含子集的图片
+//7.判断图片是否包含mask子集图片 包含的上传的mask图片就是子集的mask重新生成的图片
+//8.画笔轨迹默认是mask子集，如果有画笔轨迹和mask矩形，两个mask需要合并生成最后的mask图片
 const socketBaseURL = fetchApi.socketBaseURL;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -83,7 +94,7 @@ const ProgressButton = ({ percent, children, ...rest }) => {
   );
 };
 
-
+//图片存储
 //1.接口获取初始化的值，暂时存储到localstrage 1
 //2.文生图逻辑梳理，数据调整 1
 //3.图生图逻辑梳理，数据调整 1
