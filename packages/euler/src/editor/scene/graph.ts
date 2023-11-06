@@ -36,6 +36,8 @@ export interface GraphAttrs {
   brushPath?: Path2D | null;
   points?: { x: number; y: number }[];
   iframeType?: string;
+  imageDataUrl?: string;
+  maskDataUrl?: string;
   formData?: IFormData;
   brushSize?: number; //画笔粗细
 }
@@ -63,6 +65,8 @@ export class Graph {
   points: { x: number; y: number }[];//画笔轨迹的点坐标
   brushSize?: number = 1;
   iframeType = "Meta";
+  imageDataUrl?: string;
+  maskDataUrl?: string;
   formData = {
     base_model_name: 'Base-V1-5.ckpt',
     vae_model_name: 'disabled.pt',
@@ -118,6 +122,12 @@ export class Graph {
     if (options.brushSize) {
       this.brushSize = options.brushSize;
     }
+    if (options.imageDataUrl) {
+      this.imageDataUrl = options.imageDataUrl;
+    }
+    if (options.maskDataUrl) {
+      this.maskDataUrl = options.maskDataUrl;
+    }
   }
   getAttrs(): GraphAttrs {
     return {
@@ -140,6 +150,8 @@ export class Graph {
       brushSize: this.brushSize,
       iframeType: this.iframeType,
       formData: this.formData,
+      imageDataUrl: this.imageDataUrl,
+      maskDataUrl: this.maskDataUrl,
     };
   }
   setAttrs(attrs: Partial<GraphAttrs>) {
@@ -352,13 +364,17 @@ export class Graph {
     formData,
     brushSize,
     points,
+    imageDataUrl,
+    maskDataUrl,
   }: {
     width?: number;
     height?: number;
     iframeType?: string;
     brushSize?: number;
     formData?: IFormData;
-    points?:{ x: number; y: number }[]
+    points?:{ x: number; y: number }[];
+    imageDataUrl?: string;
+    maskDataUrl?: string;
   }) {
     // 获取原来x y 坐标
     const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
@@ -380,6 +396,12 @@ export class Graph {
     if (formData) {
       this.formData = formData;
     }
+    if (imageDataUrl) {
+      this.imageDataUrl = imageDataUrl;
+    }
+    if (maskDataUrl) {
+      this.maskDataUrl = maskDataUrl;
+    }
     const { x: rotatedX, y: rotatedY } = getElementRotatedXY(this);
 
     const dx = rotatedX - preRotatedX;
@@ -387,6 +409,20 @@ export class Graph {
     this.x -= dx;
     this.y -= dy;
   }
+  // resizeAndKeepRotatedXY(props: Partial<Graph>) {
+  //   const { x: preRotatedX, y: preRotatedY } = getElementRotatedXY(this);
+  
+  //   // 使用展开运算符将传入的属性应用到当前对象
+  //   Object.assign(this, props);
+  
+  //   const { x: rotatedX, y: rotatedY } = getElementRotatedXY(this);
+  
+  //   const dx = rotatedX - preRotatedX;
+  //   const dy = rotatedY - preRotatedY;
+  //   this.x -= dx;
+  //   this.y -= dy;
+  // }
+  
   renderFillAndStrokeTexture(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ctx: CanvasRenderingContext2D,
@@ -693,6 +729,84 @@ export const MutateElementsAndRecord = {
     editor.commandManager.pushCommand(
       new SetElementsAttrs(
         'Update Rotation of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
+  },
+
+  setElementField<T extends keyof Graph>(
+    editor: Editor,
+    elements: Graph[],
+    field: T,
+    value: Graph[T]
+  ) {
+    if (elements.length === 0) {
+      return;
+    }
+  
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, [field]: el[field] }));
+  
+    for (const element of elements) {
+      const update = { [field]: value };
+      element.resizeAndKeepRotatedXY(update);
+    }
+  
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, [field]: el[field] }));
+  
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        `Update ${field} of Elements`,
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
+  },
+  // 设置元素的嵌套mask的合成图片
+  setImageDataUrl(editor: Editor, elements: Graph[], imageDataUrl: string) {
+    if (elements.length === 0) {
+      return;
+    }
+
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, imageDataUrl: el.imageDataUrl }));
+
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ imageDataUrl });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, imageDataUrl: el.imageDataUrl }));
+
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update imageDataUrl of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
+  },
+  // 设置元素嵌套childs的合成图片
+  setMaskDataUrl(editor: Editor, elements: Graph[], maskDataUrl: string) {
+    if (elements.length === 0) {
+      return;
+    }
+
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, maskDataUrl: el.maskDataUrl }));
+
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ maskDataUrl });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, maskDataUrl: el.maskDataUrl }));
+
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update maskDataUrl of Elements',
         allAffectedElements,
         newStates,
         prevStates,

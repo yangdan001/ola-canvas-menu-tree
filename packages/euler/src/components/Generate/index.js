@@ -464,6 +464,53 @@ const Generate = () => {
     };
   }
   
+  //获取file文件的唯一标识符（UID）
+  function base64ToUID(base64Info) {
+    // 使用当前时间戳来生成唯一标识符
+    const timestamp = new Date().getTime();
+  
+    // 使用图片的 Base64 数据进行编码
+    const base64Encoded = btoa(base64Info);
+  
+    // 将时间戳和编码后的 Base64 数据组合起来作为 UID
+    const uid = `rc-upload-${timestamp}-${base64Encoded.length}`;
+  
+    return uid;
+  }
+
+  //提取的 MIME 类型和文件名
+  function extractFileNameAndMimeTypeFromBase64(base64Data) {
+    const regex = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+)(;base64,)/;
+    const matches = base64Data.match(regex);
+  
+    if (matches && matches.length === 3) {
+      const mimeType = matches[1];
+      const extension = mimeType.split('/')[1];
+      const fileName = `image.${extension}`; // 默认文件名
+  
+      return { fileName, mimeType };
+    } else {
+      return null; // 无法提取文件名和 MIME 类型
+    }
+  }
+
+  //base64图片格式转file文件
+  function dataURItoBlob(dataURI) {
+    const base64Data = dataURI.split(',')[1]; // 提取 Base64 数据部分
+    const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    return new Blob([binaryData], { type: dataURI.split(',')[0].split(':')[1] });
+  }
+  
+  function base64ToFileWithBlob(dataURI, fileName, uid, fileType) {
+    const blob = dataURItoBlob(dataURI);
+    const file = new File([blob], fileName, { type: fileType });
+    file.uid = uid;
+    return file;
+  }
+
+
+
+
   // // 调用合成函数，传入主图片的 URL
   // mergeImages('path/to/your/mainImage.jpg');
   
@@ -478,8 +525,15 @@ const Generate = () => {
       const originalCtx = editor.sceneGraph.editor.ctx;
       const originalCanvas = editor.sceneGraph.editor.canvasElement;
       const selectedUrl =  selectedElements.items[0].fill[0].attrs.src
-
+      const prevStates = selectedElements.items[0]
     if (value == true) {
+      if (editor) {
+        const elements = editor.selectedElements.getItems();
+        MutateElementsAndRecord.setMaskDataUrl(editor, elements, {});
+        MutateElementsAndRecord.setImageDataUrl(editor, elements, {});
+        editor.sceneGraph.render();
+        console.log(elements,'elements00')
+      }
       // 获取选中矩形区域的像素数据
       const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
       for (let i = 0; i < selectedImageData.data.length; i += 4) {
@@ -497,9 +551,9 @@ const Generate = () => {
       resultCtx.putImageData(selectedImageData, 0, 0);
       // 遍历每个矩形元素并绘制到新 Canvas 上
       // 将选中元素的子元素绘制到Canvas上
-      const children = selectedElements.items[0].children;
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      const maskChildren = selectedElements.items[0].children;
+      for (let i = 0; i < maskChildren.length; i++) {
+        const child = maskChildren[i];
         const rectX = child.x;
         const rectY = child.y;
         const rectWidth = child.width;
@@ -512,19 +566,135 @@ const Generate = () => {
           resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
           resultCtx.fillStyle = `rgba(${child.fill[0].attrs.r},${child.fill[0].attrs.g},${child.fill[0].attrs.b},${child.fill[0].attrs.a})`;
           resultCtx.fillRect(rectXInImageData, rectYInImageData, rectWidth, rectHeight);
+        }else if(child.type=='Pen'){
+          resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+          resultCtx.strokeStyle = `rgba(${child.fill[0].attrs.r},${child.fill[0].attrs.g},${child.fill[0].attrs.b},${child.fill[0].attrs.a})`;
+          // 设置线宽
+          resultCtx.lineWidth = selectedElements.items[0].brushSize;
+          // 开始新的路径
+          resultCtx.beginPath();
+          const maskFilteredPen = maskChildren.filter(obj => obj.type === 'Pen')
+          const penPoints = maskFilteredPen[0].points
+          // 从第一个点开始
+          const firstPoint = penPoints[0];
+          resultCtx.moveTo(firstPoint.x - selectedX, firstPoint.y - selectedY);
+          // 遍历所有的点，连接它们以绘制线
+          if (penPoints.length > 0) {
+            for (let i = 1; i < penPoints.length; i++) {
+              resultCtx.lineTo(penPoints[i].x - selectedX, penPoints[i].y - selectedY);
+            }
+            resultCtx.stroke();
+          }
+          // 关闭路径，形成闭合线条
+          resultCtx.closePath();
+          // 填充路径，形成线条
+          // resultCtx.fill();
         }
       }
+      const maskFilteredArray = maskChildren.filter(obj => obj.iframeType === 'Mask' ||obj.type === 'Pen')
+      console.log(maskFilteredArray.length,'maskFilteredArray.length')
+      if(maskFilteredArray.length>0){
+        // 将新Canvas转化为数据URL
+        const maskDataURL = resultCanvas.toDataURL('image/png');
 
-      // 将新Canvas转化为数据URL
-      const dataURL = resultCanvas.toDataURL('image/png');
+        // 创建一个新的图像元素，并设置其src属性为数据URL
+        const resultImage = new Image();
+        resultImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
+        resultImage.src = maskDataURL;
+        
+        // 将图像元素添加到页面上
+        // document.body.appendChild(resultImage);
+        console.log(maskDataURL,'maskDataURL')
+        let maskUid = base64ToUID(maskDataURL)
+        let maskMimeTypeObj = extractFileNameAndMimeTypeFromBase64(maskDataURL)
+        let maskFile = base64ToFileWithBlob(maskDataURL,'image_mask.png',maskUid,maskMimeTypeObj.mimeType)
+        console.log(maskFile,'maskFile')
+        if (editor) {
+          const elements = editor.selectedElements.getItems();
+          MutateElementsAndRecord.setMaskDataUrl(editor, elements, maskFile);
+          editor.sceneGraph.render();
+          console.log(elements,'elements11')
+        }
+      }
+      // 加载主图片
+      const mainImage = new Image();
+      mainImage.src = selectedUrl;
+      mainImage.onload = () => {
+        // 绘制主图片
+        resultCtx.drawImage(mainImage, 0, 0, selectedWidth, selectedHeight);
+        /* eslint-disable-next-line no-debugger */
+        debugger
+        let imageCount = 0;  // 用于计数已加载的小图片数量
+        let dataURLs = [];   // 用于存储所有符合child.iframeType=='Image'条件的图片
+        // 将选中元素的子元素绘制到Canvas上
+        const children = selectedElements.items[0].children;
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i];
+          const rectX = child.x;
+          const rectY = child.y;
+          const rectWidth = child.width;
+          const rectHeight = child.height;
+          const rectUrl = child.fill[0].attrs.src
+          // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+          const rectXInImageData = rectX - selectedX;
+          const rectYInImageData = rectY - selectedY;
+          // 绘制矩形
+          if(child.iframeType=='Image'){
+            resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+            const subImage = new Image();
+              subImage.src = rectUrl;
+              subImage.onload = () => {
+                imageCount++
+                console.log(subImage, 0, 0, rectWidth, rectHeight,'合成图片')
+                // 绘制子图片
+                resultCtx.drawImage(subImage, rectXInImageData, rectYInImageData, rectWidth, rectHeight);
+                 // 将新Canvas转化为数据URL
+                const dataURL = resultCanvas.toDataURL('image/png');
+                dataURLs.push(dataURL)
+                // 将Canvas内容转换为Blob对象
+                resultCanvas.toBlob((blob) => {
+                  const mergedImage = new Image();
+                  mergedImage.src = URL.createObjectURL(blob);
 
-      // 创建一个新的图像元素，并设置其src属性为数据URL
-      const resultImage = new Image();
-      resultImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
-      resultImage.src = dataURL;
-
-      // 将图像元素添加到页面上
-      document.body.appendChild(resultImage);
+                  // 可以将新图片显示在页面上或进行其他操作
+                  // document.body.appendChild(mergedImage);
+                });
+                const filteredArray = children.filter(obj => obj.iframeType === 'Image')
+                console.log(imageCount,filteredArray.length,'pppp')
+                if (imageCount === filteredArray.length) {
+                  // 获取最后一个 dataURL
+                  const lastDataURL = dataURLs[dataURLs.length - 1];
+                  console.log(lastDataURL, 'lastDataURL');
+                  console.log(dataURLs, 'dataURLs');
+                  // console.log(dataURL,'dataURL')
+                  let uid = base64ToUID(lastDataURL)
+                  let mimeTypeObj = extractFileNameAndMimeTypeFromBase64(lastDataURL)
+                  let file = base64ToFileWithBlob(lastDataURL,mimeTypeObj.fileName,uid,mimeTypeObj.mimeType)
+                  console.log(file,'file')
+                  if (editor) {
+                    const elements = editor.selectedElements.getItems();
+                    MutateElementsAndRecord.setImageDataUrl(editor, elements, file);
+                    editor.sceneGraph.render();
+                    console.log(elements,'elements22')
+                  }
+                }
+                // if (++imageCount === children.length) {
+                //   // 将合成后的Canvas内容保存为新图片
+                //   const mergedImage = new Image();
+                //   mergedImage.src = resultCanvas.toDataURL('image/png');
+                //   // 可以将新图片显示在页面上或进行其他操作
+                //   document.body.appendChild(mergedImage);
+                // }
+              };
+          }
+        }
+        // 可以将合成的图片保存为新图片或进行其他操作
+      // const mergedImage = resultCanvas.toDataURL('image/png');
+      // const resultImage = new Image();
+      // resultImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
+      // resultImage.src = mergedImage;
+      // console.log(mergedImage,'mergedImage');
+      };
     }
     //合成的图片大小是画布的大小
     // else{
@@ -585,70 +755,70 @@ const Generate = () => {
     //   };
     // }
     //合成的图片大小是选中元素的大小
-    else{
-      // 创建新Canvas元素来显示选中区域
-      const resultCanvas = document.createElement('canvas');
-      resultCanvas.width = selectedWidth;
-      resultCanvas.height = selectedHeight;
-      const resultCtx = resultCanvas.getContext('2d');
-      // 清空Canvas，使背景透明
-      resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
-      // 加载主图片
-      const mainImage = new Image();
-      mainImage.src = selectedUrl;
-      mainImage.onload = () => {
-        // 绘制主图片
-        resultCtx.drawImage(mainImage, 0, 0, selectedWidth, selectedHeight);
-        let imageCount = 0;  // 用于计数已加载的小图片数量
-        // 将选中元素的子元素绘制到Canvas上
-        const children = selectedElements.items[0].children;
-        for (let i = 0; i < children.length; i++) {
-          const child = children[i];
-          const rectX = child.x;
-          const rectY = child.y;
-          const rectWidth = child.width;
-          const rectHeight = child.height;
-          const rectUrl = child.fill[0].attrs.src
-          // 根据两个坐标位置计算出两个矩形在像素数据中的位置
-          const rectXInImageData = rectX - selectedX;
-          const rectYInImageData = rectY - selectedY;
-          // 绘制矩形
-          if(child.iframeType=='Image'){
-            resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
-            const subImage = new Image();
-              subImage.src = rectUrl;
-              subImage.onload = () => {
-                console.log(subImage, 0, 0, rectWidth, rectHeight,'合成图片')
-                // 绘制子图片
-                resultCtx.drawImage(subImage, rectXInImageData, rectYInImageData, rectWidth, rectHeight);
-                // 将Canvas内容转换为Blob对象
-                resultCanvas.toBlob((blob) => {
-                  const mergedImage = new Image();
-                  mergedImage.src = URL.createObjectURL(blob);
+    // else{
+    //   // 创建新Canvas元素来显示选中区域
+    //   const resultCanvas = document.createElement('canvas');
+    //   resultCanvas.width = selectedWidth;
+    //   resultCanvas.height = selectedHeight;
+    //   const resultCtx = resultCanvas.getContext('2d');
+    //   // 清空Canvas，使背景透明
+    //   resultCtx.clearRect(0, 0, selectedWidth, selectedHeight);
+    //   // 加载主图片
+    //   const mainImage = new Image();
+    //   mainImage.src = selectedUrl;
+    //   mainImage.onload = () => {
+    //     // 绘制主图片
+    //     resultCtx.drawImage(mainImage, 0, 0, selectedWidth, selectedHeight);
+    //     let imageCount = 0;  // 用于计数已加载的小图片数量
+    //     // 将选中元素的子元素绘制到Canvas上
+    //     const children = selectedElements.items[0].children;
+    //     for (let i = 0; i < children.length; i++) {
+    //       const child = children[i];
+    //       const rectX = child.x;
+    //       const rectY = child.y;
+    //       const rectWidth = child.width;
+    //       const rectHeight = child.height;
+    //       const rectUrl = child.fill[0].attrs.src
+    //       // 根据两个坐标位置计算出两个矩形在像素数据中的位置
+    //       const rectXInImageData = rectX - selectedX;
+    //       const rectYInImageData = rectY - selectedY;
+    //       // 绘制矩形
+    //       if(child.iframeType=='Image'){
+    //         resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
+    //         const subImage = new Image();
+    //           subImage.src = rectUrl;
+    //           subImage.onload = () => {
+    //             console.log(subImage, 0, 0, rectWidth, rectHeight,'合成图片')
+    //             // 绘制子图片
+    //             resultCtx.drawImage(subImage, rectXInImageData, rectYInImageData, rectWidth, rectHeight);
+    //             // 将Canvas内容转换为Blob对象
+    //             resultCanvas.toBlob((blob) => {
+    //               const mergedImage = new Image();
+    //               mergedImage.src = URL.createObjectURL(blob);
 
-                  // 可以将新图片显示在页面上或进行其他操作
-                  document.body.appendChild(mergedImage);
-                });
-                // if (++imageCount === children.length) {
-                //   // 将合成后的Canvas内容保存为新图片
-                //   const mergedImage = new Image();
-                //   mergedImage.src = resultCanvas.toDataURL('image/png');
+    //               // 可以将新图片显示在页面上或进行其他操作
+    //               document.body.appendChild(mergedImage);
+    //             });
+    //             // if (++imageCount === children.length) {
+    //             //   // 将合成后的Canvas内容保存为新图片
+    //             //   const mergedImage = new Image();
+    //             //   mergedImage.src = resultCanvas.toDataURL('image/png');
       
-                //   // 可以将新图片显示在页面上或进行其他操作
-                //   document.body.appendChild(mergedImage);
-                // }
-              };
-          }
-        }
-      //   // 可以将合成的图片保存为新图片或进行其他操作
-      // const mergedImage = resultCanvas.toDataURL('image/png');
-      // const resultImage = new Image();
-      // resultImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
-      // resultImage.src = mergedImage;
+    //             //   // 可以将新图片显示在页面上或进行其他操作
+    //             //   document.body.appendChild(mergedImage);
+    //             // }
+    //           };
+    //       }
+    //     }
+    //   //   // 可以将合成的图片保存为新图片或进行其他操作
+    //   // const mergedImage = resultCanvas.toDataURL('image/png');
+    //   // const resultImage = new Image();
+    //   // resultImage.crossOrigin = 'anonymous'; // 如果需要，确保允许跨来源访问
+    //   // resultImage.src = mergedImage;
 
-      // console.log(mergedImage);
-      };
-    }
+    //   // console.log(mergedImage);
+    //   };
+    // }
     setinpaintingchecked(value)
     updateFormData(type,value)
   }
@@ -854,6 +1024,8 @@ const Generate = () => {
     const selectedElements = editor.selectedElements;
     const selectedWidth = selectedElements.items[0].width
     const selectedHeight = selectedElements.items[0].height
+    const selectedImageDataUrl= selectedElements.items[0].imageDataUrl
+    const selectedMaskDataUrl = selectedElements.items[0].maskDataUrl
     form.setFieldsValue({
       width: selectedWidth,
       height: selectedHeight,
@@ -918,7 +1090,7 @@ const Generate = () => {
           seed: allValue.seed ? allValue.seed : 'disable',
           denoise: allValue.denoise, //去噪强度 Denoising Strength
         },
-        isInpainting: allValue.isInpainting?'1':'0',
+        isInpainting: selectedMaskDataUrl?'2':(allValue.isInpainting?'1':'0'),
 
       }
       let controlnetFiles = []
