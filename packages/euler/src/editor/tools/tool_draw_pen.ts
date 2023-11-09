@@ -81,10 +81,11 @@ export class DrawPenTool implements ITool {
       e,
       this.editor.setting.get('snapToPixelGrid'),
     );
+    const selectedItems = this.editor.selectedElements.getItems();
     //画笔粗细设置 选中元素的brushSize属性 或者setting文件的brushSize属性
     this.brushSize = this.editor.selectedElements?.getItems()[0]?.brushSize || this.editor.setting.get('brushSize');
      //在范围内的才记录画笔的坐标点
-    if (this.editor.sceneGraph.isPointInSelectedBox(currentScenePoint)) {
+    if (this.editor.sceneGraph.isPointInSelectedBox(currentScenePoint) && selectedItems[0].fill[0].type == 'Image') {
       // 实时画 功能实现 每一次都是从上个点画起
       this.editor.sceneGraph.drawLine(this.editor.ctx, this.prevPoint, currentPoint, this.brushSize);
       this.prevPoint = currentPoint;
