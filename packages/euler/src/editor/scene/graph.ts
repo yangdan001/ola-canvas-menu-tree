@@ -36,6 +36,7 @@ export interface GraphAttrs {
   brushPath?: Path2D | null;
   points?: { x: number; y: number }[];
   iframeType?: string;
+  uploadImageDataUrl?: string;
   imageDataUrl?: string;
   maskDataUrl?: string;
   formData?: IFormData;
@@ -65,6 +66,7 @@ export class Graph {
   points: { x: number; y: number }[];//画笔轨迹的点坐标
   brushSize?: number = 1;
   iframeType = "Meta";
+  uploadImageDataUrl?: string;
   imageDataUrl?: string;
   maskDataUrl?: string;
   formData = {
@@ -122,6 +124,9 @@ export class Graph {
     if (options.brushSize) {
       this.brushSize = options.brushSize;
     }
+    if (options.uploadImageDataUrl) {
+      this.uploadImageDataUrl = options.uploadImageDataUrl;
+    }
     if (options.imageDataUrl) {
       this.imageDataUrl = options.imageDataUrl;
     }
@@ -150,6 +155,7 @@ export class Graph {
       brushSize: this.brushSize,
       iframeType: this.iframeType,
       formData: this.formData,
+      uploadImageDataUrl: this.uploadImageDataUrl,
       imageDataUrl: this.imageDataUrl,
       maskDataUrl: this.maskDataUrl,
     };
@@ -365,6 +371,7 @@ export class Graph {
     brushSize,
     points,
     imageDataUrl,
+    uploadImageDataUrl,
     maskDataUrl,
   }: {
     width?: number;
@@ -374,6 +381,7 @@ export class Graph {
     formData?: IFormData;
     points?:{ x: number; y: number }[];
     imageDataUrl?: string;
+    uploadImageDataUrl?: string;
     maskDataUrl?: string;
   }) {
     // 获取原来x y 坐标
@@ -398,6 +406,9 @@ export class Graph {
     }
     if (imageDataUrl) {
       this.imageDataUrl = imageDataUrl;
+    }
+    if (uploadImageDataUrl) {
+      this.uploadImageDataUrl = uploadImageDataUrl;
     }
     if (maskDataUrl) {
       this.maskDataUrl = maskDataUrl;
@@ -783,6 +794,30 @@ export const MutateElementsAndRecord = {
     editor.commandManager.pushCommand(
       new SetElementsAttrs(
         'Update imageDataUrl of Elements',
+        allAffectedElements,
+        newStates,
+        prevStates,
+      ),
+    );
+  },
+  // 设置元素的嵌套mask的合成图片
+  setUploadImageDataUrl(editor: Editor, elements: Graph[], uploadImageDataUrl: string) {
+    if (elements.length === 0) {
+      return;
+    }
+
+    const allAffectedElements = elements.flatMap(el => getAllElementsWithChildren(el));
+    const prevStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, uploadImageDataUrl: el.uploadImageDataUrl }));
+
+    for (const element of elements) {
+      element.resizeAndKeepRotatedXY({ uploadImageDataUrl });
+    }
+
+    const newStates = allAffectedElements.map(el => ({ x: el.x, y: el.y, uploadImageDataUrl: el.uploadImageDataUrl }));
+
+    editor.commandManager.pushCommand(
+      new SetElementsAttrs(
+        'Update uploadImageDataUrl of Elements',
         allAffectedElements,
         newStates,
         prevStates,

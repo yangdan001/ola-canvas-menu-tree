@@ -123,6 +123,7 @@ const Generate = () => {
   // const [textToImageDataRes, setTextToImageDataRes] = useState({});
   const [soketData, setSoketData] = useState({});
   const [formData, setFormData] = useState({});
+  const [fileList, setFileList] = useState([])
   const intl = useIntl();
   const MIXED = intl.formatMessage({ id: 'mixed' });
   useEffect(() => {
@@ -282,6 +283,7 @@ const Generate = () => {
      * 第2步：将图片填充在原来元素上，形状大小要同原来的元素；
      * */
     var image = new Image(); // 创建一个新的Image对象
+    image.crossOrigin = 'anonymous'
     image.src = imgUrl // 图片的路径
     // // 在图片加载完成后执行绘制操作
     image.onload = function () {
@@ -311,6 +313,12 @@ const Generate = () => {
   const normFile = (e) => {
     if (e && e.file) {
       setFileObj(e.file)
+      if (editor) {
+        const elements = editor.selectedElements.getItems();
+        MutateElementsAndRecord.setUploadImageDataUrl(editor, elements, e.file);
+        editor.sceneGraph.render();
+        console.log(elements,'elements44')
+      }
     }
     if (Array.isArray(e)) {
       return e;
@@ -427,6 +435,7 @@ const Generate = () => {
   
     // 创建主图片对象
     const mainImage = new Image();
+    mainImage.crossOrigin = 'anonymous'
     mainImage.src = mainImageSrc;
   
     mainImage.onload = function () {
@@ -457,6 +466,7 @@ const Generate = () => {
       // 导出合成后的图片
       const mergedImageSrc = canvas.toDataURL();
       const mergedImage = new Image();
+      mergedImage.crossOrigin = 'anonymous'
       mergedImage.src = mergedImageSrc;
   
       // 将合成后的图片添加到页面
@@ -534,7 +544,9 @@ const Generate = () => {
         editor.sceneGraph.render();
         console.log(elements,'elements00')
       }
+       
       // 获取选中矩形区域的像素数据
+      // originalCtx.crossOrigin = 'anonymous';
       const selectedImageData = originalCtx.getImageData(selectedX, selectedY, selectedWidth, selectedHeight);
       for (let i = 0; i < selectedImageData.data.length; i += 4) {
         selectedImageData.data[i + 3] = 0;
@@ -618,12 +630,11 @@ const Generate = () => {
       }
       // 加载主图片
       const mainImage = new Image();
+      mainImage.crossOrigin = 'anonymous'
       mainImage.src = selectedUrl;
       mainImage.onload = () => {
         // 绘制主图片
         resultCtx.drawImage(mainImage, 0, 0, selectedWidth, selectedHeight);
-        /* eslint-disable-next-line no-debugger */
-        debugger
         let imageCount = 0;  // 用于计数已加载的小图片数量
         let dataURLs = [];   // 用于存储所有符合child.iframeType=='Image'条件的图片
         // 将选中元素的子元素绘制到Canvas上
@@ -642,6 +653,7 @@ const Generate = () => {
           if(child.iframeType=='Image'){
             resultCtx.globalCompositeOperation = 'source-over'; // 设置合成模式为覆盖源图像
             const subImage = new Image();
+            subImage.crossOrigin = 'anonymous'
               subImage.src = rectUrl;
               subImage.onload = () => {
                 imageCount++
@@ -654,6 +666,7 @@ const Generate = () => {
                 // 将Canvas内容转换为Blob对象
                 resultCanvas.toBlob((blob) => {
                   const mergedImage = new Image();
+                  mergedImage.crossOrigin = 'anonymous'
                   mergedImage.src = URL.createObjectURL(blob);
 
                   // 可以将新图片显示在页面上或进行其他操作
@@ -1004,8 +1017,29 @@ const Generate = () => {
   }
 
   const onChangeHandler = (info) => {
+    console.log(info,'info')
+    setFileList(info.fileList);
     let fileUrl = window.URL.createObjectURL(info.file.originFileObj)
     setImgData(info.file.originFileObj)
+    if (editor) {
+      const elements = editor.selectedElements.getItems();
+      MutateElementsAndRecord.setUploadImageDataUrl(editor, elements, info.file.originFileObj);
+      editor.sceneGraph.render();
+      console.log(elements,'elements33')
+    }
+    // const selectedElements = editor.selectedElements;
+    //   selectedElements.items[0].uploadImageDataUrl = info.file.originFileObj
+    //   const newStates = selectedElements.items[0].uploadImageDataUrl
+    //   editor.commandManager.pushCommand(
+    //     new SetElementsAttrs(
+    //       'Update Type of Elements',
+    //       selectedElements.items[0],
+    //       newStates,
+    //       selectedElements.items[0],
+    //     ),
+    //   );
+    //   // 重新渲染右侧画布
+    //   editor.sceneGraph.render();
     setImgUrl(fileUrl)
     //读取base64图
     const reader = new FileReader();
@@ -1018,6 +1052,22 @@ const Generate = () => {
     }
   }
 
+  const onPreview = async (file) => {
+    let src = file.url;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
+
+
    //表单提交逻辑
    const onFinish = _.debounce(async (values) => {
     const sceneGraph = editor.sceneGraph;
@@ -1026,6 +1076,8 @@ const Generate = () => {
     const selectedHeight = selectedElements.items[0].height
     const selectedImageDataUrl= selectedElements.items[0].imageDataUrl
     const selectedMaskDataUrl = selectedElements.items[0].maskDataUrl
+    const uploadImageDataUrl = selectedElements.items[0].uploadImageDataUrl
+    console.log(selectedImageDataUrl,'selectedImageDataUrl')
     form.setFieldsValue({
       width: selectedWidth,
       height: selectedHeight,
@@ -1036,7 +1088,7 @@ const Generate = () => {
       MutateElementsAndRecord.setFormdata(editor, elements, allValue);
       editor.sceneGraph.render();
     }
-    if (fileObj && fileObj.name) {
+    if (uploadImageDataUrl && uploadImageDataUrl.name) {
       if (allValue.controlnet) {
         localStorage.setItem('selectType', '3');
       } else {
@@ -1073,8 +1125,8 @@ const Generate = () => {
         lora: allValue.lora ? loraFormValue : [],
         controlnet: allValue.controlnet ? controlnetFormValue : [],
         image_names: {
-          control_image_name: (selectType == 3 || selectType == 1 )&& fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
-          custom_image_name: selectType == 2 && fileObj && fileObj.name ? [allValue.custom_image_name[0].name] : [],
+          control_image_name: (selectType == 3 || selectType == 1 ) && selectedImageDataUrl && selectedImageDataUrl.name ? [selectedImageDataUrl.name]:((selectType == 3 || selectType == 1 ) && uploadImageDataUrl && uploadImageDataUrl.name ? [uploadImageDataUrl.name] : []) ,
+          custom_image_name: selectType == 2 && selectedImageDataUrl && selectedImageDataUrl.name && selectedMaskDataUrl && selectedMaskDataUrl.name?[selectedImageDataUrl.name,selectedMaskDataUrl.name]:(selectType == 2 && selectedImageDataUrl && selectedImageDataUrl.name?[selectedImageDataUrl.name]:(selectType == 2 && selectedMaskDataUrl && selectedMaskDataUrl.name && uploadImageDataUrl && uploadImageDataUrl.name?[uploadImageDataUrl.name,selectedMaskDataUrl.name]:(uploadImageDataUrl && uploadImageDataUrl.name?[uploadImageDataUrl.name] : []))),
         },
         prompts: {
           positive_prompt: allValue.positive_prompt,
@@ -1094,12 +1146,17 @@ const Generate = () => {
 
       }
       let controlnetFiles = []
-      if (Object.keys(imgData).length !== 0) {
-        controlnetFiles.push(imgData)
+      if (selectedImageDataUrl!=undefined && Object.keys(selectedImageDataUrl).length !== 0) {
+        controlnetFiles.push(selectedImageDataUrl)
+      }else if (uploadImageDataUrl!=undefined && Object.keys(uploadImageDataUrl).length !== 0) {
+        controlnetFiles.push(uploadImageDataUrl)
+      }
+      if (selectedMaskDataUrl!=undefined && Object.keys(selectedMaskDataUrl).length !== 0) {
+        controlnetFiles.push(selectedMaskDataUrl)
       }
       if (selectType === '1') {
         if (allValue.controlnet) {
-          if (fileObj && fileObj.name) {
+          if (uploadImageDataUrl && uploadImageDataUrl.name) {
           textToImageSocket(datas, controlnetFiles)
           } else {
             message.error('请上传图片！');
@@ -1110,11 +1167,11 @@ const Generate = () => {
         }
       }
       if (selectType === '2') {
-        datas.isInpainting = '0'
+        // datas.isInpainting = '0'
         imageToImageSocket(datas, controlnetFiles)
       }
       if (selectType === '3') {
-        if (fileObj && fileObj.name) {
+        if (uploadImageDataUrl && uploadImageDataUrl.name) {
           textToImageSocket(datas, controlnetFiles)
         } else {
           message.error('请上传图片！');
@@ -1292,6 +1349,8 @@ const Generate = () => {
             showUploadList={false}
             maxCount={1}
             multiple={false}
+            fileList={fileList}
+            onPreview={onPreview}
             onChange={onChangeHandler}>
             <div className='upload-box'>
               <PlusOutlined style={{ fontSize: '24px', color: '#985EFF' }} />
