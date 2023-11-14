@@ -496,9 +496,10 @@ const Generate = () => {
     if (matches && matches.length === 3) {
       const mimeType = matches[1];
       const extension = mimeType.split('/')[1];
-      const fileName = `image.${extension}`; // 默认文件名
-  
-      return { fileName, mimeType };
+      const timestamp = new Date().getTime();
+      const fileName = `${timestamp}.${extension}`; // 使用时间戳作为文件名
+      const maskFileName = `${timestamp}_mask.${extension}`; // 使用时间戳作为文件名
+      return { fileName, maskFileName, mimeType };
     } else {
       return null; // 无法提取文件名和 MIME 类型
     }
@@ -619,7 +620,7 @@ const Generate = () => {
         console.log(maskDataURL,'maskDataURL')
         let maskUid = base64ToUID(maskDataURL)
         let maskMimeTypeObj = extractFileNameAndMimeTypeFromBase64(maskDataURL)
-        let maskFile = base64ToFileWithBlob(maskDataURL,'image_mask.png',maskUid,maskMimeTypeObj.mimeType)
+        let maskFile = base64ToFileWithBlob(maskDataURL,maskMimeTypeObj.maskFileName,maskUid,maskMimeTypeObj.mimeType)
         console.log(maskFile,'maskFile')
         if (editor) {
           const elements = editor.selectedElements.getItems();

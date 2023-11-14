@@ -36,7 +36,7 @@ export interface GraphAttrs {
   brushPath?: Path2D | null;
   points?: { x: number; y: number }[];
   iframeType?: string;
-  uploadImageDataUrl?: string;
+  uploadImageDataUrl?: string | File;
   imageDataUrl?: string;
   maskDataUrl?: string;
   formData?: IFormData;
@@ -66,7 +66,7 @@ export class Graph {
   points: { x: number; y: number }[];//画笔轨迹的点坐标
   brushSize?: number = 1;
   iframeType = "Meta";
-  uploadImageDataUrl?: string;
+  uploadImageDataUrl?: string | File;
   imageDataUrl?: string;
   maskDataUrl?: string;
   formData = {
@@ -381,7 +381,7 @@ export class Graph {
     formData?: IFormData;
     points?:{ x: number; y: number }[];
     imageDataUrl?: string;
-    uploadImageDataUrl?: string;
+    uploadImageDataUrl?: string | File;
     maskDataUrl?: string;
   }) {
     // 获取原来x y 坐标
@@ -801,7 +801,7 @@ export const MutateElementsAndRecord = {
     );
   },
   // 设置元素的嵌套mask的合成图片
-  setUploadImageDataUrl(editor: Editor, elements: Graph[], uploadImageDataUrl: string) {
+  setUploadImageDataUrl(editor: Editor, elements: Graph[], uploadImageDataUrl: string | File) {
     if (elements.length === 0) {
       return;
     }
