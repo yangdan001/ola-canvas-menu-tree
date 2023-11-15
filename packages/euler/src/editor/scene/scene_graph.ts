@@ -559,6 +559,8 @@ getPointElements(point: IPoint): Graph[] {
 
   
   toJSON() {
+    /* eslint-disable-next-line no-debugger */
+    debugger
     // 深度复制函数
     function deepCopy(obj: any, seen: any[] = []): any {
         if (!obj || typeof obj !== 'object') {
@@ -571,6 +573,13 @@ getPointElements(point: IPoint): Graph[] {
         
         if (Array.isArray(obj)) {
             return obj.map(item => deepCopy(item, seen));
+        }
+
+        if (obj instanceof File) {
+          // 提取关键信息，并将其他属性附加到 fileInfo
+          const { name, type, lastModified, size, uid, webkitRelativePath, lastModifiedDate } = obj as any;
+          const fileInfo = { name, type, lastModified, size, uid, webkitRelativePath, lastModifiedDate };
+          return { ...fileInfo, isFile: true };
         }
         
         const copy: any = {};
@@ -618,6 +627,8 @@ getPointElements(point: IPoint): Graph[] {
   // }
 
   addGraphsByStr(str: string) {
+    /* eslint-disable-next-line no-debugger */
+    debugger
     const ctorMap = {
       [GraphType.Graph]: Graph,
       [GraphType.Rect]: Rect,
@@ -627,6 +638,48 @@ getPointElements(point: IPoint): Graph[] {
       [GraphType.Text]: TextGraph,
       [GraphType.Pen]: PenGraph,
     };
+
+    const convertObjectToFile = (obj: any): File | undefined => {
+      // Assuming the object has properties such as content, type, and name
+      const { type, name, lastModified, size, uid, lastModifiedDate, webkitRelativePath, isFile } = obj;
+    
+      // Check if the required properties are available
+      if (obj !== undefined && type && name) {
+        // Create a custom object with additional properties
+        const fileObjectWithProperties = {
+          type,
+          name,
+          lastModified: lastModified || Date.now(),
+          size: size || 0,
+          uid: uid || '',
+          lastModifiedDate: lastModifiedDate ? new Date(lastModifiedDate) : new Date(),
+          webkitRelativePath: webkitRelativePath || '',
+          isFile: isFile !== undefined ? isFile : true,
+        };
+        console.log(fileObjectWithProperties,'fileObjectWithProperties')
+        const jsonString = JSON.stringify(obj);
+        const blobWithSize = new Blob([jsonString], { type });
+        console.log(blobWithSize,'blob')
+        // Create a new File object using the custom object
+        const fileObject = new File([blobWithSize], name, {
+          type: fileObjectWithProperties.type,
+          lastModified: fileObjectWithProperties.lastModified,
+          size: fileObjectWithProperties.size,
+          // uid: fileObjectWithProperties.uid,
+          lastModifiedDate: fileObjectWithProperties.lastModifiedDate,
+          webkitRelativePath: fileObjectWithProperties.webkitRelativePath,
+          isFile: fileObjectWithProperties.isFile,
+        } as any);
+
+        (fileObject as any).uid = fileObjectWithProperties.uid;
+
+        return fileObject;
+      }
+    
+      return undefined;
+    };
+    
+    
   
     const parseGraph = (attrs: any) => {
       const type = attrs.type as GraphType; // 使用类型断言
@@ -635,6 +688,19 @@ getPointElements(point: IPoint): Graph[] {
         throw new Error('Found wrong type of graph');
       }
     
+      if (
+        attrs.uploadImageDataUrl &&
+        typeof attrs.uploadImageDataUrl === 'object' &&
+        !(attrs.uploadImageDataUrl instanceof File)
+      ) {
+        const fileObject = convertObjectToFile(attrs.uploadImageDataUrl);
+        console.log(fileObject,'fileObject')
+        if (fileObject !== undefined) {
+          attrs.uploadImageDataUrl = fileObject;
+        }
+      }
+   
+  
       const graph = new Ctor(attrs);
     
       if (attrs.children && Array.isArray(attrs.children)) {
