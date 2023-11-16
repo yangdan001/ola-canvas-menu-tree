@@ -679,7 +679,6 @@ getPointElements(point: IPoint): Graph[] {
       return undefined;
     };
     
-    
   
     const parseGraph = (attrs: any) => {
       const type = attrs.type as GraphType; // 使用类型断言
@@ -693,10 +692,35 @@ getPointElements(point: IPoint): Graph[] {
         typeof attrs.uploadImageDataUrl === 'object' &&
         !(attrs.uploadImageDataUrl instanceof File)
       ) {
-        const fileObject = convertObjectToFile(attrs.uploadImageDataUrl);
-        console.log(fileObject,'fileObject')
-        if (fileObject !== undefined) {
-          attrs.uploadImageDataUrl = fileObject;
+        const uploadFileObject = convertObjectToFile(attrs.uploadImageDataUrl);
+        console.log(uploadFileObject,'uploadFileObject')
+        if (uploadFileObject !== undefined) {
+          attrs.uploadImageDataUrl = uploadFileObject;
+      }
+    }
+
+      if (
+        attrs.imageDataUrl &&
+        typeof attrs.imageDataUrl === 'object' &&
+        !(attrs.imageDataUrl instanceof File)
+      ) {
+        const imageFileObject = convertObjectToFile(attrs.imageDataUrl);
+        console.log(imageFileObject,'imageFileObject')
+        if (imageFileObject !== undefined) {
+          attrs.imageDataUrl = imageFileObject;
+
+        }
+      }
+
+      if (
+        attrs.maskDataUrl &&
+        typeof attrs.maskDataUrl === 'object' &&
+        !(attrs.maskDataUrl instanceof File)
+      ) {
+        const maskFileObject = convertObjectToFile(attrs.maskDataUrl);
+        console.log(maskFileObject,'maskFileObject')
+        if (maskFileObject !== undefined) {
+          attrs.maskDataUrl = maskFileObject;
         }
       }
    
