@@ -1,0 +1,30 @@
+image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest  # 使用最新版 Docker
+
+stages:
+  - build
+  - deploy
+
+before_script:  # 登录 AWS 
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  - aws configure set region $AWS_DEFAULT_REGION
+  - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 227263203486.dkr.ecr.ap-southeast-1.amazonaws.com
+
+build_develop:
+  stage: build
+  environment: develop
+  image: 227263203486.dkr.ecr.ap-southeast-1.amazonaws.com/euler_front_base:latest
+  script:
+    - export CI=false
+    - pnpm install
+    - pnpm run all:dev
+    - aws s3 sync packages/euler/build/ s3://$S3_BUCKET_NAME/$CI_COMMIT_REF_SLUG/ --delete
+    - aws s3 sync packages/euler/build/ s3://$S3_BUCKET_NAME/latest/ --acl public-read
+
+deploy_develop:
+  stage: deploy
+  environment: develop
+  script:
+    - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
+
