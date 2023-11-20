@@ -1,0 +1,187 @@
+/* reset-login.css */
+
+/* Uncomment this section if needed */
+/*
+body {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+}
+*/
+
+.container {
+  overflow-y: auto;
+  height: 100vh;
+  background-color: black;
+  position: relative;
+  color: white;
+  min-height: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container label {
+  display: block;
+  color: #BB93F8;
+  font-size: 18px;
+}
+
+.container input:hover,
+.container input:visited,
+.container input:active,
+.container input:focus {
+  border: 1px solid #BB93F8 !important;
+}
+
+.errorText {
+  color: red;
+  height: 20px;
+}
+
+.formStyle {
+  /* margin: auto 0; */
+  width: 400px;
+  background-color: black;
+  padding: 10px 20px;
+}
+
+.formStyle .logo {
+  background-color: black;
+  text-align: center;
+}
+
+.formStyle .logo img {
+  width: 100px;
+}
+
+.formStyle .title {
+  text-align: center;
+  font-size: 24px;
+}
+
+.formStyle .user,
+.formStyle .email,
+.formStyle .password {
+  margin-bottom: 10px;
+}
+
+.formStyle input {
+  margin-top: 10px;
+  display: block;
+  height: 40px;
+  line-height: 50px;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 16px;
+  width: 375px;
+  outline: none;
+  background-color: black;
+  color: white;
+  caret-color: white;
+}
+
+.formStyle input:-webkit-autofill {
+  color: white;
+  -webkit-box-shadow: 0 0 0px 1000px #000 inset !important;
+  -webkit-text-fill-color: white;
+}
+
+.formStyle .password {
+  position: relative;
+}
+
+.formStyle .password img {
+  position: absolute;
+  right: 15px;
+  top: 51%;
+  display: inline-block;
+  width: 20px;
+  cursor: pointer;
+}
+
+.formStyle .login,
+.formStyle .register {
+  margin-top: 20px;
+}
+
+.formStyle button {
+  border: 1px solid transparent;
+  display: block;
+  width: 400px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #6200EE;
+  color: white;
+  font-size: 16px;
+}
+
+.formStyle button:active {
+  border: 1px solid #BB93F8;
+}
+
+.formStyle .remember {
+  position: relative;
+}
+
+.formStyle .remember .checkbox_styles {
+  cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+.formStyle .remember .checkbox_styles+label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 18px;
+  width: 18px;
+  border: 1px solid white;
+  border-radius: 3px;
+  background-color: transparent;
+}
+
+.formStyle .remember .checkbox_styles:checked+label::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 6px;
+  width: 6px;
+  height: 15px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.formStyle .remember .checkbox_styles:checked+label::before {
+  background-color: #6200EE;
+}
+
+.formStyle .remember .label_styles {
+  cursor: pointer;
+  margin-left: 32px;
+  display: inline-block;
+  font-size: 13px;
+}
+
+.formStyle .register .already {
+  cursor: pointer;
+  text-align: center;
+  color: #78A2F3;
+}
+
+.loginForm :global .ant-spin-dot-spin {
+  top: 66% !important;
+}
+
+.loginForm :global .ant-spin-text {
+  color: #FFFFFF;
+  text-shadow: none !important;
+  top: 68% !important;
+}
